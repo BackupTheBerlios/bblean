@@ -1,0 +1,7 @@
+LIBRARY bbSDK.dll
+
+EXPORTS
+beginPlugin = _beginPlugin
+beginPluginEx = _beginPluginEx
+endPlugin = _endPlugin
+pluginInfo = _pluginInfo

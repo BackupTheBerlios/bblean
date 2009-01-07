@@ -1,0 +1,58 @@
+# -------------------------------------------
+# bbSDK - Blackbox for Windows Plugin SDK
+
+# makefile for bcc55 free compiler
+
+# Build:    make -f makefile-bcc
+# Cleanup:  make -f makefile-bcc clean
+
+# -------------------------------------------
+# names
+
+NAME    = bbSDK
+
+OBJ     = $(NAME).obj
+BIN     = $(NAME).dll
+DEF     = $(NAME).def
+RES     =
+
+# -------------------------------------------
+# paths
+
+BBAPI   = ..\..\blackbox
+BBLIB   = $(BBAPI)\blackbox_bor.lib
+DEFINES = -I$(BBAPI)
+
+# -------------------------------------------
+# targets
+
+all : $(BIN)
+
+clean :
+	for %f in ($(OBJ) $(BIN) *.tds) do if exist %f del %f
+
+# -------------------------------------------
+# compiler settings and rules
+
+CC      = bcc32
+LINKER  = ilink32
+RC      = brcc32 -i$(MAKEDIR)\..\include
+
+CFLAGS  = -O1 -w -v $(DEFINES)
+LFLAGS  = -aa -Tpd -Gn -x -v
+STARTUP = c0d32.obj
+LIBS    = import32.lib cw32.lib $(BBLIB)
+
+$(BIN): $(OBJ)
+	$(LINKER) $(LFLAGS) $(STARTUP) $(OBJ),$(BIN),,$(LIBS),$(DEF),$(RES)
+
+.cpp.obj:
+	$(CC) $(CFLAGS) -c $<
+
+.c.obj:
+	$(CC) $(CFLAGS) -c $<
+
+.rc.res:
+	$(RC) $<
+
+# -------------------------------------------
