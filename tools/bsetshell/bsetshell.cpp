@@ -162,7 +162,7 @@ ST bool get_shell(char *buffer)
     buffer[0] = 0;
     if (0 == is_usingNT)
         return rw_ini(A_RD, buffer);
-    if (is_per_user)
+    else if (is_per_user)
         return rw_reg(A_RD|A_SZ, HKEY_CURRENT_USER, logonstr, "Shell", buffer);
     else
         return rw_reg(A_RD|A_SZ, HKEY_LOCAL_MACHINE, logonstr, "Shell", buffer);
@@ -297,22 +297,20 @@ set_line:
         case IDOK:
         case IDC_LOG1:
             /* okay, now really set it */
-            GetDlgItemText(hDlg, IDC_EDT1, buffer, sizeof buffer);
-            if (0 == buffer[0]
-             || 0 == SearchPath(NULL, buffer, ".exe", MAX_PATH, temp, NULL)) {
-                message(MB_OK, "Error: File does not exist: '%s'", buffer[0] ? buffer : "<empty>");
-                return 1;
+            GetDlgItemText(hDlg, IDC_EDT1, shellpath, sizeof shellpath);
+            if (strcmp(shellpath, "explorer.exe")) {
+                if (0 == shellpath[0]
+                    || 0 == SearchPath(NULL, shellpath, ".exe", MAX_PATH, temp, NULL)) {
+                    message(MB_OK, "Error: File does not exist: '%s'", shellpath);
+                    return 1;
+                }
+                strcpy(shellpath, temp);
             }
-
-            /* we dont want spaces or quotes, so just use the 8.3 dos name */
-            if (0 != stricmp(buffer, szExplorer))
-                GetShortPathName(temp, buffer, MAX_PATH);
-
-            strcpy(shellpath, buffer);
 
             if (0 == is_usingNT) {
                 /* win9x/me */
-                f = rw_ini(A_WR, shellpath);
+                GetShortPathName(temp, shellpath, MAX_PATH);
+                f = rw_ini(A_WR, temp);
             } else {
                 if (is_admin) {
                     /* set the boot option that indicates whether to look
