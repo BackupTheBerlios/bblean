@@ -21,6 +21,5 @@ INSTALL_IF_NEW = bbIconBox.rc
 
 include $(TOP)/build/makefile.inc
 
-vpath %.cpp $(BBAPI)
 $(OBJ) : bbIconBox.h bbPlugin.h
 resource.res: drag1.cur drag2.cur

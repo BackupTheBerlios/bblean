@@ -83,17 +83,17 @@ ifeq "$(TYPE)" "lib"
 NO_BBLIB ?= 1
 endif
 
+ifneq "$(NO_BBLIB)" "1"
+  DEFINES += -I$(TOP)/lib
+  LIBS += $(TOP)/lib/$(call LIBNAME,bblib)
+endif
+
 ifeq "$(TYPE)" "dll"
   VPATH += $(TOP)/plugins/bbPlugin
   DEFINES += -I$(TOP)/plugins/bbPlugin
 ifneq "$(NO_BBLIB)" "1"
   LIBS += $(BBAPI)/$(call LIBNAME,blackbox)
 endif
-endif
-
-ifneq "$(NO_BBLIB)" "1"
-  DEFINES += -I$(TOP)/lib
-  LIBS += $(TOP)/lib/$(call LIBNAME,bblib)
 endif
 
 $(BIN): $(OBJ) $(LIBS)

@@ -8,11 +8,11 @@ CP      = g++
 WINDRES = windres.exe
 CFLAGS  += -Os -Wall -fno-strict-aliasing
 LFLAGS  += -s
+SYSLIBS += -lstdc++
 
 ifneq "$(SUBSYSTEM)" "CONSOLE"
 LFLAGS += -mwindows
 SYSLIBS += -lcomctl32 -lcomdlg32 -ladvapi32 -lversion -luuid -lole32 -lwinmm
-SYSLIBS += -lstdc++
 endif
 
 ifdef IMPLIB
