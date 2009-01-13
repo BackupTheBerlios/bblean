@@ -24,7 +24,7 @@ void dbg_window(HWND hwnd, const char *fmt, ...)
     GetWindowThreadProcessId(hwnd, &pid);
 
     x = GetClassName(hwnd, buffer, 80);
-    x += sprintf(buffer+x, "hwnd: %x  pid: %d: ", (DWORD)hwnd, pid);
+    x += sprintf(buffer+x, " hwnd:%x pid:%d", (DWORD)hwnd, pid);
     va_start(arg, fmt);
     vsprintf (buffer+x, fmt, arg);
     strcat(buffer, "\n");
