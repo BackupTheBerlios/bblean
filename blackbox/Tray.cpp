@@ -359,7 +359,7 @@ ST UINT ModifyTrayIcon(systemTrayNode *p, NIDBB *pNid)
     }
 
     if ((pNid->uFlags & NIF_GUID) && pNid->pGuid) {
-#ifndef BBTINY
+#if 0//ndef BBTINY
         if (Settings_LogFlag & LOG_TRAY) {
             WCHAR* pOle; char s_guid[200];
             StringFromCLSID(*pNid->pGuid, &pOle);
@@ -507,7 +507,11 @@ LRESULT AppBarEvent(void *data, unsigned size)
         return 0;
     }
 
-    // dbg_printf("AppBarEvent(%d) message %d hwnd %x pid %d shmem %x size %d", size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem, size);
+    // dbg_printf("AppBarEventV%d message:%d hwnd:%x pid:%d shmem:%x size:%d", size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem, size);
+
+    log_printf((LOG_TRAY, "AppBarEventV%d message:%d hwnd:%x pid:%d shmem:%x size:%d",
+        size == sizeof(APPBARMSGDATAV2) ? 2 : 1,
+        *p_message, abd->hWnd, *p_pid, *p_shmem, size));
 
     switch (*p_message) {
 
@@ -716,7 +720,6 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         if (NULL == p || NULL == nid.pVersion_Timeout)
             return FALSE;
         p->version = *nid.pVersion_Timeout;
-        log_printf((LOG_TRAY, "Tray: NIM_SETVERSION (%d)", p->version));
         return TRUE;
     }
 
@@ -731,7 +734,7 @@ ST LRESULT CALLBACK TrayWndProc(
     HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     void *data;
-    int size;
+    unsigned size;
     int id;
 
     if (message == WM_WINDOWPOSCHANGED && tray_on_top) {
@@ -751,12 +754,14 @@ ST LRESULT CALLBACK TrayWndProc(
 
     if (id == 1)
         return TrayEvent(data, size);
-
     if (id == 0)
         return AppBarEvent(data, size);
-
-    //dbg_printf("Tray: other WM_COPYDATA: %d", id);
-    log_printf((LOG_TRAY, "Tray: other WM_COPYDATA: %d", id));
+#if 0
+    unsigned n;
+    dbg_printf("Tray: other WM_COPYDATA: %d", id);
+    for (n = 0; (n+1) * 4 <= size; ++n)
+        dbg_printf("   member %d: %08x", n, ((DWORD*)data)[n]);
+#endif
     return FALSE;
 }
 
@@ -872,6 +877,7 @@ ST DWORD WINAPI SSO_Thread(void *pv)
     // Wait for the exit event
     BBWait(0, 1, &BBSSO_Stop);
 
+#ifndef _WIN64 // crashes on x64
     // Go through each element of the array and stop it..
     sso_list_t *t;
     dolist(t, sso_list) {
@@ -895,7 +901,7 @@ ST DWORD WINAPI SSO_Thread(void *pv)
         COMCALL0(pOCT, Release);
     }
     // exception: ole32.dll,0x001288CE -> 766B88CE
-
+#endif
     freeall(&sso_list);
     CoUninitialize();
     return 0;
