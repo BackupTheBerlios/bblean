@@ -111,9 +111,7 @@ endif
 # --------------------------------------------------------------------
 ifneq "$(INSTDIR)" ""
 
-all : install
-
-install :
+all :
 	@$(INST) "$(INSTDIR)" $(INSTALL_FILES) -- -keep $(INSTALL_IF_NEW)
 
 endif

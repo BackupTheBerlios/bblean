@@ -265,6 +265,8 @@ int bdfbitmap(char *line, FILE *in, Font *fnt)
     fnt->bmwidth = bmwidth ;
 
   ch->size = bmheight ;
+  if (!bmheight)
+    return 1;
   ch->bitmap = row = (unsigned int *)xalloc(ch->size, sizeof(unsigned int)) ;
 
   while ( bmheight-- ) {

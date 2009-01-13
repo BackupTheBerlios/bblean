@@ -21,10 +21,10 @@
 */
 
 #include "BBApi.h"
+#include <commctrl.h>
 #include "win0x500.h"
 #include "bblib.h"
 #include "bbPlugin.h"
-#include <commctrl.h>
 
 static HWND hToolTips;
 static bool usingNT;
@@ -95,7 +95,7 @@ void ExitToolTips()
 // Out:     void
 //===========================================================================
 
-void SetToolTip(HWND hwnd, RECT *tipRect, char *tipText)
+void SetToolTip(HWND hwnd, RECT *tipRect, const char *tipText)
 {
     struct tt **tp, *t;
     UINT_PTR n = 0;
