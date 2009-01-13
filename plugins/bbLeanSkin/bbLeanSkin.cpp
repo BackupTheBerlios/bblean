@@ -1257,9 +1257,10 @@ void setHooks32(void)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
+    BOOL ret;
+
     char cmdline[MAX_PATH];
     char path[MAX_PATH];
-    unsigned ret;
 
     hAck32 = CreateEvent(NULL, FALSE, FALSE, BBLEANSKIN_RUN32EVENT);
     if (NULL == hAck32)
@@ -1268,7 +1269,7 @@ void setHooks32(void)
         return;
 
     sprintf(cmdline, "\"%s\" %d",
-        set_my_path(hInstance, path, "RunEngine32.exe"),
+        set_my_path(hInstance, path, "bbLeanSkinRun32.exe"),
         ENGINE_THISVERSION);
 
     memset(&si, 0, sizeof si);
@@ -1284,14 +1285,14 @@ void setHooks32(void)
 
 void unsetHooks32(void)
 {
-    if (NULL == hAck32)
-        return;
-    PulseEvent(hAck32);
+    if (hAck32) {
+        PulseEvent(hAck32);
+        CloseHandle(hAck32);
+    }
     if (hProcess32) {
         WaitForSingleObject(hProcess32, 5000);
         CloseHandle(hProcess32);
     }
-    CloseHandle(hAck32);
     hAck32 = hProcess32 = NULL;
 }
 

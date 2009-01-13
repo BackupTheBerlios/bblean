@@ -49,8 +49,8 @@ ifeq "$(PROG)" "eng32"
 endif
 
 ifeq "$(PROG)" "run32"
-  BIN = RunEngine32.exe
-  OBJ = RunEngine32.obj
+  BIN = bbLeanSkinRun32.exe
+  OBJ = bbLeanSkinRun32.obj
   NO_BBLIB = 1
   ALWAYS_32 = 1
   LIBS = $(call LIBNAME,bbLeanSkinEng32)
@@ -63,7 +63,7 @@ VPATH += engine
 vpath %.cpp $(BBAPI)
 ENG_H = hookinfo.h subclass.h
 
-bbLeanSkin.obj RunEngine32.obj : $(ENG_H)
+bbLeanSkin.obj bbLeanSkinRun32.obj : $(ENG_H)
 subclass.obj subclass32.obj : $(ENG_H) $(BBAPI)/bImage.cpp
 hookctl.obj hookctl32.obj : $(ENG_H)
 readstyle.obj : $(BBAPI)/settings.cpp

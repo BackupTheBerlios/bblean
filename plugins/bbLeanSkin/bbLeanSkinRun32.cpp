@@ -33,19 +33,18 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     while (' ' == *szCmdLine)
         ++szCmdLine;
 
-    // OutputDebugString("Start Engine32");
-
     if (0 == *szCmdLine) {
-        MessageBox(NULL, "For internal usage only.", "RunEngine32.exe",
+        MessageBox(NULL, "For internal usage only.", "bbLeanSkinRun32.exe",
             MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
         return 1;
     }
     if (atoi(szCmdLine) != EntryFunc(ENGINE_GETVERSION)) {
-        MessageBox(NULL, "Version mismatch: bbLeanSkinEng32.dll", "RunEngine32.exe",
+        MessageBox(NULL, "Version mismatch: bbLeanSkinEng32.dll", "bbLeanSkinRun32.exe",
             MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
         return 1;
     }
 
+    // OutputDebugString("Start Engine32");
     hAck32 = OpenEvent(EVENT_ALL_ACCESS, FALSE, BBLEANSKIN_RUN32EVENT);
     if (NULL == hAck32)
         return 1;
@@ -56,10 +55,9 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     {
         MSG msg;
         DWORD r;
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            continue;
         }
         r = MsgWaitForMultipleObjects(1, &hAck32, FALSE, INFINITE, QS_ALLINPUT);
         if (r != WAIT_OBJECT_0 + 1)
@@ -68,7 +66,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     EntryFunc(ENGINE_UNSETHOOKS);
     CloseHandle(hAck32);
 
-    // OutputDebugString("Start Engine32");
+    // OutputDebugString("Stop Engine32");
     return 0;
 }
 
