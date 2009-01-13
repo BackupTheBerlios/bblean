@@ -157,6 +157,7 @@ protected:
     // init / exit
     void make_menu_window(void);
     void destroy_menu_window(bool force);
+    void post_autohide();
 
     // scrolling
     int get_y_range(int *py0, int *ps);

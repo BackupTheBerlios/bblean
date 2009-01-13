@@ -183,9 +183,7 @@ void Menu::destroy_menu_window(bool force)
     if (NULL == hwnd)
         return;
 
-    if ((m_flags & BBMENU_HWND) && m_hwndRef)
-        PostMessage(m_hwndRef, BB_AUTOHIDE, 0, 1);
-    m_hwndRef = NULL;
+    post_autohide();
 
     if (m_pChild)
         m_pChild->LinkToParentItem(NULL);
@@ -209,11 +207,20 @@ void Menu::destroy_menu_window(bool force)
 
     register_droptarget(false);
     remove_assoc(&g_MenuWindowList, this);
-    m_hwnd = NULL;
+    m_hwnd = m_hwndRef = NULL;
     DestroyWindow(hwnd);
     if (m_hBitMap)
         DeleteObject(m_hBitMap), m_hBitMap = NULL;
     decref();
+}
+
+//===========================================================================
+void Menu::post_autohide()
+{
+    if (m_flags & BBMENU_HWND) {
+        PostMessage(m_hwndRef, BB_AUTOHIDE, 0, 1);
+        m_flags &= ~BBMENU_HWND;
+    }
 }
 
 //===========================================================================
@@ -1011,11 +1018,7 @@ void Menu::SetPinned(bool bPinned)
         LinkToParentItem(NULL);
         p->Hide();
     }
-
-    if ((m_flags & BBMENU_HWND) && m_hwndRef) {
-        PostMessage(m_hwndRef, BB_AUTOHIDE, 0, 1);
-        m_hwndRef = NULL;
-    }
+    post_autohide();
 }
 
 //==============================================
@@ -1521,10 +1524,13 @@ one_more:
 
             //--------------------------------------
             case VK_ESCAPE:
-                Menu_All_Hide();
-                focus_top_window();
+                if (0 == (menu_root()->m_flags & BBMENU_HWND)) {
+                    Menu_All_Hide();
+                    focus_top_window();
+                } else {
+                    menu_root()->Hide();
+                }
                 break;
-
             case VK_DELETE:
                 HideNow();
                 break;
