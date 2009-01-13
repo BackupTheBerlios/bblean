@@ -14,8 +14,8 @@ all.progs clean.progs :
 	$(MAKE) $* PROG=dll
 	$(MAKE) $* PROG=eng
 ifdef BB64
-	$(MAKE) $* PROG=eng32 COMPILER=vc8
-	$(MAKE) $* PROG=run32 COMPILER=vc8
+	$(MAKE) $* PROG=eng32
+	$(MAKE) $* PROG=run32
 endif
 
 # --------------------------------------------------------------------
@@ -43,6 +43,7 @@ ifeq "$(PROG)" "eng32"
   OBJ = hookctl32.obj subclass32.obj BImage32.obj drawico32.obj
   NO_BBLIB = 1
   IMPLIB = 1
+  ALWAYS_32 = 1
   INSTALL_FILES = $(BIN)
   LFLAGS += $(EXTRA_LFLAGS)
 endif
@@ -50,6 +51,8 @@ endif
 ifeq "$(PROG)" "run32"
   BIN = RunEngine32.exe
   OBJ = RunEngine32.obj
+  NO_BBLIB = 1
+  ALWAYS_32 = 1
   LIBS = $(call LIBNAME,bbLeanSkinEng32)
   INSTALL_FILES = $(BIN)
 endif

@@ -12,7 +12,8 @@ export LIB
 export INCLUDE
 export PATH
 
-_CFLAGS = /Zi /MD /wd4996 -DVC8
+DEFINES += -DVC8
+_CFLAGS = /Zi /MD /wd4996
 _CPPFLAGS = /EHsc
 
 ifndef NO_MT

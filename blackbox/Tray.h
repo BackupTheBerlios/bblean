@@ -39,6 +39,9 @@ extern BOOL (WINAPI* pIsWow64Message)(VOID);
 //===========================================================================
 #ifdef INCLUDE_NIDS
 
+#define HWND32 DWORD
+#define HANDLE32 DWORD
+
 // Blackbox private:
 typedef struct _NIDBB {
     // basic info
@@ -163,22 +166,11 @@ typedef struct _NID2KW6 {
 
 
 // ----------------------------------------
-#if 0
-typedef struct _AppBarData {
-    DWORD   cbSize;
-    HWND    hWnd;
-    UINT    uCallbackMessage;
-    UINT    uEdge;
-    RECT    rc;
-    LPARAM lParam;
-} APPBARDATA,*PAPPBARDATA;
-#endif
-
 /* 2K */
 typedef struct
 {
   DWORD cbSize;
-  HWND hWnd;
+  HWND32 hWnd;
   UINT uCallbackMessage;
   UINT uEdge;
   RECT rc;
@@ -190,7 +182,7 @@ typedef struct
 {
   APPBARDATAV1 abd;
   DWORD  dwMessage;
-  HANDLE hSharedMemory;
+  HANDLE32 hSharedMemory;
   DWORD  dwSourceProcessId;
 }
 APPBARMSGDATAV1;
@@ -199,12 +191,14 @@ APPBARMSGDATAV1;
 typedef struct
 {
   DWORD cbSize;
-  HWND hWnd;
+  HWND32 hWnd;
   UINT uCallbackMessage;
   UINT uEdge;
   RECT rc;
   LPARAM lParam;
+#ifndef _WIN64
   DWORD dw64BitAlign;
+#endif
 }
 APPBARDATAV2;
 
@@ -214,17 +208,18 @@ typedef struct
   DWORD  dwMessage;
   HANDLE hSharedMemory;
   DWORD  dwSourceProcessId;
+#ifndef _WIN64
   DWORD dw64BitAlign;
+#endif
 }
 APPBARMSGDATAV2;
 
 // ----------------------------------------
 // 32 bit versions when compiling for x64
 
-#ifdef _WIN64
 typedef struct _NIDNT_32 {
     DWORD cbSize;
-    UINT hWnd;
+    HWND32 hWnd;
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
@@ -234,7 +229,7 @@ typedef struct _NIDNT_32 {
 
 typedef struct _NID2K_32 {
     DWORD cbSize;
-    UINT hWnd;
+    HWND32 hWnd;
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
@@ -253,7 +248,7 @@ typedef struct _NID2K_32 {
 
 typedef struct _NID2KW_32 {
     DWORD cbSize;
-    UINT hWnd;
+    HWND32 hWnd;
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
@@ -272,7 +267,7 @@ typedef struct _NID2KW_32 {
 
 typedef struct _NID2KW6_32 {
     DWORD cbSize;
-    UINT hWnd;
+    HWND32 hWnd;
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
@@ -290,8 +285,5 @@ typedef struct _NID2KW6_32 {
     GUID guidItem;
 } NID2KW6_32;
 
-#endif //def _WIN64
-
-#endif
-//===========================================================================
+#endif //defINCLUDE_NIDS
 #endif //ndef _BBTRAY_H_

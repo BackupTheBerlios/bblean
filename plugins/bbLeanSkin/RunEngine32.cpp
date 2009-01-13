@@ -33,6 +33,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     while (' ' == *szCmdLine)
         ++szCmdLine;
 
+    // OutputDebugString("Start Engine32");
+
     if (0 == *szCmdLine) {
         MessageBox(NULL, "For internal usage only.", "RunEngine32.exe",
             MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
@@ -65,6 +67,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
     }
     EntryFunc(ENGINE_UNSETHOOKS);
     CloseHandle(hAck32);
+
+    // OutputDebugString("Start Engine32");
     return 0;
 }
 

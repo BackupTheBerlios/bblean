@@ -271,7 +271,9 @@ void exec_button_action(WinInfo *WI, int n)
                 if (btn_SysMenu == n)
                     s.rect.right = s.rect.left;
                 s.hwnd = hwnd;
-
+#ifndef _WIN64
+                s._pad32 = 0;
+#endif
                 cds.dwData = 202;
                 cds.cbData = sizeof s;
                 cds.lpData = &s;

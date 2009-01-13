@@ -20,9 +20,11 @@ void dbg_window(HWND hwnd, const char *fmt, ...)
     char buffer[4000];
     int x;
     va_list arg;
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
 
     x = GetClassName(hwnd, buffer, 80);
-    x += sprintf(buffer+x, " <%p>: ", hwnd);
+    x += sprintf(buffer+x, "hwnd: %x  pid: %d: ", (DWORD)hwnd, pid);
     va_start(arg, fmt);
     vsprintf (buffer+x, fmt, arg);
     strcat(buffer, "\n");

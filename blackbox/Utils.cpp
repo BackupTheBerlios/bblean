@@ -215,16 +215,22 @@ void _log_printf(int flag, const char *fmt, ...)
 #endif //def __BBCORE__
 //===========================================================================
 
+struct boxinfo {
+    const char *c, *m, *i;
+    char *b;
+};
+
 BOOL CALLBACK dlgproc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     static char *buffer;
+    struct boxinfo *b = (struct boxinfo *)lParam;
     switch( msg )
     {
     case WM_INITDIALOG:
-        SetWindowText (hDlg, ((char**)lParam)[0]);
-        SetDlgItemText(hDlg, 401, ((char**)lParam)[1]);
-        SetDlgItemText(hDlg, 402, ((char**)lParam)[2]);
-        buffer = ((char**)lParam)[3];
+        SetWindowText (hDlg, b->c);
+        SetDlgItemText(hDlg, 401, b->m);
+        SetDlgItemText(hDlg, 402, b->i);
+        buffer = b->b;
         return 1;
     case WM_COMMAND:
         switch( LOWORD( wParam ))
@@ -247,8 +253,9 @@ int EditBox(
     const char *initvalue,
     char *buffer)
 {
+    struct boxinfo b = { caption, message, initvalue, buffer };
     return DialogBoxParam(
-        NULL, MAKEINTRESOURCE(IDC_EDITBOX), NULL, (DLGPROC)dlgproc, (LPARAM)&caption);
+        NULL, MAKEINTRESOURCE(IDC_EDITBOX), NULL, (DLGPROC)dlgproc, (LPARAM)&b);
 }
 
 //===========================================================================

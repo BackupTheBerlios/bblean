@@ -71,6 +71,7 @@ extern DWORD BBThreadId;
 extern unsigned WM_ShellHook;
 extern int VScreenX, VScreenY, VScreenWidth, VScreenHeight;
 extern bool usingNT, usingXP, usingVista;
+extern int usingVersion;
 extern bool underExplorer;
 extern bool multimon;
 extern bool bbactive;

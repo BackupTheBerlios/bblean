@@ -49,6 +49,7 @@ unsigned WM_ShellHook;
 bool usingNT;
 bool usingXP;
 bool usingVista;
+int usingVersion;
 bool underExplorer;
 bool PluginsHidden;
 bool multimon;
@@ -278,9 +279,10 @@ void set_os_info(void)
     usingNT = 0 == (version & 0x80000000);
     if (usingNT) {
         DWORD hex_version = ((version<<8) & 0xFF00) + ((version>>8) & 0x00FF);
-        //dbg_printf("hex_version %x", hex_version);
+        // dbg_printf("hex_version %x", hex_version);
         usingXP = hex_version >= 0x501;
         usingVista = hex_version >= 0x600;
+        usingVersion = hex_version;
     }
 }
 

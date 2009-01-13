@@ -475,51 +475,65 @@ int pass_back(DWORD pid, HANDLE shmem, void *mem, int size)
 LRESULT AppBarEvent(void *data, unsigned size)
 {
     DWORD *p_message;
-    HANDLE *p_shmem;
     DWORD *p_pid;
     APPBARDATAV1 *abd, abd_ret;
+    HANDLE32 *p_shmem;
 
     abd = (APPBARDATAV1*)data;
+
+#if 0
+    dbg_window((HWND)((APPBARDATAV1*)abd)->hWnd, "appevent");
+    dbg_printf("%d %d %d", sizeof(APPBARDATAV1), sizeof(APPBARMSGDATAV1),
+        offsetof(APPBARMSGDATAV1,dwMessage)) ;
+    dbg_printf("%d %d %d", sizeof(APPBARDATAV2), sizeof(APPBARMSGDATAV2),
+        offsetof(APPBARMSGDATAV2,dwMessage)) ;
+#endif
 
     switch (size) {
     case sizeof(APPBARMSGDATAV1):
         p_message = &((APPBARMSGDATAV1*)abd)->dwMessage;
-        p_shmem = &((APPBARMSGDATAV1*)abd)->hSharedMemory;
+        p_shmem = (HANDLE32*)&((APPBARMSGDATAV1*)abd)->hSharedMemory;
         p_pid = &((APPBARMSGDATAV1*)abd)->dwSourceProcessId;
         break;
 
     case sizeof(APPBARMSGDATAV2):
         p_message = &((APPBARMSGDATAV2*)abd)->dwMessage;
-        p_shmem = &((APPBARMSGDATAV2*)abd)->hSharedMemory;
+        p_shmem = (HANDLE32*)&((APPBARMSGDATAV2*)abd)->hSharedMemory;
         p_pid = &((APPBARMSGDATAV2*)abd)->dwSourceProcessId;
         break;
 
     default:
-        //dbg_printf("AppBarEvent: unknown size: %d", size);
+        dbg_printf("AppBarEvent: unknown size: %d", size);
         return 0;
     }
 
-    //dbg_printf("AppBarEvent(%d) message %d hwnd %x pid %d shmem %x", size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem);
+    // dbg_printf("AppBarEvent(%d) message %d hwnd %x pid %d shmem %x size %d", size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem, size);
 
     switch (*p_message) {
-    case ABM_NEW:
-    case ABM_REMOVE:
+
+    case ABM_NEW:  //0
         return TRUE;
-    case ABM_GETSTATE:
+
+    case ABM_REMOVE: //1
+        return TRUE;
+
+    case ABM_GETSTATE: //4
         return ABS_ALWAYSONTOP;
+
     case ABM_GETAUTOHIDEBAR:
-        return FALSE;
-    case ABM_GETTASKBARPOS:
+        return FALSE; //7
+
+    case ABM_GETTASKBARPOS: //5
         memcpy(&abd_ret, abd, sizeof abd_ret);
         GetWindowRect(hTrayWnd, &abd_ret.rc);
         if (abd_ret.rc.top < VScreenX + VScreenHeight/2)
             abd_ret.uEdge = ABE_TOP;
         else
             abd_ret.uEdge = ABE_BOTTOM;
-        return pass_back(*p_pid, *p_shmem, &abd_ret, sizeof abd_ret);
+        return pass_back(*p_pid, (HANDLE)*p_shmem, &abd_ret, sizeof abd_ret);
     }
 
-    return 0;
+    return FALSE;
 }
 
 //===========================================================================
@@ -543,11 +557,9 @@ ST LRESULT TrayEvent(void *data, unsigned size)
     is running under WOW64. (Kernel32.dll)
         BOOL IsWow64Process(HANDLE hProcess, PBOOL Wow64Process);
 */
-
-    // not tested:
-    bool isWin64Icon = !have_imp(pIsWow64Message) || !pIsWow64Message();
-
-    if (false == isWin64Icon) {
+    // bool isWin64Icon = !have_imp(pIsWow64Message) || !pIsWow64Message();
+    // if (false == isWin64Icon)
+    {
         size                    = ((NIDNT_32*)pData)->cbSize        ;
         nid.hWnd                = (HWND)((NIDNT_32*)pData)->hWnd    ;
         nid.uID                 = ((NIDNT_32*)pData)->uID           ;
@@ -582,8 +594,8 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pTip                = &((NIDNT_32*)pData)->szTip        ;
         }
     }
-    else
-#endif
+    // else
+#else
     {
         size                    = ((NIDNT*)pData)->cbSize           ;
         nid.hWnd                = ((NIDNT*)pData)->hWnd             ;
@@ -619,6 +631,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pTip                = &((NIDNT*)pData)->szTip           ;
         }
     }
+#endif
 
     // search the list
     dolist (p, trayIconList)
@@ -742,6 +755,7 @@ ST LRESULT CALLBACK TrayWndProc(
     if (id == 0)
         return AppBarEvent(data, size);
 
+    //dbg_printf("Tray: other WM_COPYDATA: %d", id);
     log_printf((LOG_TRAY, "Tray: other WM_COPYDATA: %d", id));
     return FALSE;
 }
@@ -825,7 +839,6 @@ ST int sso_load(const char *name, const char *guid)
 
 ST DWORD WINAPI SSO_Thread(void *pv)
 {
-    sso_list_t *t;
     HKEY hk0 = HKEY_LOCAL_MACHINE, hk1;
     const char *key =
         "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad";
@@ -860,8 +873,17 @@ ST DWORD WINAPI SSO_Thread(void *pv)
     BBWait(0, 1, &BBSSO_Stop);
 
     // Go through each element of the array and stop it..
+    sso_list_t *t;
     dolist(t, sso_list) {
         IOleCommandTarget *pOCT = t->pOCT;
+        /* sometimes for some reason trying to access the SSObject's vtbl
+        here causes a GPF. Maybe it was already released. */
+        if (IsBadReadPtr(*(void**)pOCT, 5*sizeof(void*)/*&Exec+1*/)) {
+#ifdef BBOPT_MEMCHECK
+            BBMessageBox(MB_OK, "Bad ShellService Object: %s", t->name);
+#endif
+            continue;
+        }
         COMCALL5(pOCT, Exec,
             &CGID_ShellServiceObject,
             3, // stop

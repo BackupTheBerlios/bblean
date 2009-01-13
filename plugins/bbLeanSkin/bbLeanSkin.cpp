@@ -303,7 +303,7 @@ void free_exclusion_list(void)
 void write_bin(void)
 {
     char path[MAX_PATH];
-    FILE *fp = fopen(set_my_path(path, "skin_struct.bin"), "wb");
+    FILE *fp = fopen(set_my_path(hInstance, path, "skin_struct.bin"), "wb");
     int size = offset_exInfo + lpvMem->exInfo.size;
     fwrite(lpvMem, size, 1, fp);
     fclose(fp);
@@ -614,7 +614,7 @@ extern "C" DLL_EXPORT Menu *pluginMenu(bool popup)
     MakeMenuItem(m, "Edit Settings", temp, false);
     find_config_file(temp+x, "exclusions.rc");
     MakeMenuItem(m, "Edit Exclusions", temp, false);
-    set_my_path(temp+x, "readme.txt");
+    set_my_path(hInstance, temp+x, "readme.txt");
 
     MakeMenuNOP(m, NULL);
     MakeMenuItem(m, "Readme", temp, false);
@@ -705,7 +705,7 @@ void write_buttons(void)
     up = mSkin.glyphmap;
     gs = ONE_GLYPH(up[0], up[1]);
 
-    fp = fopen(set_my_path(buffer, "defbutton.txt"), "wt");
+    fp = fopen(hInstance, set_my_path(hInstance, buffer, "defbutton.txt"), "wt");
     fprintf(fp, "\t0x%02X,0x%02X,\n", up[0], up[1]);
     up += 2;
 
@@ -1268,7 +1268,7 @@ void setHooks32(void)
         return;
 
     sprintf(cmdline, "\"%s\" %d",
-        set_my_path(NULL, path, "RunEngine32.exe"),
+        set_my_path(hInstance, path, "RunEngine32.exe"),
         ENGINE_THISVERSION);
 
     memset(&si, 0, sizeof si);

@@ -291,13 +291,17 @@ void ContextMenu::Copymenu (HMENU hm)
         if (MII.hSubMenu)
         {
             wc->HandleMenuMsg(WM_INITMENUPOPUP, (WPARAM)MII.hSubMenu, MAKELPARAM(n, FALSE));
+            if (usingVersion >= 0x601)
+                BBSleep(10);
             CM = new ContextMenu(text_string, wc, MII.hSubMenu, 0);
         }
         else
         if (MII.fType & MFT_SEPARATOR)
         {
-            /*if (Settings_menu.drawSeparators)
-                MakeMenuNOP(this, NULL);*/
+#if 0
+            if (Settings_menu.drawSeparators)
+                MakeMenuNOP(this, NULL);
+#endif
             continue;
         }
 

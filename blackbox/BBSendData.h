@@ -33,8 +33,15 @@
 struct bb_senddata
 {
     WPARAM wParam;
+#ifndef _WIN64
+    DWORD fill;
+#endif
     BYTE lParam_data[2000];
 };
+
+#ifndef offsetof
+# define offsetof(s,m) ((size_t)&(((s*)0)->m))
+#endif
 
 //=====================================================
 // Send a message with data to bblean from another process
@@ -62,7 +69,7 @@ BOOL BBSendData(
     if (-1 == lParam_size)
         lParam_size = 1+strlen((const char*)lParam);
 
-    s = lParam_size+sizeof(WPARAM);
+    s = lParam_size + offsetof(bb_senddata, lParam_data);
 
     // for speed, the local buffer is used when sufficient
     if (s <= sizeof BBSD)
@@ -71,6 +78,9 @@ BOOL BBSendData(
         pBBSD = (struct bb_senddata*)malloc(s);
 
     pBBSD->wParam = wParam;
+#ifndef _WIN64
+    pBBSD->fill = 0;
+#endif
     memcpy(pBBSD->lParam_data, lParam, lParam_size);
 
     cds.dwData = msg;
@@ -95,7 +105,7 @@ UINT BBReceiveData(HWND hwnd, LPARAM lParam, int (*fn) (
     pBBSD = (struct bb_senddata*)((COPYDATASTRUCT*)lParam)->lpData;
     if (fn && fn(hwnd, msg, pBBSD->wParam,
         (const char *)pBBSD->lParam_data,
-        ((PCOPYDATASTRUCT)lParam)->cbData - sizeof (WPARAM)
+        ((PCOPYDATASTRUCT)lParam)->cbData - + offsetof(bb_senddata, lParam_data)
         )) return TRUE;
 
     if (BB_SENDDATA == msg)

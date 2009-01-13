@@ -28,6 +28,9 @@
 
 #define ST static
 
+static const char sys_command[] = "SysCommand %lx,%x";
+#define HWNDFMT DWORD
+
 ST HMENU get_sysmenu(HWND Window)
 {
     BOOL iconic = IsIconic(Window);
@@ -139,6 +142,7 @@ bool sysmenu_exists()
 void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysBroam)
 {
     int n, c;
+    int usingXP = 0 == (GetVersion() & 0x80000000);
 
     static int (WINAPI *pGetMenuStringW)(HMENU,UINT,LPWSTR,int,UINT);
 
@@ -150,7 +154,11 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
     {
         MENUITEMINFO info;
         memset(&info, 0, sizeof(info));
-        info.cbSize = MENUITEMINFO_SIZE_0400; // to make this work on win95
+        if (usingXP)
+            info.cbSize = sizeof(info);
+        else
+            info.cbSize = MENUITEMINFO_SIZE_0400; // to make this work on win95
+
         info.fMask  = MIIM_DATA|MIIM_ID|MIIM_SUBMENU|MIIM_TYPE|MIIM_STATE;
         GetMenuItemInfo (hm, n, TRUE, &info);
 
@@ -191,7 +199,7 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
         if (!(info.fState & MFS_DISABLED) && !(info.fState & MFS_GRAYED))
         {
             char broam[256];
-            sprintf(broam, sysBroam, (DWORD_PTR)hwnd, info.wID);
+            sprintf(broam, sysBroam, (HWNDFMT)hwnd, info.wID);
             if (sep)
                 MakeMenuNOP(m, NULL), sep = false;
             MakeMenuItem(m, text_string, broam, false);
@@ -202,8 +210,6 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
 //===========================================================================
 // Function: ShowSysmenu
 //===========================================================================
-
-static const char sys_command[] = "SysCommand %lx,%x";
 
 bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
 {
@@ -258,12 +264,12 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
             string_node *p = info.deskNames;
             for (n = 0; p && n < info.ScreensX; ++n, p = p->next)
             {
-                sprintf(broam, sysBroam, (DWORD_PTR)Window, n+0x1000);
+                sprintf(broam, sysBroam, (HWNDFMT)Window, n+0x1000);
                 MakeMenuItem(s, p->str, broam, workspace == n);
             }
             MakeSubmenu(m, s, "Send To");
         }
-        sprintf(broam, sysBroam, (DWORD_PTR)Window, 0x1100);
+        sprintf(broam, sysBroam, (HWNDFMT)Window, 0x1100);
         MakeMenuItem(m, "On All &Workspaces", broam, is_sticky);
         n = 1;
     }
@@ -274,12 +280,12 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
         if (false == iconic && (style & WS_SIZEBOX))
         {
             f = NULL != GetProp(Window, BBSHADE_PROP);
-            sprintf(broam, sysBroam, (DWORD_PTR)Window, 0x1102);
+            sprintf(broam, sysBroam, (HWNDFMT)Window, 0x1102);
             MakeMenuItem(m, "Sha&de", broam, f);
         }
 
         f = 0 != (exstyle & WS_EX_TOPMOST);
-        sprintf(broam, sysBroam, (DWORD_PTR)Window, 0x1101);
+        sprintf(broam, sysBroam, (HWNDFMT)Window, 0x1101);
         MakeMenuItem(m, "Always On &Top", broam, f);
         n = 1;
     }
@@ -314,14 +320,13 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
 bool exec_sysmenu_command(const char *temp, bool sendToSwitchTo)
 {
     HWND task_hwnd;
-    HWND BBhwnd;
+    HWND BBhwnd = GetBBWnd();
     unsigned task_msg;
 
-    BBhwnd = GetBBWnd();
-    if (2 != sscanf(temp, sys_command, (DWORD_PTR*)&task_hwnd, &task_msg))
+    // dbg_printf("hwnd %x  msg %x : %s", (DWORD)task_hwnd, task_msg, temp);
+    if (2 != sscanf(temp, sys_command, (HWNDFMT*)&task_hwnd, &task_msg))
         return false;
 
-    // dbg_printf("hwnd %lx  msg %x", task_hwnd, task_msg);
     if (task_msg >= 0x1000 && task_msg < 0x1100)
     {
         int desk = task_msg - 0x1000;

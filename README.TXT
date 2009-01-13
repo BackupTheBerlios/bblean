@@ -31,7 +31,7 @@
         gcc         for MinGW (default)
         msc         for MSVC 6.0
         vc8         for MS VC8 express
-        ia64        for MS IA64 compiler (from the PSDK)
+        msc64       for MS 64 bit compiler
 
     - Some options (e.g. compiler installation paths) can be set in
       the build/makefile-???.inc files.

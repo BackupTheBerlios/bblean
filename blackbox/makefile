@@ -50,3 +50,9 @@ $(OBJ): BBApi.h BB.h
 $(MENUOBJ): Menu/Menu.h
 Blackbox.obj: BBSendData.h
 Tray.obj : Tray.h
+
+ifeq "$(BB64)" "1"
+resource.res : blackbox64.manifest
+else
+resource.res : blackbox.manifest
+endif
