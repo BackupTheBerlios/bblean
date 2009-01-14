@@ -2132,7 +2132,7 @@ int GetAppByWindow(HWND hwnd, char* processName)
         // hMod = (HMODULE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
         if (hPr != INVALID_HANDLE_VALUE)
         {
-            DWORD_PTR base = (DWORD)-1;
+            DWORD_PTR base = (DWORD_PTR)-1;
             MODULEENTRY32 me;
             me.dwSize = sizeof(me);
             if (pModule32First(hPr, &me)) {
@@ -2141,8 +2141,8 @@ int GetAppByWindow(HWND hwnd, char* processName)
                     {
                         strcpy(processName, me.szModule);
                         base = (DWORD_PTR)me.modBaseAddr;
-                        if (base <= 0x00400000)
                         //if (hMod == me.hModule)
+                        if (base <= 0x00400000)
                             break;
                     }
                 } while (pModule32Next(hPr, &me));

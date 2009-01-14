@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------
 # common makefile.inc for bbLean core, plugins and tools
 
-# choose compiler (one of gcc, msc, vc8, msc64)
+# choose compiler (one of gcc, msc, vc8, msc64, gcc64)
 # See also makefile-???.inc
 
 COMPILER ?= gcc

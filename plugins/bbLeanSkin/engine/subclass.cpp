@@ -689,7 +689,7 @@ void PaintAll(struct WinInfo* WI)
 //-----------------------------------------------------------------
 bool get_rolled(WinInfo *WI)
 {
-    DWORD prop = (DWORD)GetProp(WI->hwnd, BBSHADE_PROP);
+    DWORD prop = (DWORD)(DWORD_PTR)GetProp(WI->hwnd, BBSHADE_PROP);
     bool rolled = 0 != (IsZoomed(WI->hwnd) 
         ? HIWORD(prop) 
         : LOWORD(prop));

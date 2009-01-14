@@ -267,8 +267,8 @@ Menu *CfgMenuMaker(const char *title, const char *defbroam, const struct cfgmenu
         else if (v)
         {
             sprintf(end_id, "_%s", item_text);
-            if ((int)v <= SUB_PLUGIN_SLIT)
-                pSub = PluginManager_GetMenu(item_text, menu_id, pop, (int)v);
+            if ((DWORD_PTR)v <= SUB_PLUGIN_SLIT)
+                pSub = PluginManager_GetMenu(item_text, menu_id, pop, (int)(DWORD_PTR)v);
             else
                 pSub = CfgMenuMaker(item_text, defbroam, (struct cfgmenu*)v, pop, menu_id);
             if (NULL == pSub)

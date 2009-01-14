@@ -24,7 +24,7 @@ void dbg_window(HWND hwnd, const char *fmt, ...)
     GetWindowThreadProcessId(hwnd, &pid);
 
     x = GetClassName(hwnd, buffer, 80);
-    x += sprintf(buffer+x, " hwnd:%x pid:%d", (DWORD)hwnd, pid);
+    x += sprintf(buffer+x, " hwnd:%lx pid:%ld", (DWORD)(DWORD_PTR)hwnd, pid);
     va_start(arg, fmt);
     vsprintf (buffer+x, fmt, arg);
     strcat(buffer, "\n");
@@ -42,7 +42,7 @@ int load_imp(void *pp, const char *dll, const char *proc)
         if (0 == *(DWORD_PTR*)pp)
             *(DWORD_PTR*)pp = 1;
     }
-    return *(DWORD_PTR*)pp > 1;
+    return have_imp(*(void**)pp);
 }
 
 void BitBltRect(HDC hdc_to, HDC hdc_from, RECT *r)

@@ -39,6 +39,9 @@
 #ifdef WIN32
 #include <windows.h>
 //#include <tchar.h>
+#ifndef GWLP_USERDATA
+# define DWORD_PTR unsigned long
+#endif
 #endif
 
 #include <stdio.h>

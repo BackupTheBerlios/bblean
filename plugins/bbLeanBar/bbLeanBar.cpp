@@ -20,10 +20,6 @@
  ============================================================================
 */
 
-#define WINVER 0x0500
-#define _WIN32_WINNT 0x0500
-#define _WIN32_IE 0x0500
-
 #ifdef BBTINY
 #define NO_DROP
 #define NO_TIPS
@@ -1205,11 +1201,11 @@ void barinfo::GetRCSettings()
     struct config *p = cfg_list;
     do switch (p->mode) {
         case R_BOL:
-            *(bool*)p->ptr = BBP_read_bool(this, p->str, 0 != (int)p->def);
+            *(bool*)p->ptr = BBP_read_bool(this, p->str, 0 != (int)(DWORD_PTR)p->def);
             break;
 
         case R_INT:
-            *(int*)p->ptr  = BBP_read_int(this, p->str, (int)p->def);
+            *(int*)p->ptr  = BBP_read_int(this, p->str, (int)(DWORD_PTR)p->def);
             break;
 
         case R_STR:

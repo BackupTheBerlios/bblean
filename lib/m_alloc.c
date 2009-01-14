@@ -9,6 +9,10 @@
 #define STRING(x) _STRING(x)
 #pragma message(__FILE__ "("STRING(__LINE__)") : warning 0: MEMCHECK enabled.")
 
+#ifndef GWLP_USERDATA
+# define DWORD_PTR unsigned long
+#endif
+
 struct alloc_block
 {
     struct alloc_block *prev;
@@ -21,12 +25,12 @@ struct alloc_block
 };
 
 #define ALLOC_HASHSIZE 256
-#define ALLOC_HASHFN(ab) (((unsigned long)ab>>4) & (ALLOC_HASHSIZE-1))
+#define ALLOC_HASHFN(ab) (((DWORD_PTR)ab>>4) & (ALLOC_HASHSIZE-1))
 #define ALLOC_MAG 0x12345678
 
 #define ALLOC_MEM(ab) &ab->check2
 #define ALLOC_BLK(v) (struct alloc_block*)\
-    ((char*)v-(unsigned)ALLOC_MEM(((struct alloc_block*)NULL)))
+    ((char*)v-(DWORD_PTR)ALLOC_MEM(((struct alloc_block*)NULL)))
 #define ALLOC_CHK1(ab) (ab)->check1
 #define ALLOC_CHK2(ab) ((struct alloc_block*)((char*)ab+ab->size))->check2
 

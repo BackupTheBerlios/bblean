@@ -414,7 +414,7 @@ void create_editline (struct button *bp)
       g_hInstance,
       NULL
       );
-    bp->data = (DWORD)edw;
+    bp->data = (DWORD_PTR)edw;
     SetWindowLongPtr(edw, GWLP_USERDATA, (LONG_PTR)bp);
     prvlineproc = (WNDPROC)SetWindowLongPtr (edw, GWLP_WNDPROC, (LONG_PTR)LineProc);
     set_button_place(bp);

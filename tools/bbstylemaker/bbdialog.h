@@ -132,7 +132,7 @@ struct button {
 
     struct button *next;
     struct dlg *dlg;
-    unsigned long data;
+    DWORD_PTR data;
     int x, y, w, h;
 };
 

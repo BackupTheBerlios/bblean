@@ -31,7 +31,8 @@
         gcc         for MinGW (default)
         msc         for MSVC 6.0
         vc8         for MS VC8 express
-        msc64       for MS 64 bit compiler
+        msc64       for MS AMD64 compiler
+        gcc64       for MinGW-w64 compiler
 
     - Some options (e.g. compiler installation paths) can be set in
       the build/makefile-???.inc files.

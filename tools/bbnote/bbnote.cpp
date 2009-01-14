@@ -958,7 +958,7 @@ int make_dlg_wnd (struct dlg *dlg, HWND hwnd, int x, int y, const char *title, W
         r.top    = bp->y + dlg->dlg_title_h;
         r.right  = bp->xl;
         r.bottom = bp->yl;
-        bp->data = (DWORD)editline(&r, dlg->hwnd, bp->str);
+        bp->data = (DWORD_PTR)editline(&r, dlg->hwnd, bp->str);
     } while ((++bp)->str);
 
     return 1;
@@ -1514,7 +1514,7 @@ LRESULT CALLBACK SearchProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case WM_CREATE:
             mwnd = hwnd;
             cfg_f=1;
-            do_search(0, (DWORD)ewnd);
+            do_search(0, (DWORD_PTR)ewnd);
             return 0;
 
         case WM_DESTROY:
@@ -1621,7 +1621,7 @@ LRESULT CALLBACK SearchProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (1000 == LOWORD(wParam))
             {
                 HWND edw = (HWND)dlg->btp[8].data;
-                do_search(0,(DWORD)ewnd);
+                do_search(0,(DWORD_PTR)ewnd);
                 SendMessage (edw, WM_SETTEXT, 0, (LPARAM)seabuf);
                 SendMessage (edw, EM_SETSEL, 0,-1);
                 SetFocus    (edw);

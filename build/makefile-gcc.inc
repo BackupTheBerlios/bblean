@@ -6,6 +6,7 @@ USING_MINGW = 1
 CC      = gcc
 CP      = g++
 WINDRES = windres.exe
+AR      = ar
 CFLAGS  += -Os -Wall -fno-strict-aliasing
 LFLAGS  += -s
 SYSLIBS += -lstdc++
@@ -28,7 +29,7 @@ LINK.dll    = $(CC) $(LFLAGS) -shared -o $@ $^ $(SYSLIBS)
 
 define LINK.a
  $(call DEL,$@)
- ar rcs $@ $^
+ $(AR) rcs $@ $^
 endef
 
 LIBNAME = lib$1.a

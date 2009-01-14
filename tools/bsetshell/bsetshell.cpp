@@ -54,6 +54,10 @@ ST bool is_blackbox;
 #ifndef KEY_WOW64_32KEY
 #define KEY_WOW64_32KEY 0x0200
 #endif
+#ifndef GWLP_USERDATA
+# define DWORD_PTR unsigned long
+# define LONG_PTR long
+#endif
 
 /* ======================================================================== */
 
@@ -378,7 +382,7 @@ int WINAPI WinMain(
     )
 {
     switch (DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DLG1),
-                NULL, (DLGPROC)dlgfunc, (LONG)hInstance)) {
+                NULL, (DLGPROC)dlgfunc, (LONG_PTR)hInstance)) {
     case 0:
         return 1;
     case 1:

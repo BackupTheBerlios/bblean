@@ -210,8 +210,8 @@ RGBREF _RGBtoHSL(RGBREF lRGBColor)
     G = lRGBColor.rgb.Green;
     B = lRGBColor.rgb.Blue;
 
-    cMax = max( max(R,G), B);   /* calculate lightness */
-    cMin = min( min(R,G), B);
+    cMax = imax( imax(R,G), B);   /* calculate lightness */
+    cMin = imin( imin(R,G), B);
     L = (BYTE)((((cMax+cMin)*HSLMAX)+RGBMAX)/(2*RGBMAX));
 
     if (cMax==cMin){            /* r=g=b --> achromatic case */

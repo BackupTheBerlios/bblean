@@ -826,7 +826,7 @@ void readSettings(void)
 
     p = ReadString(rcpath, "bbleanskin.titlebar.buttons:", "4-321");
     if (strchr(p, '-')) {
-        sprintf(mSkin.button_string, "%.*s", sizeof mSkin.button_string - 1, p);
+        sprintf(mSkin.button_string, "%.*s", (int)sizeof mSkin.button_string - 1, p);
     } else {
         sprintf(mSkin.button_string, "%.3s-%.3s", p, p + imin(3, strlen(p)));
     }

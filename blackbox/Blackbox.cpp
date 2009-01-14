@@ -402,7 +402,7 @@ int WINAPI WinMain(
 
     hMainInstance = hInstance;
     BBThreadId = GetCurrentThreadId();
-    stack_top = (unsigned)&hInstance;
+    stack_top = (DWORD_PTR)&hInstance;
     set_os_info();
 
     for (;;)
@@ -784,7 +784,7 @@ LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 #ifdef LOG_BB_MESSAGES
     //dbg_printf("hwnd %04x msg %d wp %x lp %x", hwnd, uMsg, wParam, lParam);
     if (uMsg >= BB_MSGFIRST && uMsg < BB_MSGLAST)
-        log_BBMessage(uMsg, wParam, lParam, stack_top - (unsigned)&hwnd);
+        log_BBMessage(uMsg, wParam, lParam, stack_top - (DWORD_PTR)&hwnd);
 #endif
 
     switch (uMsg)
@@ -1677,7 +1677,7 @@ static const char * const shutdn_cmds_display[] =
 
 DWORD WINAPI ShutdownThread(void *mode)
 {
-    switch ((int)mode)
+    switch ((DWORD_PTR)mode)
     {
         case BBSD_SHUTDOWN:
             if (ExitWindowsEx(EWX_SHUTDOWN|EWX_POWEROFF, 0))

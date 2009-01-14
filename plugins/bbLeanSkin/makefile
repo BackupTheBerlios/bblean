@@ -10,13 +10,19 @@ ifndef PROG
 
 include $(TOP)/build/makefile.inc
 
-all.progs clean.progs :
+all.progs :
 	$(MAKE) $* PROG=dll
 	$(MAKE) $* PROG=eng
-ifdef BB64
+ifeq "$(BB64)" "1"
 	$(MAKE) $* PROG=eng32
 	$(MAKE) $* PROG=run32
 endif
+
+clean.progs :
+	$(MAKE) $* PROG=dll
+	$(MAKE) $* PROG=eng
+	$(MAKE) $* PROG=eng32
+	$(MAKE) $* PROG=run32
 
 # --------------------------------------------------------------------
 else
@@ -71,10 +77,10 @@ readstyle.obj : $(BBAPI)/settings.cpp
 %32.obj: %.cpp
 	$(COMPILE.cpp)
 
+# For some reason the gcc 3.4 (rt 3.7) hangs in it's _DllMainCRTStartup
+# That's why it is bypassed here by starting with DllMain directly
 ifeq "$(USING_MINGW)" "1"
-  # For some reason the gcc 3.4 (rt 3.7) hangs in it's _DllMainCRTStartup
-  # That's why it is bypassed here by starting with DllMain directly
-  EXTRA_LFLAGS = -Wl,-e,_DllMain@12
+EXTRA_LFLAGS = -Wl,-e,_DllMain@12
 endif
 
 # --------------------------------------------------------------------

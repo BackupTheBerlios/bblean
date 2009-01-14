@@ -1223,7 +1223,7 @@ static const char *artwizfonts[] = {
     NULL
     };
 
-void set_artwiz_font(NStyleItem *pSI, unsigned long *pdata)
+void set_artwiz_font(NStyleItem *pSI, DWORD_PTR *pdata)
 {
     int n, m;
     const char *p, **pp;

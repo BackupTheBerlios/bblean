@@ -690,10 +690,12 @@ struct desk_box : icon_box
         {
             Item *item = GetFolderIcon(index-1);
             RECT iconRect, r;
-            int n;
-            GetIconRect(index-1, &iconRect);
-            desk = (int)item->data;
             winStruct *w2;
+            int n;
+
+            GetIconRect(index-1, &iconRect);
+            desk = (DWORD_PTR)item->data;
+
             for (n = 0; n < my_Desk.winCount; n++) {
                 w2 = get_winstruct(&my_Desk, n);
                 if (w2->info.desk == desk) {
@@ -738,7 +740,7 @@ struct desk_box : icon_box
         else
             T = N, U = A;
 
-        desk = (int)icon->data;
+        desk = (DWORD_PTR)icon->data;
 
         if (iconWidth >= 16)
         {
@@ -1216,8 +1218,8 @@ bool icon_box::GetRCSettings(void)
     {
         switch (p->m)
         {
-            case M_BOL: *(bool*)p->v = BBP_read_bool(this, p->key, 0 != p->d); break;
-            case M_INT: *(int*)p->v = BBP_read_int(this, p->key, (int)p->d); break;
+            case M_BOL: *(bool*)p->v = BBP_read_bool(this, p->key, 0 != (int)(DWORD_PTR)p->d); break;
+            case M_INT: *(int*)p->v = BBP_read_int(this, p->key, (int)(DWORD_PTR)p->d); break;
             case M_STR: BBP_read_string(this, (char*)p->v, p->key, (const char*)p->d); break;
         }
     } while ((++p)->key);

@@ -1032,10 +1032,10 @@ static void Settings_ReadSettings(const char *bbrc, const struct rccfg *cp)
         switch (cp->mode)
         {
             case C_INT:
-                *(int*)cp->ptr = ReadInt(bbrc, key, (int)cp->p_default);
+                *(int*)cp->ptr = ReadInt(bbrc, key, (int)(DWORD_PTR)cp->p_default);
                 break;
             case C_BOL:
-                *(bool*)cp->ptr = ReadBool (bbrc, key, 0 != (int)cp->p_default);
+                *(bool*)cp->ptr = ReadBool (bbrc, key, 0 != (int)(DWORD_PTR)cp->p_default);
                 break;
             case C_STR:
                 strcpy((char*)cp->ptr, ReadString (bbrc, key, (char*)cp->p_default));
