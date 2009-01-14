@@ -23,184 +23,13 @@
 // file into a HBITMAP, for Desk.cpp to paint the wallpaper.
 
 #include "BB.h"
-#include "bbrc.h"
 #include "Settings.h"
+#include "bbroot.h"
 #define ST static
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//===========================================================================
 #ifndef BBTINY
 
-struct rootinfo
-{
-    char mod;       // -mod
-    char solid;     // -solid
-    char gradient;  // -gradient
-
-    COLORREF color1;
-    COLORREF color2;
-    bool interlaced;
-    int type;
-    int bevelstyle;
-    int bevelposition;
-
-    int modx;
-    int mody;
-    COLORREF modfg;
-
-    const char *cptr;
-    char token[MAX_PATH];
-};
-
-void init_root(struct rootinfo *r)
-{
-    // clear and set some default values
-    memset(r, 0, sizeof *r);
-    r->modx = r->mody = 4;
-    r->type = B_SOLID;
-}
-
-static const char * const switches[] = {
-    "-solid",       "-gradient",    "-mod",
-    "-from",        "-bg",          "-background",
-    "-to",          "-fg",          "-foreground",
-    "interlaced",
-    NULL
-};
-
-enum rootcommand_tokens
-{
-    E_eos = 0   , E_other,
-
-    E_solid     , E_gradient  , E_mod       ,
-    E_from      , E_bg        , E_background ,
-    E_to        , E_fg        , E_foreground ,
-    Einterlaced
-};
-
-int next_token(struct rootinfo *r)
-{
-    strlwr(NextToken(r->token, &r->cptr, NULL));
-    if (r->token[0])
-        return get_string_index(r->token, switches) + E_other + 1;
-    return E_eos;
-}
-
-bool read_color(const char *token, COLORREF *pCR)
-{
-    COLORREF CR = ReadColorFromString(token);
-    if (CLR_INVALID == CR) return false;
-    *pCR = CR;
-    return true;
-}
-
-bool read_int(const char *token, int *ip)
-{
-    const char *p = token;
-    if ('-' == *p) ++p;
-    if (*p < '0' || *p > '9')
-        return false;
-    *ip = atoi(token);
-    return true;
-}
-
-bool parse_command(struct rootinfo *r, const char *command)
-{
-    r->cptr = command;
-    for (;;)
-    {
-        int s = next_token(r);
-cont_1:
-        switch (s)
-        {
-        case E_eos:
-            return true;
-
-        default:
-            return false;
-
-        case E_solid:
-            r->solid = 1;
-            if (next_token(r) == Einterlaced)
-            {
-                r->interlaced = true;
-                s = next_token(r);
-                if (s != E_other)
-                    goto cont_1;
-            }
-
-            if (false==read_color(r->token, &r->color1))
-                return false;
-            if (r->interlaced)
-                r->color2 = shadecolor(r->color1, -40);
-            continue;
-
-        case E_bg:
-        case E_background:
-        case E_from:
-            next_token(r);
-            if (false==read_color(r->token, &r->color1)) return false;
-            continue;
-
-        case E_to:
-            next_token(r);
-            if (false==read_color(r->token, &r->color2)) return false;
-            continue;
-
-        case E_fg:
-        case E_foreground:
-            next_token(r);
-            if (false==read_color(r->token, &r->modfg)) return false;
-            if (r->solid && r->interlaced)
-                r->color2 = r->modfg;
-            continue;
-
-        case E_gradient:
-            r->gradient = 1;
-            r->type = B_HORIZONTAL;
-            for (;;) {
-                int n, f = 0;
-                s = next_token(r);
-                if (E_eos == s || '-' == r->token[0]) break;
-
-                n = findtex(r->token, 1);
-                if (-1 != n) r->type = n; else ++f;
-
-                n = findtex(r->token, 2);
-                if (-1 != n) r->bevelstyle = n; else ++f;
-
-                n = findtex(r->token, 3);
-                if (-1 != n) r->bevelposition = n; else ++f;
-
-                n = NULL != strstr(r->token, "interlaced");
-                if (0 != n) r->interlaced = true; else ++f;
-
-                if (f==4) break;
-            }
-            if (r->bevelstyle) {
-                if (0 == r->bevelposition)
-                    r->bevelposition = BEVEL1;
-            } else {
-                if (0 != r->bevelposition)
-                    r->bevelstyle = BEVEL_RAISED;
-            }
-            goto cont_1;
-
-        case E_mod:
-            r->mod = 1;
-            next_token(r);
-            if (false == read_int(r->token, &r->modx)) return false;
-            next_token(r);
-            if (false == read_int(r->token, &r->mody)) return false;
-            continue;
-
-        case Einterlaced:
-            r->interlaced = true;
-            continue;
-        }
-    }
-}
-
-//===========================================================================
 void Modula(HDC hdc, int width, int height, int mx, int my, COLORREF fg)
 {
     int x, y;
@@ -212,7 +41,6 @@ void Modula(HDC hdc, int width, int height, int mx, int my, COLORREF fg)
     DeleteObject(SelectObject(hdc, P0));
 }
 
-//===========================================================================
 HBITMAP make_root_bmp(const char *command)
 {
     struct rootinfo RI;
@@ -220,7 +48,7 @@ HBITMAP make_root_bmp(const char *command)
     HBITMAP bmp = NULL;
 
     init_root(r);
-    if (parse_command(r, command) && (r->gradient + r->solid + r->mod))
+    if (parse_root(r, command) && (r->gradient | r->solid | r->mod) && 0 == r->bmp)
     {
         int width, height;
         RECT rect;
@@ -239,7 +67,7 @@ HBITMAP make_root_bmp(const char *command)
         B0 = SelectObject(buf, bmp);
 
         MakeGradient(buf, rect,
-            r->type, r->color1, r->color2, r->interlaced,
+            r->type, r->color1, r->color2, 0 != r->interlaced,
             r->bevelstyle, r->bevelposition,
             0, 0, 0
             );
@@ -252,12 +80,10 @@ HBITMAP make_root_bmp(const char *command)
 
         ReleaseDC(hwnd_desk, hdc_desk);
     }
+    delete_root(r);
     return bmp;
 }
 
-//===========================================================================
-
-//===========================================================================
 static HBITMAP read_bitmap(const char* path, bool delete_after)
 {
     HWND hwnd_desk = GetDesktopWindow();
@@ -312,11 +138,10 @@ static HBITMAP read_bitmap(const char* path, bool delete_after)
     return bmp;
 }
 
+
 #endif //ndef BBTINY
-
 //===========================================================================
 
-//===========================================================================
 ST bool is_bsetroot_command(const char **cptr)
 {
     char token[MAX_PATH];
@@ -324,7 +149,6 @@ ST bool is_bsetroot_command(const char **cptr)
     return 0 == stricmp(token, "bsetroot") || 0 == stricmp(token, "bsetbg");
 }
 
-//===========================================================================
 HBITMAP load_desk_bitmap(const char* command, bool makebmp)
 {
     char exe_path[MAX_PATH];

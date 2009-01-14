@@ -23,6 +23,7 @@
 #define APPNAME "bbStyleMaker"
 #define APPNAME_VER "bbStyleMaker 1.31"
 
+#include "bbroot.h"
 #include "bbrc.h"
 
 // ------------------------------------------------
@@ -90,43 +91,6 @@ typedef struct NStyleItem
 
 } NStyleItem;
 
-// ------------------------------------------------
-#define WP_NONE 0
-#define WP_TILE 1
-#define WP_CENTER 2
-#define WP_FULL 3
-
-struct rootinfo
-{
-    char bmp;       // -bitmap
-    char wpstyle;   // -center/-tile/-full
-    char wpfile[MAX_PATH]; // the image
-    int sat;        // -sat
-    int hue;        // -hue
-
-    char mod;       // -mod
-    char solid;     // -solid
-    char gradient;  // -gradient
-
-    COLORREF color1;
-    COLORREF color2;
-    bool interlaced;
-    int type;
-    int bevelstyle;
-    int bevelposition;
-
-    int modx;
-    int mody;
-    COLORREF modfg;
-
-    int scale;  // -scale
-
-    // internal
-    const char *cptr;
-    char token[MAX_PATH];
-};
-
-// ------------------------------------------------
 #define ROOTCOMMAND_SIZE (MAX_PATH+80)
 
 typedef struct NStyleStruct

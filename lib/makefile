@@ -15,6 +15,7 @@ OBJ = \
   tokenize.obj \
   winutils.obj \
   bbrc.obj \
+  bbroot.obj \
   m_alloc.obj \
   pidl.obj \
 
