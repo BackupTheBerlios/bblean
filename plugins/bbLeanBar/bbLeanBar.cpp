@@ -656,7 +656,7 @@ void barinfo::make_cfg()
     {  "sendToSwitchTo"    ,R_BOL, (void*)false,          &sendToSwitchTo },
     { NULL,0,NULL,NULL }
     };
-    cfg_list = (struct config *)memcpy(new char[sizeof c], c, sizeof c);
+    cfg_list = new config[array_count(c)], memcpy(cfg_list, c, sizeof c);
 
     struct pmenu m [] = {
     { "Width Percent",          "widthPercent",     CFG_INT, &widthPercent  },
@@ -694,7 +694,7 @@ void barinfo::make_cfg()
 
     { NULL,NULL,0,NULL }
     };
-    cfg_menu = (struct pmenu *)memcpy(new char [sizeof m], m,  sizeof m);
+    cfg_menu = new pmenu[array_count(m)], memcpy(cfg_menu, m, sizeof m);
 }
 
 //===========================================================================
