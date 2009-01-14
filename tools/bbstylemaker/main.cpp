@@ -210,8 +210,10 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine
     }
 
     g_hInstance = hInstance;
-    set_my_path(rcpath, APPNAME ".rc");
+    set_my_path(NULL, rcpath, APPNAME ".rc");
     bimage_init(true, true);
+    bb_rcreader_init();
+
     if (0 == bbstylemaker_create())
         return 1;
 
@@ -713,7 +715,7 @@ int get_xobstyle(char *temp)
 
     r = ReadString(rcpath, "bbstylemaker.blackboxrc", "");
     if (0 == *r)
-        r = set_my_path(b1, "blackbox.rc");
+        r = set_my_path(NULL, b1, "blackbox.rc");
 
     lr = strlen(r);
     while (lr) { --lr; if (IS_SLASH(r[lr])) break; }
@@ -2003,7 +2005,7 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
         WriteInt(rcpath, "bbstylemaker.xpos", dlg->x);
         WriteInt(rcpath, "bbstylemaker.ypos", dlg->y);
         delete_dlg(dlg);
-        reset_reader();
+        reset_rcreader();
         PostQuitMessage(0);
         break;
 
@@ -2238,7 +2240,7 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
             break;
 
         case CMD_DOC:
-            edit_file(set_my_path(buffer, "readme.txt"));
+            edit_file(set_my_path(NULL, buffer, "readme.txt"));
             break;
 
         case CMD_CFG:

@@ -197,3 +197,22 @@ char *m_format(const char *fmt, ...)
 
 /* ------------------------------------------------------------------------- */
 
+// strlwr a keyword, calculate hash value and length
+unsigned calc_hash(char *p, const char *s, int *pLen, int delim)
+{
+    unsigned h; int c; char *d = p;
+    for (h = 0; 0 != (c = *s) && delim != c; ++s, ++d)
+    {
+        if (c >= 'A' && c <= 'Z')
+            c += 32;
+        *d = (char)c;
+        if ((h ^= c) & 1)
+            h^=0xedb88320;
+        h>>=1;
+    }
+    *d = 0;
+    *pLen = d - p;
+    return h;
+}
+
+/* ------------------------------------------------------------------------- */

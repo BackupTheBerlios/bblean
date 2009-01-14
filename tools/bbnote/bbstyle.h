@@ -117,6 +117,7 @@ int readstyle(const char *fname);
 void makedlgfont(void);
 void get_vscr_rect(RECT* rw);
 char *set_my_path(char*, const char *);
+void bb_rcreader_init(void);
 
 int fileexist(char*);
 

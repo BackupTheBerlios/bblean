@@ -20,6 +20,7 @@
   ========================================================================== */
 
 #include "BB.h"
+#include "bbrc.h"
 #include "PluginManager.h"
 #define ST static
 

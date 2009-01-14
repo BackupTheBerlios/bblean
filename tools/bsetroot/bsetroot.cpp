@@ -21,7 +21,7 @@
 
 #include "BBApi.h"
 #include "BImage.h"
-#include "bblib.h"
+#include "bbrc.h"
 
 #ifdef TINY_IMAGE
 const char *szAppName = "bsetroot 2.1-tiny";
@@ -90,15 +90,6 @@ int image_getheight(HIMG img);
 RGBQUAD image_getpixel(HIMG img, int x, int y);
 int image_setpixel(HIMG img, int x, int y, RGBQUAD c);
 int image_resample(HIMG *img, int w, int h);
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// utilities
-
-struct styleprop { const char *key; int  val; };
-extern const struct styleprop styleprop_1[];
-extern const struct styleprop styleprop_2[];
-extern const struct styleprop styleprop_3[];
-int findtex(const char *p, const struct styleprop *s);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /* bimage utils */
@@ -352,13 +343,13 @@ cont_1:
                 s = next_token(r);
                 if (E_eos == s || '-' == r->token[0]) break;
 
-                n = findtex(r->token, styleprop_1);
+                n = findtex(r->token, 1);
                 if (-1 != n) r->type = n; else ++f;
 
-                n = findtex(r->token, styleprop_2);
+                n = findtex(r->token, 2);
                 if (-1 != n) r->bevelstyle = n; else ++f;
 
-                n = findtex(r->token, styleprop_3);
+                n = findtex(r->token, 3);
                 if (-1 != n) r->bevelposition = n; else ++f;
 
                 n = NULL != strstr(r->token, "interlaced");

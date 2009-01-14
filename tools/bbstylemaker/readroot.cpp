@@ -195,13 +195,13 @@ cont_1:
                 if (E_eos == s || '-' == r->token[0])
                     break;
 
-                n = findtex(r->token, styleprop_1);
+                n = findtex(r->token, 1);
                 if (-1 != n) r->type = n; else ++f;
 
-                n = findtex(r->token, styleprop_2);
+                n = findtex(r->token, 2);
                 if (-1 != n) r->bevelstyle = n; else ++f;
 
-                n = findtex(r->token, styleprop_3);
+                n = findtex(r->token, 3);
                 if (-1 != n) r->bevelposition = n; else ++f;
 
                 n = NULL != strstr(r->token, "interlaced");
@@ -359,9 +359,9 @@ void make_bsetroot_string(NStyleStruct *pss, char *out, int all)
 
         x += sprintf(out+x, " -gradient %s%s%s%sgradient -from %s -to %s",
             i ? "interlaced":"",
-            bs ? styleprop_2[bs].key : "",
+            bs ? get_styleprop(2)[bs].key : "",
             bs && bp > BEVEL1 ? "bevel2" : "",
-            styleprop_1[1+styleprop_1[1+t].val].key,
+            get_styleprop(1)[1+get_styleprop(1)[1+t].val].key,
             rgb_string(b1, c1),
             rgb_string(b2, c2)
             );

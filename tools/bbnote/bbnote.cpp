@@ -269,6 +269,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine
 
     set_my_path(ininame, "bbnote.ini");
     set_my_path(defstyle, "bbnote.rc");
+    bb_rcreader_init();
     readcfg();
 
     if (!strncmp(szCmdLine,"-w",2))

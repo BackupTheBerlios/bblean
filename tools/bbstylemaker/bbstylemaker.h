@@ -23,6 +23,8 @@
 #define APPNAME "bbStyleMaker"
 #define APPNAME_VER "bbStyleMaker 1.31"
 
+#include "bbrc.h"
+
 // ------------------------------------------------
 typedef struct NStyleItem
 {
@@ -197,9 +199,6 @@ extern struct NStyleItem Palette[10];
 
 int bb_msgbox(HWND hwnd, const char *s, const char *t, int f);
 int bbstylemaker_create(void);
-char *set_my_path(char *path, const char *fname);
-
-void reset_reader(void);
 
 int get_save_filename(HWND hwnd, char *buffer, const char *title, const char *filter);
 int choose_font(HWND hwnd, NStyleItem *pSI);
@@ -208,6 +207,7 @@ int is_style_old(const char *style);
 int is_style_changed(void);
 int readstyle(const char *fname, StyleStruct*, int root);
 int writestyle(const char *fname, StyleStruct*, char **style_info, int flags);
+void bb_rcreader_init(void);
 
 int Settings_ItemSize(int i);
 int bsetroot_parse(NStyleStruct *pss, const char *command);

@@ -23,6 +23,7 @@
 // file into a HBITMAP, for Desk.cpp to paint the wallpaper.
 
 #include "BB.h"
+#include "bbrc.h"
 #include "Settings.h"
 #define ST static
 
@@ -161,13 +162,13 @@ cont_1:
                 s = next_token(r);
                 if (E_eos == s || '-' == r->token[0]) break;
 
-                n = findtex(r->token, styleprop_1);
+                n = findtex(r->token, 1);
                 if (-1 != n) r->type = n; else ++f;
 
-                n = findtex(r->token, styleprop_2);
+                n = findtex(r->token, 2);
                 if (-1 != n) r->bevelstyle = n; else ++f;
 
-                n = findtex(r->token, styleprop_3);
+                n = findtex(r->token, 3);
                 if (-1 != n) r->bevelposition = n; else ++f;
 
                 n = NULL != strstr(r->token, "interlaced");

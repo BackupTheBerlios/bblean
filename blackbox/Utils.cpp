@@ -21,6 +21,7 @@
 
 #include "BB.h"
 #include "Settings.h"
+#include "bbrc.h"
 #include <time.h>
 #include <shlobj.h>
 #include <shellapi.h>

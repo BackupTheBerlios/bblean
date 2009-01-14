@@ -1664,7 +1664,7 @@ void dlg_save_config(struct dlg *dlg)
 
     char path[MAX_PATH];
 
-    fp = fopen(set_my_path(path, "dlgitems.rc"), "wt");
+    fp = fopen(set_my_path(NULL, path, "dlgitems.rc"), "wt");
     if (NULL == fp) return;
 
     for (app = ap, bp = dlg->bn_ptr; bp; bp = bp->next) {
@@ -1752,7 +1752,7 @@ void dlg_load_config(struct dlg *dlg)
     char path[MAX_PATH];
     char line[200];
 
-    fp = fopen(set_my_path(path, "dlgitems.rc"), "rt");
+    fp = fopen(set_my_path(NULL, path, "dlgitems.rc"), "rt");
     if (NULL == fp) return;
 
     while (fgets(line, sizeof line, fp))

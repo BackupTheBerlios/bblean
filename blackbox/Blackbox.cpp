@@ -31,6 +31,7 @@
 #include "BBSendData.h"
 #include "BImage.h"
 #include "bbshell.h"
+#include "bbrc.h"
 
 #include <mmsystem.h>
 #include <process.h>
@@ -404,6 +405,7 @@ int WINAPI WinMain(
     BBThreadId = GetCurrentThreadId();
     stack_top = (DWORD_PTR)&hInstance;
     set_os_info();
+    bb_rcreader_init();
 
     for (;;)
     {
@@ -547,7 +549,7 @@ void kill_plugins(void)
     PluginManager_Exit();
     endToolbar(hMainInstance);
     SetDesktopMargin(NULL, BB_DM_RESET, 0);
-    reset_reader();
+    reset_rcreader();
     reset_rcpaths();
 }
 
@@ -1120,7 +1122,7 @@ LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
                     break;
 
                 case BB_RESETREADER_TIMER:
-                    reset_reader();
+                    reset_rcreader();
                     break;
 
                 case BB_TASKUPDATE_TIMER:

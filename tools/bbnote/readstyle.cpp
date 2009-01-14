@@ -67,8 +67,6 @@ COLORREF get_mixed_color(StyleItem *pSI)
         return mixcolors(t, b, 144);
 }
 
-bool get_070(LPCSTR path);
-
 //===========================================================================
 // Function: get_fontheight
 //===========================================================================

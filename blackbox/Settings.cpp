@@ -20,6 +20,7 @@
   ========================================================================== */
 
 #include "BB.h"
+#include "bbrc.h"
 
 #ifndef BBSETTING_STYLEREADER_ONLY
 # include "Menu/MenuMaker.h"
@@ -30,9 +31,6 @@
 #define BBSETTINGS_INTERNAL
 #include "Settings.h"
 
-COLORREF ReadColorFromString(LPCSTR string);
-bool get_070(LPCSTR path);
-
 // to be used in multimonitor setups (in the future, maybe ...)
 int screenNumber = 0;
 
@@ -40,8 +38,6 @@ int screenNumber = 0;
 const int styleitem_size_assert = 1/(sizeof(StyleItem)==300?1:0);
 /* If you get an error here that means that BBApi.h was changed
    in an incompatible way */
-
-extern bool dont_translate_065;
 
 //#define PARSEFONT_AFTER
 //===========================================================================
@@ -504,12 +500,12 @@ static int read_style_item (
 
     const struct s_prop *cp = s_prop;
     COLORREF cr;
-    int w;
+    int w, trans;
     const char *p;
     char fullkey[100];
     char *lastword;
 
-    dont_translate_065 = true;
+    trans = set_translate_065(false);
 
 restart:
     w = strlen(key);
@@ -703,7 +699,7 @@ restart:
     }
     while ((char*)++cp < (char*)s_prop + sizeof s_prop);
 
-    dont_translate_065 = false;
+    set_translate_065(trans);
     return 0 != (si->validated & f);
 }
 
@@ -724,7 +720,7 @@ void ReadStyle(const char *style, StyleStruct *pStyle)
     memset(pStyle, 0, sizeof *pStyle);
     pStyle->bulletUnix = bu;
     pStyle->metricsUnix = true;
-    pStyle->is_070 = get_070(style);
+    pStyle->is_070 = 0 != get_070(style);
 
 #ifndef BBSETTING_STYLEREADER_ONLY
     pStyle->toolbarAlpha = Settings_toolbar.alphaEnabled ? Settings_toolbar.alphaValue : 255;
@@ -737,7 +733,7 @@ void ReadStyle(const char *style, StyleStruct *pStyle)
         const char *p;
         COLORREF cr;
         void *v;
-        int sn, dn, maxlen, type;
+        int sn, dn, maxlen, type, trans;
 
         sn = s->sn;
         dn = s->sn_def;
@@ -765,9 +761,9 @@ void ReadStyle(const char *style, StyleStruct *pStyle)
             continue;
         }
 
-        dont_translate_065 = true;
+        trans = set_translate_065(false);
         p = ReadValue(style, s->rc_string, NULL);
-        dont_translate_065 = false;
+        set_translate_065(trans);
 
         if (p) switch (sn) {
             case SN_BORDERWIDTH:
@@ -900,7 +896,7 @@ int ReadStyleItem(
         pStyleItemDefault,
         0,
         f,
-        get_070(fileName)
+        0 != get_070(fileName)
         );
     return ret;
 }

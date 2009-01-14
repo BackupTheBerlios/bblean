@@ -27,22 +27,17 @@
 #endif
 
 #include "BBApi.h"
+#include <commdlg.h>
 #include "win0x500.h"
 #include "bblib.h"
 #include "StyleStruct.h"
 #include "bbstylemaker.h"
 
-#include <commdlg.h>
-
-struct styleprop { const char *key; int  val; };
-extern const struct styleprop styleprop_1[], styleprop_2[],styleprop_3[];
-int findtex(const char *p, const struct styleprop *s);
-
 #define ST static
 #define NLS2(a,b) b
 
-
 ST char stylerc_path[MAX_PATH];
+
 LPCSTR extensionsrcPath(LPCSTR extensionsrcFileName)
 {
     return "";
@@ -62,13 +57,40 @@ char *rgb_string(char *buffer, COLORREF value)
     return buffer;
 }
 
-#define __BBSM__
-bool rc_dos_eol = true;
 #include "utils.cpp"
 #include "rcfile.cpp"
 #include "readroot.cpp"
+#define __BBSM__
 #define BBSETTINGS_INTERNAL
 #include "Settings.h"
+
+ST void fn_write_error(const char *filename)
+{
+    BBMessageBox(MB_OK, NLS2("$Error_WriteFile$",
+        "Error: Could not open \"%s\" for writing."), filename);
+}
+
+ST void fn_set_flush_timer (int n)
+{
+    //SetTimer(BBhwnd, BB_RESETREADER_TIMER, n, NULL);
+}
+
+ST struct rcreader_init g_rc =
+{
+    fn_write_error,             // void (*write_error)(const char *filename);
+    fn_set_flush_timer,         // void (*set_flush_timer)(int t);
+
+    true,                       // char dos_eol;
+    false,                      // char translate_065;
+
+    0,                          // char found_last_value;
+    NULL                        // struct fil_list *rc_files;
+};
+
+void bb_rcreader_init(void)
+{
+    init_rcreader(&g_rc);
+}
 
 // -------------------------------------------------------------------------
 
@@ -98,7 +120,9 @@ int readstyle(const char *fname, StyleStruct* s, int root)
 {
     if (root)
         strcpy(stylerc_path, fname);
+
     ReadStyle(fname, s);
+
     if (root) {
         int i;
         for (i = 0; i < 5; ++i) {
@@ -106,6 +130,7 @@ int readstyle(const char *fname, StyleStruct* s, int root)
             replace_str(&style_info[i], p);
         }
     }
+
     //check_style(fname);
     return 1;
 }
@@ -346,74 +371,10 @@ int check_item(const char *dd, const struct ck *ck)
     }
 }
 
-//===========================================================================
 int check_key(const char *dd)
 {
     return check_item(dd, cp_all);
 }
-
-
-//===========================================================================
-bool translate_key065(char *key)
-{
-    static const char *pairs [] =
-    {
-        // from         -->   to
-        ".appearance"       , ""                ,
-        "alignment"         , "justify"         ,
-        "color1"            , "color"           ,
-        "color2"            , "colorTo"         ,
-        "backgroundColor"   , "color"           ,
-        "foregroundColor"   , "picColor"        ,
-        "disabledColor"     , "disableColor"    ,
-        "menu.active"       , "menu.hilite"     ,
-        "window.handleHeight","handleWidth"   ,
-        NULL
-    };
-    const char **p = pairs;
-    bool ret = false;
-    int k = 0;
-    do
-    {
-        char *q = (char*)stristr(key, *p);
-        if (q)
-        {
-            int lp = strlen(p[0]);
-            int lq = strlen(q);
-            int lr = strlen(p[1]);
-            int k0 = k + lr - lp;
-            memmove(q + lr, q + lp, lq - lp + 1);
-            memmove(q, p[1], lr);
-            k = k0;
-            ret = true;
-        }
-    } while ((p += 2)[0]);
-    return ret;
-}
-
-//===========================================================================
-// This one converts all keys in a style from 065 to 070 style conventions
-
-void make_style065(struct fil_list *fl)
-{
-    struct lin_list *tl, **tlp, *ol;
-    char buffer[1000]; int f;
-    for (tlp = &fl->lines; NULL != (tl = *tlp); tlp = &tl->next)
-    {
-        if (0 == tl->str[0])
-            continue;
-        memcpy(buffer, tl->str+tl->o, tl->k);
-        f = translate_key065(buffer);
-        if (f) {
-            ol = tl;
-            *tlp = tl = make_line(fl, buffer, tl->str+tl->k);
-            tl->next = ol->next;
-            free_line(fl, ol);
-        }
-    }
-}
-
-//===========================================================================
 
 // check for the presence of a specific comment string in the style
 struct lin_list *FindRCComment(struct fil_list *fl, LPCSTR keyword)
@@ -891,9 +852,9 @@ static void write_style_item (const char * style, StyleStruct *pStyle, StyleItem
                     u = si->bevelposition;
                     if (u == 0 || t > 2)
                         t = 0;
-                    addstr(&tp, styleprop_2[t].key, 0);
+                    addstr(&tp, get_styleprop(2)[t].key, 0);
                     if (t && u >= BEVEL2 && u <= BEVEL2+1) {
-                        addstr(&tp, styleprop_3[u-1].key, 1);
+                        addstr(&tp, get_styleprop(3)[u-1].key, 1);
                     }
 
                     // texture
@@ -914,7 +875,7 @@ static void write_style_item (const char * style, StyleStruct *pStyle, StyleItem
                         } else {
                         // ---------------------------
                         if (t != B_SOLID)
-                            addstr(&tp, styleprop_1[1+styleprop_1[1+t].val].key, 1);
+                            addstr(&tp, get_styleprop(1)[1+get_styleprop(1)[1+t].val].key, 1);
 
                         if (si->interlaced)
                             addstr(&tp, "interlaced", 1);
@@ -1066,14 +1027,23 @@ int writestyle(
     struct lin_list *sl, *tl, **tlp, *tl_3dc;
     const char *auto_string;
     bool newfile;
+    bool tabify;
     bool has_auto;
     const char *p, *q;
     const struct items *s;
     int i, r;
 
+
+    // get some options
+    tabify = ReadBool(rcpath, "bbstylemaker.tabify", false);
+    g_rc.dos_eol = 0 == stricmp(ReadString(rcpath, "bbstylemaker.eolMode", ""), "dos");
+    colorMode = 0 == stricmp(ReadString(rcpath, "bbstylemaker.colorMode", ""), "rgb");
+    fontMode = ReadInt(rcpath, "bbstylemaker.fontMode", 1);
+    useWildcards = ReadBool(rcpath, "bbstylemaker.wildcards.use", false);
+
     tlp = NULL;
 
-    reset_reader();
+    reset_rcreader();
     auto_string = (flags & 1) ? auto_string2 : auto_string1;
 
     fl = read_file(style);
@@ -1084,13 +1054,7 @@ int writestyle(
     else
         make_style065(fl);
 
-    // get some options
-    fl->tabify = ReadBool(rcpath, "bbstylemaker.tabify", false);
-    rc_dos_eol = 0 == stricmp(ReadString(rcpath, "bbstylemaker.eolMode", ""), "dos");
-    colorMode = 0 == stricmp(ReadString(rcpath, "bbstylemaker.colorMode", ""), "rgb");
-    fontMode = ReadInt(rcpath, "bbstylemaker.fontMode", 1);
-    useWildcards = ReadBool(rcpath, "bbstylemaker.wildcards.use", false);
-
+    fl->tabify = tabify;
     newfile = fl->newfile;
     has_auto = NULL != FindRCComment(fl, auto_string);
 
@@ -1290,7 +1254,7 @@ int writestyle(
 
     // flush file to disk
     r = fl->dirty;
-    reset_reader();
+    reset_rcreader();
     return r;
 }
 

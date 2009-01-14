@@ -14,6 +14,7 @@ OBJ = \
   tinylist.obj \
   tokenize.obj \
   winutils.obj \
+  bbrc.obj \
   m_alloc.obj \
   pidl.obj \
 

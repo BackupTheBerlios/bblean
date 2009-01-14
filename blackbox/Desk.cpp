@@ -20,6 +20,7 @@
   ========================================================================== */
 
 #include "BB.h"
+#include "bbrc.h"
 #include "Desk.h"
 #include "Settings.h"
 #include "Workspaces.h"

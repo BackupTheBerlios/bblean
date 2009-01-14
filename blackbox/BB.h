@@ -122,26 +122,6 @@ unsigned long getfileversion(const char *path);
 BOOL BBExecute_string(const char *s, int flags);
 int BBExecute_pidl(const char* verb, const void *pidl);
 
-/* rc-reader */
-void reset_reader(void);
-FILE *create_rcfile(const char *path);
-char *read_file_into_buffer(const char *path, int max_len);
-char scan_line(char **pp, char **ss, int *ll);
-int match(const char *str, const char *pat);
-bool read_next_line(FILE *fp, char* szBuffer, unsigned dwLength);
-bool is_stylefile(const char* path);
-bool get_070(const char* path);
-
-/* generic hash function */
-unsigned calc_hash(char *p, const char *s, int *pLen, int delim);
-
-/* Parse style texture */
-struct styleprop { const char *key; int val; };
-int findtex(const char *p, const struct styleprop *s);
-extern const struct styleprop styleprop_1[];
-extern const struct styleprop styleprop_2[];
-extern const struct styleprop styleprop_3[];
-
 /* drawing */
 void read_pix(void);
 void reset_pix(void);
@@ -166,6 +146,8 @@ void _log_printf(int flag, const char *fmt, ...);
 #define LOG_TRAY 4
 #define LOG_SHUTDOWN 8
 #define log_printf(args) _log_printf args
+
+void bb_rcreader_init(void);
 
 // ==============================================================
 /* Blackbox.cpp */
