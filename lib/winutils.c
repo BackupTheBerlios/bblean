@@ -69,16 +69,17 @@ int is_bbwindow(HWND hwnd)
     return GetWindowThreadProcessId(hwnd, NULL) == GetCurrentThreadId();
 }
 
-
 int get_fontheight(HFONT hFont)
 {
     TEXTMETRIC TXM;
     HDC hdc = CreateCompatibleDC(NULL);
     HGDIOBJ other = SelectObject(hdc, hFont);
-    GetTextMetrics(hdc, &TXM);
+    int ret = 12;
+    if (GetTextMetrics(hdc, &TXM))
+        ret = TXM.tmHeight - TXM.tmExternalLeading;/*-TXM.tmInternalLeading;*/
     SelectObject(hdc, other);
     DeleteDC(hdc);
-    return TXM.tmHeight-TXM.tmExternalLeading;/*-TXM.tmInternalLeading; */
+    return ret;
 }
 
 int get_filetime(const char *fn, FILETIME *ft)
