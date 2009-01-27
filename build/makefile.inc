@@ -10,25 +10,23 @@ COMPILER ?= gcc
 
 # --------------------------------------------------------------------
 
-BS      = "$(subst /,\,$1)"
-BSNQ    = $(subst /,\,$1)
-MAKE    := @$(call BS,$(MAKE))
-COPY    = copy $(call BS,$1) $(call BS,$2)
-MKDIR   = mkdir $(call BS,$@)
-RM      = for %%f in ($(foreach F,$1,$(call BSNQ,$F))) do $(call DEL,%%f)
+BSL     = $(subst /,\,$1)
 
-FUZZY   = $(call BS,$(TOP)/build/fuzzydoc/fuzzydoc.exe)
-INST    = $(call BSNQ,$(TOP)/build/inst.exe)
-
+MAKE    := @"$(call BSL,$(MAKE))"
+COPY    = copy $(call BSL,$1) "$(call BSL,$2)"
+MKDIR   = mkdir "$(call BSL,$@)"
+RM      = @for %%f in ($(call BSL,$1)) do $(call DEL,%%f)
+DIR     = @dir "$(call BSL,$@)" | find "$(call BSL,$@)"
 ifeq "$(OS)" "Windows_NT"
- DIR     = @dir $(call BS,$@) | find $(call BS,$@)
- SHELL   = cmd
- DEL     = @if exist $1 (echo -- removing $1 && del $1)
+DEL     = @if exist $1 (echo -- removing $1 && del $1)
+SHELL   = cmd.exe
 else
- DIR     = @dir $(call BSNQ,$@)
- SHELL   = command.com
- DEL     = if exist $1 del $1
+DEL     = if exist $1 del $1
+SHELL   = command.com
 endif
+
+FUZZY   = $(call BSL,$(TOP)/build/fuzzydoc/fuzzydoc.exe)
+INST    = $(call BSL,$(TOP)/build/inst.exe)
 
 # --------------------------------------------------------------------
 
@@ -51,10 +49,8 @@ clean.stuff :
 
 %.obj: %.c
 	$(COMPILE.c)
-
 %.obj: %.cpp
 	$(COMPILE.cpp)
-
 %.res: %.rc
 	$(COMPILE.rc)
 
@@ -84,15 +80,15 @@ NO_BBLIB ?= 1
 endif
 
 ifneq "$(NO_BBLIB)" "1"
-  DEFINES += -I$(TOP)/lib
-  LIBS += $(TOP)/lib/$(call LIBNAME,bblib)
+DEFINES += -I$(TOP)/lib
+LIBS += $(TOP)/lib/$(call LIBNAME,bblib)
 endif
 
 ifeq "$(TYPE)" "dll"
-  VPATH += $(TOP)/plugins/bbPlugin
-  DEFINES += -I$(TOP)/plugins/bbPlugin
+VPATH += $(TOP)/plugins/bbPlugin
+DEFINES += -I$(TOP)/plugins/bbPlugin
 ifneq "$(NO_BBLIB)" "1"
-  LIBS += $(BBAPI)/$(call LIBNAME,blackbox)
+LIBS += $(BBAPI)/$(call LIBNAME,blackbox)
 endif
 endif
 
@@ -110,9 +106,8 @@ endif
 
 # --------------------------------------------------------------------
 ifneq "$(INSTDIR)" ""
-
 all :
-	@$(INST) "$(INSTDIR)" -dos $(INSTALL_FILES) -- -keep $(INSTALL_IF_NEW)
+	@$(INST) "$(INSTDIR)" -d $(INSTALL_FILES) -- -k $(INSTALL_IF_NEW)
 
 endif
 # --------------------------------------------------------------------

@@ -18,17 +18,22 @@ INSTALL_FILES = \
   -subdir backgrounds .
 
 CLEAN_FILES = \
-  bbnote.ini bbstylemaker.rc docs/bbnote.* docs/bbstylemaker.txt \
-  docs/bsetroot.* docs/*.bmp \
+  bbnote.ini \
+  docs/bbnote.* \
+  bbstylemaker.rc \
+  docs/bbstylemaker.txt \
+  bsetroot.rc \
+  docs/bsetroot.* \
+  docs/*.bmp \
   *.exe *.dll
 
 # gmake's abspath is broken
 ABSPATH = $(if $(findstring :,$1),$1,$(abspath $1))
 ifneq "$(INSTDIR)" ""
-  override INSTDIR := $(call ABSPATH,$(INSTDIR))
-  I = INSTDIR=$(INSTDIR)
+override INSTDIR := $(call ABSPATH,$(INSTDIR))
+I = INSTDIR=$(INSTDIR)
 else
-  I = IGNORE=.
+I = IGNORE=.
 endif
 
 MAKE_CORE   = $(MAKE) $* -C $1 "$I"
@@ -39,8 +44,6 @@ include $(TOP)/build/makefile.inc
 
 all.progs clean.progs :
 	$(call MAKE_CORE,build)
-	$(call MAKE_CORE,build/bdf2fon)
-	$(call MAKE_CORE,fonts)
 
 	$(call MAKE_CORE,lib)
 	$(call MAKE_CORE,blackbox)
@@ -60,5 +63,8 @@ all.progs clean.progs :
 	$(call MAKE_TOOL,bsetroot)
 	$(call MAKE_TOOL,bbstylemaker)
 	$(call MAKE_TOOL,bbnote)
+
+	$(call MAKE_CORE,build/bdf2fon)
+	$(call MAKE_CORE,fonts)
 
 # --------------------------------------------------------------------

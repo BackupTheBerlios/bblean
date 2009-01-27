@@ -26,12 +26,10 @@
 #define ISOLATIONAWARE_MANIFEST_RESOURCE_ID 2
 #define ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID 3
 
-#ifndef VC8
 #ifdef _WIN64
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "blackbox64.manifest"
 #else
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "blackbox.manifest"
-#endif
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

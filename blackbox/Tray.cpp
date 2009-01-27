@@ -793,10 +793,6 @@ ST HANDLE BBSSO_Thread;
 MDEFINE_GUID(CGID_ShellServiceObject, 0x000214D2L, 0, 0,0xC0,0,0,0,0,0,0,0x46);
 #endif
 
-#ifdef VC8
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.common-controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
-
 // vista uses stobject.dll to load ShellServiceObjects
 // {35CEC8A3-2BE6-11D2-8773-92E220524153}
 // {730F6CDC-2C86-11D2-8773-92E220524153}

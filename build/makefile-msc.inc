@@ -4,8 +4,8 @@
 USING_MSC = 1
 
 SUBSYSTEM   ?= WINDOWS
-_CFLAGS     ?= /Zd /MD
-_CPPFLAGS   ?= /GX
+_CFLAGS     = /Zi /MD
+_CPPFLAGS   = /GX
 
 CFLAGS      += /O1 /W3 $(_CFLAGS) /nologo
 LFLAGS      += /SUBSYSTEM:$(SUBSYSTEM) /DEBUG /NOLOGO /OPT:REF,ICF,NOWIN98
@@ -48,7 +48,7 @@ define LINK.dll
 endef
 
 define LINK.lib
- $(call DEL,$@)
+ $(call RM,$@)
  $(LINK) /lib /nologo -out:$@ $^
 endef
 

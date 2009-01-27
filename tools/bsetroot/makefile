@@ -460,7 +460,8 @@ ifeq "$(PROG)" "bsetroot"
 BIN = bsetroot.exe
 OBJ = bsetroot.obj BImage.obj bsrt-rsc.res $(call LIBNAME,Image)
 
-INSTALL_FILES = $(BIN) bsetroot.rc -to docs bsetroot.htm
+INSTALL_FILES = $(BIN) -to docs bsetroot.htm
+INSTALL_IF_NEW = bsetroot.rc
 CLEAN_FILES = bsetroot.htm
 
 all : bsetroot.htm

@@ -21,8 +21,8 @@ ARTWIZ_FONTS = \
 
 VPATH = artwiz-latin1-1.0-src
 
-FNT2FON = $(call BSNQ,$(TOP)/build/bdf2fon/fnt2fon)
-BDF2FNT = $(call BSNQ,$(TOP)/build/bdf2fon/bdf2fnt)
+FNT2FON = $(call BSL,$(TOP)/build/bdf2fon/fnt2fon)
+BDF2FNT = $(call BSL,$(TOP)/build/bdf2fon/bdf2fnt)
 FNT_FILES = $(patsubst %,%.fnt,$(ARTWIZ_FONTS))
 FON_FILES = $(patsubst %,%.fon,$(ARTWIZ_FONTS))
 

@@ -3,6 +3,8 @@
 
 BB64 = 1
 
+include $(TOP)/build/makefile-msc.inc
+
 ifndef ALWAYS_32
 ifdef BIN
 
@@ -24,6 +26,5 @@ _CPPFLAGS = /EHsc
 endif
 endif
 
-include $(TOP)/build/makefile-msc.inc
 
 # --------------------------------------------------------------------

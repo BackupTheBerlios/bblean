@@ -8,7 +8,11 @@ CP      = g++
 WINDRES = windres.exe
 AR      = ar
 CFLAGS  += -Os -Wall -fno-strict-aliasing
+ifeq "$(DEBUG)" "1"
+CFLAGS  += -g
+else
 LFLAGS  += -s
+endif
 SYSLIBS += -lstdc++
 
 ifneq "$(SUBSYSTEM)" "CONSOLE"
@@ -28,7 +32,7 @@ LINK.exe    = $(CC) $(LFLAGS) -o $@ $^ $(SYSLIBS)
 LINK.dll    = $(CC) $(LFLAGS) -shared -o $@ $^ $(SYSLIBS)
 
 define LINK.a
- $(call DEL,$@)
+ $(call RM,$@)
  $(AR) rcs $@ $^
 endef
 

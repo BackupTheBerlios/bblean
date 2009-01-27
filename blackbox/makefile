@@ -43,6 +43,12 @@ VPATH = Menu
 INSTALL_FILES = $(BIN) -to docs Menu/menu-bullets.bmp
 IMPLIB = 1
 
+ifeq "$(BB64)" "1"
+EXTRA_MANIFEST = blackbox64.manifest
+else
+EXTRA_MANIFEST = blackbox.manifest
+endif
+
 include $(TOP)/build/makefile.inc
 
 # some dependencies:
@@ -50,9 +56,4 @@ $(OBJ): BBApi.h BB.h
 $(MENUOBJ): Menu/Menu.h
 Blackbox.obj: BBSendData.h
 Tray.obj : Tray.h
-
-ifeq "$(BB64)" "1"
-resource.res : blackbox64.manifest
-else
-resource.res : blackbox.manifest
-endif
+resource.res : $(EXTRA_MANIFEST)
