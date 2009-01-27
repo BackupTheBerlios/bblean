@@ -39,6 +39,7 @@ KeyToGrab(V),           WithModifier(Win),      WithAction(MaximizeVertical)
 KeyToGrab(H),           WithModifier(Win),      WithAction(MaximizeHorizontal)
 KeyToGrab(Y),           WithModifier(Win),      WithAction(RestoreWindow)
 KeyToGrab(N),           WithModifier(Win),      WithAction(MinimizeWindow)
+KeyToGrab(D),           WithModifier(Win),      WithAction(MinimizeAll)
 KeyToGrab(PageUp),      WithModifier(Win),      WithAction(RaiseWindow)
 KeyToGrab(PageDown),    WithModifier(Win),      WithAction(LowerWindow)
 KeyToGrab(End),         WithModifier(Win),      WithAction(ShadeWindow)
@@ -67,11 +68,7 @@ KeyToGrab(Spacebar),    WithModifier(Win),      WithAction(LockWorkstation)
 # Extern commands:
 KeyToGrab(E),           WithModifier(Win),      WithAction(Exec explorer.exe /e,c:\)
 KeyToGrab(Pause),       WithModifier(Win),      WithAction(Exec control.exe sysdm.cpl)
-KeyToGrab(D),           WithModifier(Win),      WithAction(Exec control.exe desk.cpl)
 KeyToGrab(Home),        WithModifier(Win),      WithAction(Exec docs\bblean.htm)
 
-# BroadcastMessage example (toggles bbLeanSkin)
+# BroadcastMessage example (toggles bbLeanSkin, uncomment to use)
 ! KeyToGrab(L), WithModifier(Win), WithAction(exec @BBCfg.plugin.load bbLeanSkin)
-
-# Show bbEnter
-KeyToGrab(F1), WithModifier(Win), WithAction(@bbEnter.Focus)

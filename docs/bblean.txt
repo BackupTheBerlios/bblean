@@ -194,6 +194,7 @@ Win + V:                    MaximizeVertical
 Win + H:                    MaximizeHorizontal
 Win + N:                    MinimizeWindow
 Win + Y:                    RestoreWindow
+Win + D:                    MinimizeAll
 Win + End:                  ShadeWindow
 Win + PageUp:               RaiseWindow
 Win + PageDown:             LowerWindow
@@ -223,7 +224,6 @@ Win + R:                    Run
 Extern commands: :
 Win + E:                    Exec explorer.exe /e,c:\  (explorer window)
 Win + Pause:                Exec control.exe sysdm.cpl (system properties)
-Win + D:                    Exec control.exe desk.cpl  (display properties)
 Win + Home:                 Exec docs\bblean.htm (bblean documentation)
 
 
