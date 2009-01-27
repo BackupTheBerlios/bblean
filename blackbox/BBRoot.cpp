@@ -162,7 +162,8 @@ HBITMAP load_desk_bitmap(const char* command, bool makebmp)
     cptr = command;
     if (false == is_bsetroot_command(&cptr)) {
 bbexec:
-        BBExecute_string(command, RUN_NOERRORS);
+        if (command[0])
+            BBExecute_string(command, RUN_NOERRORS);
         return NULL;
     }
 

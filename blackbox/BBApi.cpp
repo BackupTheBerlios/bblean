@@ -607,12 +607,14 @@ BOOL BBExecute_string(const char *line, int flags)
     }
 
     ret = -1 != run_process(cmd, workdir, flags);
-    // dbg_printf("cmd (%d) <%s>", ret, cmd);
-
-    if (FALSE == ret)
+    if (ret) {
+        // dbg_printf("cmd (%d) <%s>", ret, cmd);
+    } else {
         ret = BBExecute(NULL, NULL, file, args, workdir,
             flags & RUN_HIDDEN ? SW_HIDE : SW_SHOWNORMAL,
             flags & RUN_NOERRORS);
+        // dbg_printf("exec (%d) <%s> <%s>", ret, file, args);
+    }
 
     free_str(&cmd_temp);
     free_str(&line_temp);
