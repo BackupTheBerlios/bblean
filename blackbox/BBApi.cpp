@@ -988,8 +988,6 @@ void SnapWindowToEdge(WINDOWPOS* wp, LPARAM nDist, UINT flags, ...)
     int snapdist, padding;
     bool snap_plugins, sizing, snap_workarea;
     HWND self, parent;
-    static DWORD snap_tick;
-    DWORD ticknow;
     RECT r;
     va_list va;
     //int grid = 0;
@@ -1019,13 +1017,14 @@ void SnapWindowToEdge(WINDOWPOS* wp, LPARAM nDist, UINT flags, ...)
     // well, why is this here? Because some plugins call this
     // even if they reposition themselves rather than being
     // moved by the user.
-
-    ticknow = GetTickCount();
-    if (GetCapture() != self) {
-        if (snap_tick < ticknow)
+    {
+        static bool capture;
+        if (GetCapture() == self)
+            capture = true;
+        else if (capture)
+            capture = false;
+        else
             return;
-    } else {
-        snap_tick = ticknow + 100;
     }
 
     // ------------------------------------------------------
