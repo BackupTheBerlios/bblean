@@ -170,8 +170,8 @@ char *sprint_window(char *buffer, HWND hwnd, const char *msg)
     GetWindowText(hwnd, caption, sizeof caption);
 
     sprintf(buffer,
-#ifdef _WIN64
-        "%s window (64) with title \"%s\"\r\n\t%s:%s"
+#ifdef BBLEANSKIN_ENG32
+        "%s window/32 with title \"%s\"\r\n\t%s:%s"
 #else
         "%s window with title \"%s\"\r\n\t%s:%s"
 #endif

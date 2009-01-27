@@ -51,6 +51,7 @@ ifeq "$(PROG)" "eng32"
   IMPLIB = 1
   ALWAYS_32 = 1
   INSTALL_FILES = $(BIN)
+  DEFINES += -D BBLEANSKIN_ENG32
   LFLAGS += $(EXTRA_LFLAGS)
 endif
 
