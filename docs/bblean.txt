@@ -731,6 +731,20 @@ clicks on the explore desktop background. deskhook.dll is not part of the binary
 but is included in the source code.
 
 
+Other misc. options for extensions.rc:
+
+Option : Description :
+blackbox.options.openFolderCommand : for menu double-click, e.g. explorer.exe /e,"%1"
+blackbox.options.locale         : locale identifier for clock and date strings
+blackbox.options.UTF8Encoding   : use unicode and read menu.rc etc. as UTF-8 files
+blackbox.options.translation    : translation file for messages and menus. See "docs/nls-c.txt"
+blackbox.options.log            : enable blackbox.log. Possible options: Startup, Tray
+blackbox.editor                 : editor to edit styles and rc files
+blackbox.startup.run            : program or script to run after system startup
+blackbox.contextmenu.itemAdjust : left adjust for contextmenus/sendto. Default: 28/28
+blackbox.appearance.bullet.bitmap : bitmap for menu bullets. See "docs/menu-bullets.bmp"
+
+
 ****************************************************************************
 
 Issues
