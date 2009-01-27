@@ -50,12 +50,12 @@ bbLeanBar.tasks.maxWidth: 100
 
 ------------
 # Icon Color
-bbleanbar.icon.saturation: 0
-bbleanbar.icon.hue: 40
+bbLeanBar.icon.saturation: 20
+bbLeanBar.icon.hue: 60
 
 # ------------
 # Clock-Format
-bbleanbar.strftimeFormat: %d %a %#H:%M
+bbLeanBar.strftimeFormat: %d %a %#H:%M
 
 # ---------------
 # Special Options

@@ -49,7 +49,7 @@ bbIconBox.Quick+Launch.rows: 4
 bbIconBox.Quick+Launch.columns: 2
 bbIconBox.Quick+Launch.icon.size: 16
 bbIconBox.Quick+Launch.icon.saturation: 80
-bbIconBox.Quick+Launch.icon.hue: 60
+bbIconBox.Quick+Launch.icon.hue: 0
 bbIconBox.Quick+Launch.drawTitle: true
 bbIconBox.Quick+Launch.drawBorder: true
 bbIconBox.Quick+Launch.toolTips: true
@@ -71,8 +71,8 @@ bbIconBox.task1.title: A
 bbIconBox.task1.rows: 4
 bbIconBox.task1.columns: 2
 bbIconBox.task1.icon.size: 16
-bbIconBox.task1.icon.saturation: 255
-bbIconBox.task1.icon.hue: 80
+bbIconBox.task1.icon.saturation: 80
+bbIconBox.task1.icon.hue: 0
 bbIconBox.task1.drawTitle: true
 bbIconBox.task1.drawBorder: true
 bbIconBox.task1.toolTips: true
@@ -94,8 +94,8 @@ bbIconBox.task2.title: B
 bbIconBox.task2.rows: 4
 bbIconBox.task2.columns: 2
 bbIconBox.task2.icon.size: 16
-bbIconBox.task2.icon.saturation: 255
-bbIconBox.task2.icon.hue: 80
+bbIconBox.task2.icon.saturation: 80
+bbIconBox.task2.icon.hue: 0
 bbIconBox.task2.drawTitle: true
 bbIconBox.task2.drawBorder: true
 bbIconBox.task2.toolTips: true
@@ -117,8 +117,8 @@ bbIconBox.task3.title: C
 bbIconBox.task3.rows: 4
 bbIconBox.task3.columns: 2
 bbIconBox.task3.icon.size: 16
-bbIconBox.task3.icon.saturation: 255
-bbIconBox.task3.icon.hue: 80
+bbIconBox.task3.icon.saturation: 80
+bbIconBox.task3.icon.hue: 0
 bbIconBox.task3.drawTitle: true
 bbIconBox.task3.drawBorder: true
 bbIconBox.task3.toolTips: true
