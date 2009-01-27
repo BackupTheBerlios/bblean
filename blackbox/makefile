@@ -40,7 +40,7 @@ OBJ = $(COREOBJ) $(MENUOBJ) $(RES)
 
 DEFINES = -D __BBCORE__
 VPATH = Menu
-INSTALL_FILES = $(BIN) -to docs Menu/menu-bullets.bmp
+INSTALL_FILES = $(BIN) -to docs Menu/menu-bullets.bmp nls-c.txt
 IMPLIB = 1
 
 ifeq "$(BB64)" "1"
