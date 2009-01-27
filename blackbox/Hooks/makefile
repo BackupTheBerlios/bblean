@@ -20,7 +20,7 @@ else
 OBJ = $(PROG).obj
 BIN = $(PROG).dll
 NO_BBLIB = 1
-# INSTALL_FILES = $(BIN) -rename readme.txt docs/bbhooks.txt
+# INSTALL_FILES = $(BIN) -as docs/bbhooks.txt readme.txt
 
 include $(TOP)/build/makefile.inc
 

@@ -13,7 +13,7 @@ OBJ = \
   resource.res
 
 INSTALL_IF_NEW = bbstylemaker.rc
-INSTALL_FILES = $(BIN) -rename readme.txt docs/bbstylemaker.txt
+INSTALL_FILES = $(BIN) -as docs/bbstylemaker.txt readme.txt
 
 include $(TOP)/build/makefile.inc
 

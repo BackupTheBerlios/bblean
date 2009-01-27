@@ -112,7 +112,7 @@ endif
 ifneq "$(INSTDIR)" ""
 
 all :
-	@$(INST) "$(INSTDIR)" $(INSTALL_FILES) -- -keep $(INSTALL_IF_NEW)
+	@$(INST) "$(INSTDIR)" -dos $(INSTALL_FILES) -- -keep $(INSTALL_IF_NEW)
 
 endif
 # --------------------------------------------------------------------
