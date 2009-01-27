@@ -686,19 +686,13 @@ void set_style(const char* filename)
 //===========================================================================
 // handle WM_COPYDATAs from bbStyleMakers
 
-#define STYLESTRUCTSIZE_OLD ((SIZEOFPART(StyleStruct, metricsUnix)+3) & ~3)
-#define STYLESTRUCTSIZE ((SIZEOFPART(StyleStruct, Slit)+3) & ~3)
-
 int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, unsigned data_size)
 {
-    int n;
-    StyleStruct *pss = &mStyle;
-
     //dbg_printf("handle_received_data %d %d %d", msg, wParam, data_size);
-
-    // bbStyleMaker 1.3
     if (BB_SETSTYLESTRUCT == msg) {
-        if (SN_STYLESTRUCT == wParam && data_size == STYLESTRUCTSIZE) {
+        if (SN_STYLESTRUCT == wParam && data_size >= STYLESTRUCTSIZE) {
+            // bbStyleMaker 1.3
+            StyleStruct *pss = &mStyle;
             bool is_070 = pss->is_070;
             memcpy(pss, data, STYLESTRUCTSIZE);
             if (is_070 != pss->is_070)
@@ -706,71 +700,6 @@ int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, u
         }
         return 1;
     }
-
-    // bbStyleMaker 1.2
-    if (BB_SETSTYLESTRUCT_OLD == msg) {
-        if (SN_STYLESTRUCT == wParam && data_size == STYLESTRUCTSIZE_OLD) {
-            for (n = SN_TOOLBAR; n < SN_WINUNFOCUS_FRAME_COLOR; ++n)
-            {
-                char *d = (char*)GetSettingPtr(n);
-                int i = Settings_ItemSize(n);
-                int o = (size_t)d - (size_t)pss;
-                const char *s = data + o;
-
-                if (0 == i || o < 0 || o >= (int)STYLESTRUCTSIZE_OLD)
-                    continue;
-
-                if (i == -1) {
-                    strcpy(d, s);
-                } else if (sizeof (StyleItem) == i) {
-                    memcpy(d, s, SIZEOFPART(StyleItem, Font));
-                    ((StyleItem *)d)->validated &= 0x1FF; //V_TEX..V_JUS
-                } else {
-                    memcpy(d, s, i);
-                }
-            }
-
-            pss->MenuTitle.marginWidth =
-            pss->Toolbar.marginWidth =
-            pss->windowTitleFocus.marginWidth =
-                pss->bevelWidth;
-
-            pss->MenuFrame.borderWidth =
-            pss->MenuTitle.borderWidth =
-            pss->Toolbar.borderWidth =
-            pss->windowTitleFocus.borderWidth =
-            pss->windowTitleUnfocus.borderWidth =
-            pss->windowHandleFocus.borderWidth =
-            pss->windowHandleUnfocus.borderWidth =
-            pss->windowGripFocus.borderWidth =
-            pss->windowGripUnfocus.borderWidth =
-            pss->frameWidth =
-                pss->borderWidth;
-
-            pss->MenuFrame.borderColor =
-            pss->MenuTitle.borderColor =
-            pss->Toolbar.borderColor =
-            pss->windowTitleFocus.borderColor =
-            pss->windowTitleUnfocus.borderColor =
-            pss->windowHandleFocus.borderColor =
-            pss->windowHandleUnfocus.borderColor =
-            pss->windowGripFocus.borderColor =
-            pss->windowGripUnfocus.borderColor =
-            pss->windowFrameFocusColor =
-            pss->windowFrameUnfocusColor =
-                pss->borderColor;
-
-            pss->MenuFrame.foregroundColor =
-            pss->MenuFrame.disabledColor =
-                pss->MenuFrame.TextColor;
-
-            pss->MenuHilite.foregroundColor =
-            pss->MenuHilite.disabledColor =
-                pss->MenuHilite.TextColor;
-        }
-        return 1;
-    }
-
     return 0;
 }
 
@@ -780,7 +709,6 @@ int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, u
 LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT r;
-    COPYDATASTRUCT cds;
     const char *str;
 
 #ifdef LOG_BB_MESSAGES
@@ -1020,23 +948,6 @@ LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
         case BB_GETSTYLESTRUCT:
             return BBSendData((HWND)lParam, BB_SENDDATA, wParam, &mStyle, STYLESTRUCTSIZE);
-
-        // ------------------------
-        // previous implementation:
-
-        case BB_GETSTYLE_OLD:
-            cds.dwData = 1;
-            cds.lpData = (void*)stylePath(NULL);
-            cds.cbData = 1+strlen((char*)cds.lpData);
-            return SendMessage ((HWND)lParam, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&cds);
-
-        case BB_GETSTYLESTRUCT_OLD:
-            if (SN_STYLESTRUCT != wParam)
-                break;
-            cds.dwData = SN_STYLESTRUCT+100;
-            cds.cbData = STYLESTRUCTSIZE_OLD;
-            cds.lpData = &mStyle;
-            return SendMessage ((HWND)lParam, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&cds);
 
         // done with BB_messages,
         //==============================================================

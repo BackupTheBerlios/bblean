@@ -54,14 +54,6 @@ COLORREF get_mixed_color(StyleItem *pSI)
         return mixcolors(t, b, 144);
 }
 
-char *set_my_path(char *path, const char *fname)
-{
-    int nLen = GetModuleFileName(NULL, path, MAX_PATH);
-    while (nLen && path[nLen-1] != '\\') nLen--;
-    strcpy(path+nLen, fname);
-    return path;
-}
-
 //===========================================================================
 
 //===========================================================================

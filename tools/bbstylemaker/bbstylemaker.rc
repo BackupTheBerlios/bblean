@@ -48,8 +48,8 @@ bbstylemaker.widthPercent: 92
 bbstylemaker.heightPercent: 92
 
 # window position (auto saved)
-bbstylemaker.xpos: 224
-bbstylemaker.ypos: 188
+bbstylemaker.xpos: -1
+bbstylemaker.ypos: -1
 
 # true for default windows caption bar:
 bbstylemaker.captionbar: false

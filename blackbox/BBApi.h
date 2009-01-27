@@ -319,10 +319,6 @@
 /* win9x: left/right winkey pressed */
 #define BB_WINKEY               10886
 
-/* previous implementation, still here for bbstylemaker 1.2 */
-#define BB_GETSTYLE_OLD         10887
-#define BB_GETSTYLESTRUCT_OLD   10888
-#define BB_SETSTYLESTRUCT_OLD   10889
 /* bbstylemaker 1.3+ */
 #define BB_SENDDATA             10890
 #define BB_GETSTYLE             10891

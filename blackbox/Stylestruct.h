@@ -78,4 +78,6 @@ typedef struct StyleStruct
 
 } StyleStruct;
 
+#define STYLESTRUCTSIZE ((SIZEOFPART(StyleStruct, Slit)+3) & ~3)
+
 #endif //ndef _STYLESTRUCT_H_

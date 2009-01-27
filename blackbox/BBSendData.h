@@ -105,7 +105,7 @@ UINT BBReceiveData(HWND hwnd, LPARAM lParam, int (*fn) (
     pBBSD = (struct bb_senddata*)((COPYDATASTRUCT*)lParam)->lpData;
     if (fn && fn(hwnd, msg, pBBSD->wParam,
         (const char *)pBBSD->lParam_data,
-        ((PCOPYDATASTRUCT)lParam)->cbData - + offsetof(bb_senddata, lParam_data)
+        ((PCOPYDATASTRUCT)lParam)->cbData - offsetof(bb_senddata, lParam_data)
         )) return TRUE;
 
     if (BB_SENDDATA == msg)
