@@ -54,9 +54,11 @@
     ----------------------------------------------------------
     History:
 
+    [07-Jan-2009] v 1.17
+    - update version for release with bbLean 1.17
+
     [03-Mai-2005] v 0.2
     - fixed tooltip buffer overflow with long (128+) applications-titles.
 
     [05-Apr-2005] v 0.1
     - initial release
-
