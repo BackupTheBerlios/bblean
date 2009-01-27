@@ -1,6 +1,7 @@
 /* ----------------------------------------------------------------------- */
 
 #include "bbshell.h"
+#include "win0x500.h"
 
 #define false 0
 #define true 1
@@ -324,48 +325,85 @@ int sh_getfolderpath(char* szPath, UINT csidl)
 }
 
 /* ----------------------------------------------------------------------- */
+/* Function:    sh_get_icon_and_name */
+/* Purpose: */
+/* ----------------------------------------------------------------------- */
+
+int sh_get_icon_and_name(LPCITEMIDLIST pID, HICON *pIcon, int iconsize, char *pName, int NameSize)
+{
+    static DWORD_PTR (WINAPI* pSHGetFileInfoW)(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
+    HIMAGELIST sysimgl;
+    UINT cbfileinfo = SHGFI_PIDL;
+
+    if (NULL == pSHGetFileInfoW) {
+        if (GetVersion() & 0x80000000)
+            *(DWORD_PTR*)&pSHGetFileInfoW = 1;
+        else
+            load_imp(&pSHGetFileInfoW, "shell32.dll", "SHGetFileInfoW");
+    }
+
+    if (pIcon) {
+        cbfileinfo |= SHGFI_SYSICONINDEX | SHGFI_SHELLICONSIZE;
+        if (iconsize < 20)
+            cbfileinfo |= SHGFI_SMALLICON;
+        if (iconsize >= 36)
+            cbfileinfo |= SHGFI_LARGEICON;
+        *pIcon = NULL;
+    }
+
+    if (pName) {
+        cbfileinfo |= SHGFI_DISPLAYNAME;
+        *pName = 0;
+    }
+
+    if (have_imp(pSHGetFileInfoW)) {
+        SHFILEINFOW shinfo;
+        shinfo.szDisplayName[0] = 0;
+        sysimgl = (HIMAGELIST)pSHGetFileInfoW((LPWSTR)pID, 0, &shinfo, sizeof shinfo, cbfileinfo);
+        if (sysimgl) {
+            if (pName)
+                bbWC2MB(shinfo.szDisplayName, pName, NameSize);
+            if (pIcon)
+                *pIcon = ImageList_GetIcon(sysimgl, shinfo.iIcon, ILD_NORMAL);
+            return 1;
+        }
+    } else {
+        SHFILEINFO shinfo;
+        shinfo.szDisplayName[0] = 0;
+        sysimgl = (HIMAGELIST)SHGetFileInfoA((LPCSTR)pID, 0, &shinfo, sizeof shinfo, cbfileinfo);
+        if (sysimgl) {
+            if (pName)
+                strcpy_max(pName, shinfo.szDisplayName, NameSize);
+            if (pIcon)
+                *pIcon = ImageList_GetIcon(sysimgl, shinfo.iIcon, ILD_NORMAL);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* ----------------------------------------------------------------------- */
 /* Function:    sh_getdisplayname */
 /* Purpose: */
 /* ----------------------------------------------------------------------- */
 
-void sh_getdisplayname (LPCITEMIDLIST pID, char *buffer)
+char *sh_getdisplayname(LPCITEMIDLIST pID, char *buffer)
 {
-    static DWORD (WINAPI* pSHGetFileInfoW)(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
-    if (0 == (GetVersion() & 0x80000000)
-     && load_imp(&pSHGetFileInfoW, "shell32.dll", "SHGetFileInfoW")) {
-        SHFILEINFOW shinfo;
-        shinfo.szDisplayName[0] = 0;
-        SHGetFileInfoW((LPWSTR)pID, 0, &shinfo, sizeof(SHFILEINFO), SHGFI_PIDL | SHGFI_DISPLAYNAME);
-        bbWC2MB(shinfo.szDisplayName, buffer, MAX_PATH);
-    } else {
-        SHFILEINFOA shinfo;
-        shinfo.szDisplayName[0] = 0;
-        SHGetFileInfoA((LPCSTR)pID, 0, &shinfo, sizeof(SHFILEINFO), SHGFI_PIDL | SHGFI_DISPLAYNAME);
-        strcpy(buffer, shinfo.szDisplayName);
-    }
+    sh_get_icon_and_name(pID, NULL, 0, buffer, MAX_PATH);
+    return buffer;
 }
 
 /* ----------------------------------------------------------------------- */
 /* Function:    sh_geticon */
 /* Purpose: */
 /* ----------------------------------------------------------------------- */
-#ifdef BBOPT_MENUICONS
-HICON sh_geticon (LPCITEMIDLIST pID, int iconsize)
-{
-    HIMAGELIST sysimgl;
-    SHFILEINFO shinfo;
-    UINT cbfileinfo;
 
-    if (iconsize > 16)
-        cbfileinfo = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SHELLICONSIZE;
-    else
-        cbfileinfo = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SHELLICONSIZE | SHGFI_SMALLICON;
-    sysimgl = (HIMAGELIST)SHGetFileInfo((LPCSTR)pID, 0, &shinfo, sizeof(SHFILEINFO), cbfileinfo);
-    if (sysimgl)
-        return ImageList_ExtractIcon(NULL, sysimgl, shinfo.iIcon);
-    return NULL;
+HICON sh_geticon(LPCITEMIDLIST pID, int iconsize)
+{
+    HICON hIcon;
+    sh_get_icon_and_name(pID, &hIcon, iconsize, NULL, 0);
+    return hIcon;
 }
-#endif
 
 /* ----------------------------------------------------------------------- */
 /* Function:    get_csidl */

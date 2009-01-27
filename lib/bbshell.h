@@ -46,7 +46,10 @@ BBLIB_EXPORT char *replace_shellfolders(char *buffer, const char *path, int sear
 /* retrieve the shell icon */
 BBLIB_EXPORT HICON sh_geticon (LPCITEMIDLIST pID, int iconsize);
 /* retrieve the default display name */
-BBLIB_EXPORT void sh_getdisplayname (LPCITEMIDLIST pID, char *buffer);
+BBLIB_EXPORT char* sh_getdisplayname (LPCITEMIDLIST pID, char *buffer);
+/* retrieve icon and display name */
+BBLIB_EXPORT int sh_get_icon_and_name(LPCITEMIDLIST pID, HICON *pIcon, int iconsize, char *szTip, int NameSize);
+
 /* support for ContextMenu, DragSource, DropTarget */
 BBLIB_EXPORT int sh_get_uiobject(
     LPCITEMIDLIST pidl,

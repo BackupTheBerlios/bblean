@@ -99,7 +99,6 @@ LPCITEMIDLIST indrag_get_pidl(HWND hwnd, POINT *);
 // utils.cpp
 
 bool select_folder(HWND hwnd, const char *title, char *name, char *path);
-int get_icon_and_tip(LPCITEMIDLIST pIDFull, HICON *pIcon, int iconsize, char *Tip, int TipSize);
 HICON extract_icon(IShellFolder *pFolder, LPCITEMIDLIST pidlRelative, int iconSize);
 
 // ---------------------------------------------

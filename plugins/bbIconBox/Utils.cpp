@@ -285,58 +285,13 @@ HICON EGGetIcon(WCHAR *file, UINT iconSize)
     return icon;
 }
 
-// ----------------------------------------------
-#endif
-// ----------------------------------------------
-
-int get_icon_and_tip(LPCITEMIDLIST pIDFull, HICON *pIcon, int iconsize, char *szTip, int TipSize)
+int sh_get_icon_and_name(LPCITEMIDLIST pID, HICON *pIcon, int iconsize, char *szTip, int TipSize)
 {
-#if 1
-    static DWORD (WINAPI* pSHGetFileInfoW)(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
-    UINT cbfileinfo;
-
-    cbfileinfo = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_DISPLAYNAME | SHGFI_SHELLICONSIZE;
-    if (iconsize < 20)
-        cbfileinfo |= SHGFI_SMALLICON;
-    if (iconsize >= 36)
-        cbfileinfo |= SHGFI_LARGEICON;
-
-    if (0 == (GetVersion() & 0x80000000)
-     && load_imp(&pSHGetFileInfoW, "shell32.dll", "SHGetFileInfoW")) {
-        SHFILEINFOW shinfo;
-        HIMAGELIST sysimgl;
-        shinfo.szDisplayName[0] = 0;
-        sysimgl = (HIMAGELIST)pSHGetFileInfoW((LPWSTR)pIDFull, 0, &shinfo, sizeof shinfo, cbfileinfo);
-        if (sysimgl) {
-            *pIcon = ImageList_GetIcon(sysimgl, shinfo.iIcon, ILD_NORMAL);
-            bbWC2MB(shinfo.szDisplayName, szTip, TipSize);
-            return 1;
-        }
-    } else {
-        SHFILEINFO shinfo;
-        HIMAGELIST sysimgl;
-        shinfo.szDisplayName[0] = 0;
-        sysimgl = (HIMAGELIST)SHGetFileInfo((LPCSTR)pIDFull, 0, &shinfo, sizeof(SHFILEINFO), cbfileinfo);
-        if (sysimgl) {
-            *pIcon = ImageList_GetIcon(sysimgl, shinfo.iIcon, ILD_NORMAL);
-            strcpy_max(szTip, shinfo.szDisplayName, TipSize);
-            return 1;
-        }
-    }
-
-    *pIcon = NULL;
-    szTip[0] = 0;
-    return 0;
-
-    // --------------------------------------------------
-#else
-    // --------------------------------------------------
     *pIcon = extract_icon(pThisFolder, pID, iconsize);
     szTip[0] = 0;
     sh_get_displayname(pThisFolder, pID, SHGDN_NORMAL, szTip);
-    #define LINK_EXTRACT_ICON
-#endif
 }
 
+#endif
 // ----------------------------------------------
 

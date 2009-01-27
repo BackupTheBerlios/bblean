@@ -92,7 +92,7 @@ void LoadFolder(Folder *pFolder, int iconsize, HWND hwnd)
                 Item *item = new Item;
                 item->is_folder = 0 != (attr & ef_folder);
                 item->data = pidl;
-                get_icon_and_tip(first_pidl(pidl), &item->hIcon, iconsize, item->szTip, sizeof item->szTip);
+                sh_get_icon_and_name(first_pidl(pidl), &item->hIcon, iconsize, item->szTip, sizeof item->szTip);
 
                 // add item to the list
                 item -> next = *ppItems, *ppItems = item;
