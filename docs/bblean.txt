@@ -450,7 +450,6 @@ Notes:
   loads.
 - When running bbLean over explorer the systray icons won't show in many cases.
 
-
 ****************************************************************************
 
 CommandLine
@@ -710,6 +709,30 @@ is for example: us, uk, jp, ...)
 
 ****************************************************************************
 
+Hacks
+=====
+
+Some options in *extensions.rc* are supported to disable parts of the
+bbLean shell for special purposes:
+
+Option : Default : Description :
+blackbox.options.hideExplorer   : true  : hide desktop icons when run under explorer
+blackbox.options.hideTaskbar    : true  : hide explorer taskbar when run under explorer
+blackbox.options.disableTray    : false : do not receive tray events
+blackbox.options.disableMargins : false : do not set desktop margins
+blackbox.options.disableVWM     : false : disable workspaces
+blackbox.options.disableDDE     : false : do not initialize DDE in shdocvw.dll
+blackbox.options.shellContextMenu : false : use plain grey context menu (right-click)
+blackbox.options.disableDesk    : false : do not create an own desktop window
+blackbox.options.desktopHook    : false : use deskhook.dll to receive desktop clicks (*)
+
+(*) deskhook.dll can be used in combination with no own desktop window to receive mouse
+clicks on the explore desktop background. deskhook.dll is not part of the binary package,
+but is included in the source code.
+
+
+****************************************************************************
+
 Issues
 ======
 
@@ -928,6 +951,9 @@ bbKeys:
 - -nolabel and -debug options can be used in bbKeys.rc
 - instead of "WithAction(ExecCommand), DoThis(<command>)" you can now
   use simply "WithAction(Exec <command>)"
+
+bbIconBox:
+- Drag & Drop applications between workspace boxes.
 
 Features by absence:
 - font-shadows, menu-icons, process-kill-menu, volume-control, ...

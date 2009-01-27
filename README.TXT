@@ -18,7 +18,7 @@
 
   ---------------------------------------------------------------------
 
-  Requirements:
+  Prerequisites:
     - A compiler (MinGW or MSC)
     - GNU make from MinGW
 
@@ -27,16 +27,15 @@
 
         make COMPILER=xxx
 
-    where xxx is on of:
+    where xxx is one of:
         gcc         for MinGW (default)
         msc         for MSVC 6.0
-        vc8         for MS VC8 express
+        vc8         for MS VC8 Express
         msc64       for MS AMD64 compiler
         gcc64       for MinGW-w64 compiler
 
-    - Some options (e.g. compiler installation paths) can be set in
-      the build/makefile-???.inc files.
-    - The 64-bit build was not tested.
+    Some options in the build/makefile-xxx.inc files might need
+    tweaking (e.g. for compiler installation paths).
 
   Clean:
     make clean
@@ -47,7 +46,7 @@
   Install into directory elsewhere
     make COMPILER=xxx INSTDIR=<directory>
 
-  Tested with MinGW package versions:
+  Tested (among others) with MinGW package versions:
     gcc/g++         3.4.5
     binutils        2.18.50
     mingw-runtime   3.15.1
