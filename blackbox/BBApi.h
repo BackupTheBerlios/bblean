@@ -46,7 +46,7 @@
 /* compiler specifics */
 /*------------------------------------------ */
 
-#ifdef __GNUC__
+#if defined __GNUC__ && !defined _WIN64
   /* Convince GNUC to export the __stdcall function with underscore */
   #define GetBlackboxPath _GetBlackboxPath
 #endif
