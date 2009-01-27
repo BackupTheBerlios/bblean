@@ -1035,7 +1035,7 @@ void setmetrics(void)
 
     if (adjustCaptionHeight)
     {
-        int n = mSkin.ncTop - (ncm_now.iBorderWidth + 4);
+        int n = mSkin.ncTop - ncm_now.iBorderWidth - 3;
         ncm_now.iCaptionHeight = ncm_now.iSmCaptionHeight = n;
         ncm_now.lfCaptionFont = mSkin.Font;
         ncm_now.lfSmCaptionFont = mSkin.Font;
