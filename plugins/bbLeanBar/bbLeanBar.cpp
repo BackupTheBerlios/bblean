@@ -91,8 +91,6 @@ ST void exit_drop_targ(class TinyDropTarget *m_TinyDropTarget);
 
 //====================
 HWND BBhwnd;
-HWND trayNotifyWnd;
-HWND trayWnd;
 ST int currentScreen;
 ST char screenName[80];
 
@@ -1609,21 +1607,6 @@ DLL_EXPORT int beginPluginEx(HINSTANCE hPluginInstance, HWND hSlit)
     struct plugin_info *p;
     struct barinfo *PI;
     int n_index;
-
-    if (NULL == BBhwnd)
-    {
-        trayWnd = NULL;
-        for (;;) {
-            trayWnd = FindWindowEx(NULL, trayWnd, "Shell_TrayWnd", NULL);
-            if (NULL == trayWnd)
-                break;
-            if (GetWindowThreadProcessId(trayWnd, NULL) == GetCurrentThreadId()) {
-                trayNotifyWnd = FindWindowEx(trayWnd, NULL, "TrayNotifyWnd", NULL);
-                break;
-            }
-        }
-        //dbg_printf("trayWnd %x trayNotifyWnd %x", trayWnd, trayNotifyWnd);
-    }
 
     BBhwnd = GetBBWnd();
     for (p = g_PI, n_index = 0; p; p = p->next, ++n_index)
