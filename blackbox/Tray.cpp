@@ -819,38 +819,42 @@ ST int sso_load(const char *name, const char *guid)
     log_printf((LOG_TRAY, "Tray: Load ShellServiceObject(%s): %s: %s",
         SUCCEEDED(hr)?"ok":"failed", name, guid));
 
-    if (!SUCCEEDED(hr))
-        return 1;
-
-    // dbg_printf("Starting ShellService %d %s %s", (pOCT->AddRef(),pOCT->Release()), name, guid);
-    COMCALL5(pOCT, Exec,
-        &CGID_ShellServiceObject,
-        2, // start
-        0,
-        NULL,
-        NULL
-        );
-
-    t = (sso_list_t*)m_alloc(sizeof(sso_list_t) + strlen(name));
-    t->pOCT = pOCT;
-    strcpy(t->name, name);
-    append_node(&sso_list, t);
+    if (SUCCEEDED(hr)) {
+        hr = COMCALL5(pOCT, Exec,
+            &CGID_ShellServiceObject,
+            2, // start
+            0,
+            NULL,
+            NULL
+            );
+        //dbg_printf("Starting ShellService %lx %d %s %s", (DWORD)hr, (pOCT->AddRef(), pOCT->Release()), name, guid);
+        if (SUCCEEDED(hr)) {
+            t = (sso_list_t*)m_alloc(sizeof(sso_list_t) + strlen(name));
+            t->pOCT = pOCT;
+            strcpy(t->name, name);
+            append_node(&sso_list, t);
+        } else {
+            pOCT->Release();
+        }
+    }
     return 1;
 }
 
 ST DWORD WINAPI SSO_Thread(void *pv)
 {
-    HKEY hk0 = HKEY_LOCAL_MACHINE, hk1;
-    const char *key =
-        "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad";
+    HKEY hk0, hk1;
+    sso_list_t *t;
+    const char *key;
+
+    hk0 = HKEY_LOCAL_MACHINE;
+    key = "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad";
 
     // CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_NOOLE1DDE);
     CoInitialize(0); // win95 compatible
 
     if (usingVista)
         sso_load("stobject", "{35CEC8A3-2BE6-11D2-8773-92E220524153}");
-
-
+    else
     if (ERROR_SUCCESS == RegOpenKeyEx(hk0, key, 0, KEY_READ, &hk1)) {
         int index;
         for (index = 0; ; ++index) {
@@ -873,31 +877,29 @@ ST DWORD WINAPI SSO_Thread(void *pv)
     // Wait for the exit event
     BBWait(0, 1, &BBSSO_Stop);
 
-#ifndef _WIN64 // crashes on x64
     // Go through each element of the array and stop it..
-    sso_list_t *t;
     dolist(t, sso_list) {
         IOleCommandTarget *pOCT = t->pOCT;
+        HRESULT hr;
         /* sometimes for some reason trying to access the SSObject's vtbl
-        here causes a GPF. Maybe it was already released. */
+           here caused a GPF. Maybe it was already released. */
         if (IsBadReadPtr(*(void**)pOCT, 5*sizeof(void*)/*&Exec+1*/)) {
 #ifdef BBOPT_MEMCHECK
             BBMessageBox(MB_OK, "Bad ShellService Object: %s", t->name);
 #endif
             continue;
         }
-        COMCALL5(pOCT, Exec,
+        hr = COMCALL5(pOCT, Exec,
             &CGID_ShellServiceObject,
             3, // stop
             0,
             NULL,
             NULL
             );
-        // dbg_printf("Stopped ShellService %d %s", (pOCT->AddRef(),pOCT->Release()), t->name);
+        //dbg_printf("Stopped ShellService %lx %d %s", (DWORD)hr, (pOCT->AddRef(), pOCT->Release()), t->name);
         COMCALL0(pOCT, Release);
     }
-    // exception: ole32.dll,0x001288CE -> 766B88CE
-#endif
+
     freeall(&sso_list);
     CoUninitialize();
     return 0;
