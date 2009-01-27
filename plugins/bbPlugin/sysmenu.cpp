@@ -28,9 +28,7 @@
 
 #define ST static
 
-static const char sys_command[] = "SysCommand %lx,%x";
-
-#define HWNDFMT(w) (DWORD)(DWORD_PTR)w
+static const char sys_command[] = "SysCommand %p,%x";
 
 #define MENUITEMINFO_SIZE_0400 \
     ((DWORD_PTR)&((MENUITEMINFO*)NULL)->cch + sizeof((MENUITEMINFO*)NULL)->cch)
@@ -48,7 +46,7 @@ ST HMENU get_sysmenu(HWND Window)
     if (is_frozen(Window))
         return systemMenu;
 
-    GetSystemMenu(Window, TRUE);
+    //XXX GetSystemMenu(Window, TRUE);
     systemMenu = GetSystemMenu(Window, FALSE);
     if (NULL == systemMenu)
         return systemMenu;
@@ -77,7 +75,7 @@ ST HMENU get_sysmenu(HWND Window)
     EnableMenuItem(systemMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
 
     // let application modify menu
-    SendMessage(Window, WM_INITMENU, (WPARAM)systemMenu, 0);
+    //XXX SendMessage(Window, WM_INITMENU, (WPARAM)systemMenu, 0);
 
     return systemMenu;
 }
@@ -98,7 +96,7 @@ bool ShowSysmenu_default(HWND Window, HWND Owner, RECT *pRect)
         Sleep(10);
     }
 
-    SendMessage(Window, WM_INITMENUPOPUP, (WPARAM)systemMenu, MAKELPARAM(0, TRUE));
+    //XXX SendMessage(Window, WM_INITMENUPOPUP, (WPARAM)systemMenu, MAKELPARAM(0, TRUE));
 
     DWORD ThreadID2 = GetWindowThreadProcessId(Window, NULL);
     DWORD ThreadID1 = GetCurrentThreadId();
@@ -183,7 +181,7 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
 
         if (info.hSubMenu)
         {
-            SendMessage(hwnd, WM_INITMENUPOPUP, (WPARAM)info.hSubMenu, MAKELPARAM(n, TRUE));
+            //XXX SendMessage(hwnd, WM_INITMENUPOPUP, (WPARAM)info.hSubMenu, MAKELPARAM(n, TRUE));
             char temp[200];
             Menu *s = MakeNamedMenu(text_string, getsysmenu_id(temp, id), true);
             copymenu(s, hwnd, info.hSubMenu, false, id, sysBroam);
@@ -200,7 +198,7 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
         if (!(info.fState & MFS_DISABLED) && !(info.fState & MFS_GRAYED))
         {
             char broam[256];
-            sprintf(broam, sysBroam, HWNDFMT(hwnd), info.wID);
+            sprintf(broam, sysBroam, hwnd, info.wID);
             if (sep)
                 MakeMenuNOP(m, NULL), sep = false;
             MakeMenuItem(m, text_string, broam, false);
@@ -265,12 +263,12 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
             string_node *p = info.deskNames;
             for (n = 0; p && n < info.ScreensX; ++n, p = p->next)
             {
-                sprintf(broam, sysBroam, HWNDFMT(Window), n+0x1000);
+                sprintf(broam, sysBroam, Window, n+0x1000);
                 MakeMenuItem(s, p->str, broam, workspace == n);
             }
             MakeSubmenu(m, s, "Send To");
         }
-        sprintf(broam, sysBroam, HWNDFMT(Window), 0x1100);
+        sprintf(broam, sysBroam, Window, 0x1100);
         MakeMenuItem(m, "On All &Workspaces", broam, is_sticky);
         n = 1;
     }
@@ -281,12 +279,12 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
         if (false == iconic && (style & WS_SIZEBOX))
         {
             f = NULL != GetProp(Window, BBSHADE_PROP);
-            sprintf(broam, sysBroam, HWNDFMT(Window), 0x1102);
+            sprintf(broam, sysBroam, Window, 0x1102);
             MakeMenuItem(m, "Sha&de", broam, f);
         }
 
         f = 0 != (exstyle & WS_EX_TOPMOST);
-        sprintf(broam, sysBroam, HWNDFMT(Window), 0x1101);
+        sprintf(broam, sysBroam, Window, 0x1101);
         MakeMenuItem(m, "Always On &Top", broam, f);
         n = 1;
     }
