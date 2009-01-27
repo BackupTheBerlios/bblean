@@ -188,27 +188,39 @@ void post_redraw(HWND hwnd)
 void exec_button_action(WinInfo *WI, int n)
 {
     HWND hwnd = WI->hwnd;
+    WPARAM SC_xxx;
+
     switch(n)
     {
         case btn_Close:
-            PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+            SC_xxx = SC_CLOSE;
+        Post_SC:
+            {
+                POINT pt;
+                GetCursorPos(&pt);
+                PostMessage(hwnd, WM_SYSCOMMAND, SC_xxx, MAKELPARAM(pt.x, pt.y));
+            }
             break;
 
         case btn_Min:
             if (WI->style & WS_MINIMIZEBOX) {
-                if (BBVERSION_LEAN == mSkin.BBVersion)
+                if (BBVERSION_LEAN == mSkin.BBVersion) {
                     PostMessage(mSkin.BBhwnd, IsIconic(hwnd) ? BB_WINDOWRESTORE : BB_WINDOWMINIMIZE, 0, (LPARAM)hwnd);
-                else
-                    PostMessage(hwnd, WM_SYSCOMMAND, IsIconic(hwnd) ? SC_RESTORE : SC_MINIMIZE, 0);
+                } else {
+                    SC_xxx = IsIconic(hwnd) ? SC_RESTORE : SC_MINIMIZE;
+                    goto Post_SC;
+                }
             }
             break;
 
         case btn_Max:
             if (WI->style & WS_MAXIMIZEBOX) {
-                if (BBVERSION_LEAN == mSkin.BBVersion)
+                if (BBVERSION_LEAN == mSkin.BBVersion) {
                     PostMessage(mSkin.BBhwnd, IsZoomed(hwnd) ? BB_WINDOWRESTORE : BB_WINDOWMAXIMIZE, 0, (LPARAM)hwnd);
-                else
-                    PostMessage(hwnd, WM_SYSCOMMAND, IsZoomed(hwnd) ? SC_RESTORE : SC_MAXIMIZE, 0);
+                } else {
+                    SC_xxx = IsZoomed(hwnd) ? SC_RESTORE : SC_MAXIMIZE;
+                    goto Post_SC;
+                }
             }
             break;
 
