@@ -2358,6 +2358,8 @@ void Menu::ShowMenu()
             pt.y -= h;
         break;
     default:
+        if (BBMENU_KBD & flags)
+            break;
         // show centered at cursor;
         pt.x -= w/2;
         pt.y -= MenuInfo.nTitleHeight/2 + MenuInfo.nTitleMargin;
