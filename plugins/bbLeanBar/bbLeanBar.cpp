@@ -773,7 +773,7 @@ void barinfo::desktop_margin_fn (void)
     if (false == this->inSlit
         && this->setDesktopMargin
         && false == this->autoHide
-        && (this->visible || this->full_screen_hidden)
+        && (this->is_visible || this->full_screen_hidden)
         )
         switch (this->place) {
         case POS_Top            :

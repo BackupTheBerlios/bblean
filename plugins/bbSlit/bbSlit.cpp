@@ -744,7 +744,7 @@ void slit_info::pos_changed(void)
 {
     int pos, margin;
     pos = margin = 0;
-    if (this->setMargin && false == this->autoHide && this->visible)
+    if (this->setMargin && false == this->autoHide && this->is_visible)
     {
         switch (place)
         {
