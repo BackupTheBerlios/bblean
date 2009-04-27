@@ -47,6 +47,12 @@ SpecialFolderItem::SpecialFolderItem(
     m_pidl_list = path ? get_folder_pidl_list(path) : pidl_list;
     // command to apply to files, optional
     m_pszExtra = new_str(pszExtra);
+    if (0 == pszTitle[0]) {
+        char disp_name[MAX_PATH];
+        replace_str(&m_pszTitle, m_pidl_list
+            ? sh_getdisplayname(first_pidl(m_pidl_list), disp_name)
+            : NLS0("Invalid Path"));
+    }
 }
 
 SpecialFolderItem::~SpecialFolderItem()
