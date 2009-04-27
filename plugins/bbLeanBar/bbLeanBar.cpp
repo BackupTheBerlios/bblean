@@ -798,16 +798,28 @@ void barinfo::update(int flag)
     this->pLeanBar->invalidate(flag);
 }
 
+void get_window_text(HWND hwnd, char *buffer, int size)
+{
+    if (0 == (GetVersion() & 0x80000000)) {
+        WCHAR wbuf[1000];
+        wbuf[0] = 0;
+        GetWindowTextW(hwnd, wbuf, size);
+        bbWC2MB(wbuf, buffer, size);
+    } else {
+        buffer[0] = 0;
+        GetWindowTextA(hwnd, buffer, size);
+    }
+}
+
 void barinfo::update_windowlabel(void)
 {
-    windowlabel[0] = 0;
-    const struct tasklist *tl;
-    dolist (tl, GetTaskListPtrEx())
-        if (tl->active)
-        {
-            strcpy_max(windowlabel, tl->caption, sizeof windowlabel);
-            break;
-        }
+    HWND hwnd = GetForegroundWindow();
+    if (NULL == hwnd || is_bbwindow(hwnd)) {
+        if (GetCapture())
+            return;
+        hwnd = BBhwnd;
+    }
+    get_window_text(hwnd, windowlabel, sizeof windowlabel);
 }
 
 //===========================================================================

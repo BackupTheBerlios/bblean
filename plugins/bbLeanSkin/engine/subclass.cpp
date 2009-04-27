@@ -403,7 +403,7 @@ void draw_line(HDC hDC, int x1, int x2, int y1, int y2, int w)
 
 //-----------------------------------------------------------------
 #if 1
-HICON get_ico(HWND hwnd)
+int get_window_icon(HWND hwnd, HICON *picon)
 {
     HICON hIco = NULL;
     SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL,
@@ -415,9 +415,13 @@ HICON get_ico(HWND hwnd)
         hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICONSM);
     if (NULL==hIco) {
         hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
-    }}}
-    return hIco;
+    if (NULL==hIco) {
+        return 0;
+    }}}}
+    *picon = hIco;
+    return 1;
 }
+
 #else
 #define DrawIconSatnHue(hDC, px, py, m_hIcon, sizex, sizey, anistep, hbr, flags, apply, sat, hue)
 #define get_ico(hwnd) NULL
@@ -533,7 +537,7 @@ void PaintAll(struct WinInfo* WI)
                 state = false;
                 break;
             case btn_Icon:
-                if (NULL == hico && NULL == (hico = get_ico(WI->hwnd)))
+                if (!get_window_icon(WI->hwnd, &hico))
                     continue;
                 state = !active;
                 break;

@@ -111,13 +111,14 @@ extern char defaultrc_path[];
 
 // ==============================================================
 /* workspaces and tasks */
-bool focus_top_window(void);
+
 struct hwnd_list { struct hwnd_list *next; HWND hwnd; };
+void get_window_icon(HWND hwnd, HICON *picon);
+void get_window_text(HWND hwnd, char *buffer, int size);
 
 // ==============================================================
 /* BBApi.cpp - some (non api) utils */
 
-unsigned long getfileversion(const char *path);
 BOOL BBExecute_string(const char *s, int flags);
 int BBExecute_pidl(const char* verb, const void *pidl);
 

@@ -312,6 +312,7 @@ ST void Toolbar_setlabel(void)
 {
     // Get current workspace name...
     DesktopInfo DI;
+    HWND hwnd;
 
     GetDesktopInfo (& DI);
     strcpy(Toolbar_WorkspaceName, DI.name);
@@ -324,19 +325,16 @@ ST void Toolbar_setlabel(void)
         struct menu_stats st;
         Menu_Stats(&st);
         sprintf(Toolbar_CurrentWindow,"Menus %d  MenuItems %d  Memory %d", st.menu_count, st.item_count, m_alloc_size());
-    } else
-#endif
-    {
-        const struct tasklist *tl;
-        dolist (tl, GetTaskListPtr())
-            if (tl->active)
-                break;
-
-        Toolbar_CurrentWindow[0] = 0;
-        if (tl)
-            strcpy_max(Toolbar_CurrentWindow, tl->caption, sizeof Toolbar_CurrentWindow);
-        //else strcpy(Toolbar_CurrentWindow, "Blackbox");
+        return;
     }
+#endif
+    hwnd = GetForegroundWindow();
+    if (NULL == hwnd || is_bbwindow(hwnd)) {
+        if (GetCapture())
+            return;
+        hwnd = BBhwnd;
+    }
+    get_window_text(hwnd, Toolbar_CurrentWindow, sizeof Toolbar_CurrentWindow);
 }
 
 ST void Toolbar_setclock(void)

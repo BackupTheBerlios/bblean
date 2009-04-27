@@ -172,6 +172,39 @@ void dbg_printf (const char *fmt, ...)
     OutputDebugString(buffer);
 }
 
+void get_window_text(HWND hwnd, char *buffer, int size)
+{
+    if (usingNT) {
+        WCHAR wbuf[1000];
+        wbuf[0] = 0;
+        GetWindowTextW(hwnd, wbuf, size);
+        bbWC2MB(wbuf, buffer, size);
+    } else {
+        buffer[0] = 0;
+        GetWindowTextA(hwnd, buffer, size);
+    }
+}
+
+void get_window_icon(HWND hwnd, HICON *picon)
+{
+    HICON hIco = NULL;
+    SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL,
+        0, SMTO_ABORTIFHUNG|SMTO_NORMAL, 1000, (DWORD_PTR*)&hIco);
+    if (NULL==hIco) {
+    SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG,
+        0, SMTO_ABORTIFHUNG|SMTO_NORMAL, 1000, (DWORD_PTR*)&hIco);
+    if (NULL==hIco) {
+        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICONSM);
+    if (NULL==hIco) {
+        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
+    if (NULL==hIco) {
+        return;
+    }}}}
+    if (*picon)
+        DestroyIcon(*picon);
+    *picon = CopyIcon(hIco);
+}
+
 //===========================================================================
 // logging support
 //===========================================================================

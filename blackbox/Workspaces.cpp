@@ -1089,53 +1089,11 @@ HWND GetActiveTaskWindow(void)
     return activeTaskWindow;
 }
 
-ST void get_ico(struct tasklist *tl)
-{
-    HWND hwnd = tl->hwnd;
-    HICON hIco = NULL;
-    SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL,
-        0, SMTO_ABORTIFHUNG|SMTO_NORMAL, 1000, (DWORD_PTR*)&hIco);
-    if (NULL==hIco) {
-    SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG,
-        0, SMTO_ABORTIFHUNG|SMTO_NORMAL, 1000, (DWORD_PTR*)&hIco);
-    if (NULL==hIco) {
-        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICONSM);
-    if (NULL==hIco) {
-        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
-    if (NULL==hIco) {
-        return;
-    }}}}
-    if (tl->icon)
-        DestroyIcon(tl->icon);
-    tl->icon = CopyIcon(hIco);
-}
-
-ST void get_text(struct tasklist *tl)
-{
-    const int bs = sizeof(tl->caption);
-    if (Settings_UTF8Encoding) {
-        WCHAR wbuf[256];
-        if (usingNT) {
-            wbuf[0] = 0;
-            GetWindowTextW(tl->hwnd, wbuf, bs);
-        } else {
-            char buf[256];
-            buf[0] = 0;
-            GetWindowTextA(tl->hwnd, buf, bs);
-            MultiByteToWideChar(CP_ACP, 0, buf, -1, wbuf, bs);
-        }
-        WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, tl->caption, bs, NULL, NULL);
-    } else {
-        tl->caption[0] = 0;
-        GetWindowTextA(tl->hwnd, tl->caption, bs);
-    }
-}
-
 void Workspaces_GetCaptions()
 {
-    struct tasklist *p;
-    dolist (p, taskList)
-        get_text(p);
+    struct tasklist *tl;
+    dolist (tl, taskList)
+        get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
 }
 
 //==================================
@@ -1146,8 +1104,8 @@ ST struct tasklist *AddTask(HWND hwnd)
     tl->hwnd = hwnd;
     tl->wkspc = currentScreen;
     append_node(&taskList, tl);
-    get_text(tl);
-    get_ico(tl);
+    get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
+    get_window_icon(tl->hwnd, &tl->icon);
     send_task_message(hwnd, TASKITEM_ADDED);
     return tl;
 }
@@ -1380,9 +1338,9 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
             // try to grab title & icon, if still missing
 
             if (0 == tl->caption[0])
-                get_text(tl);
+                get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
             if (NULL == tl->icon)
-                get_ico(tl);
+                get_window_icon(tl->hwnd, &tl->icon);
 
         }
 
@@ -1396,9 +1354,8 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
         if (tl)
         {
             UINT msg = TASKITEM_MODIFIED;
-
-            get_text(tl);
-            get_ico(tl); // disable for foobar delay issue ?
+            get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
+            get_window_icon(tl->hwnd, &tl->icon); // disable for foobar delay issue ?
             if (wParam & 0x8000) {
                 msg = TASKITEM_FLASHED;
                 tl->flashing = true;
