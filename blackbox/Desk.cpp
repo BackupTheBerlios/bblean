@@ -435,7 +435,10 @@ ST void hidewnd (HWND hwnd)
 ST BOOL CALLBACK HideBaseBars(HWND hwnd, LPARAM lParam)
 {
     char temp[32];
-    if (GetClassName(hwnd, temp, sizeof temp) && 0 == strcmp(temp, "BaseBar"))
+    if (GetClassName(hwnd, temp, sizeof temp)
+     && (0 == strcmp(temp, "BaseBar")
+      || 0 == strcmp(temp, "Button")
+        ))
         hidewnd(hwnd);
     return TRUE;
 }
