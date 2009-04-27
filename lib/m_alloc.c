@@ -1,4 +1,22 @@
 /* ------------------------------------------------------------------------- */
+/*
+  This file is part of the bbLean source code
+  Copyright © 2004-2009 grischka
+
+  http://bb4win.sourceforge.net/bblean
+  http://developer.berlios.de/projects/bblean
+
+  bbLean is free software, released under the GNU General Public License
+  (GPL version 2). For details see:
+
+  http://www.fsf.org/licenses/gpl.html
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.
+*/
+/* ------------------------------------------------------------------------- */
 /* memory tracker */
 
 #include "bblib.h"
@@ -336,29 +354,5 @@ void _m_setinfo(const char *file, int line)
     _m_line = line;
 }
 
-/* ------------------------------------------------------------------------- */
-#else
-/* ------------------------------------------------------------------------- */
-#ifndef BBLIB_STATIC
-void *m_alloc(unsigned n)
-{
-    return malloc(n);
-}
-
-void *c_alloc (unsigned n)
-{
-    return calloc(1,n);
-}
-
-void  m_free(void *v)
-{
-    free(v);
-}
-
-void *m_realloc (void *v, unsigned s)
-{
-    return realloc(v, s);
-}
-#endif
 /* ------------------------------------------------------------------------- */
 #endif /*def BBOPT_MEMCHECK */

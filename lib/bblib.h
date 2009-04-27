@@ -1,6 +1,23 @@
 /* ------------------------------------------------------------------------- */
+/*
+  This file is part of the bbLean source code
+  Copyright © 2004-2009 grischka
 
+  http://bb4win.sourceforge.net/bblean
+  http://developer.berlios.de/projects/bblean
+
+  bbLean is free software, released under the GNU General Public License
+  (GPL version 2). For details see:
+
+  http://www.fsf.org/licenses/gpl.html
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.
+*/
 /* ------------------------------------------------------------------------- */
+
 #ifndef _BBLIB_H_
 #define _BBLIB_H_
 
@@ -27,7 +44,7 @@
 # define dbg_printf _dbg_printf
 #endif
 
-#define BBOPT_MEMCHECK
+// #define BBOPT_MEMCHECK
 
 /* ------------------------------------------------------------------------- */
 
@@ -58,12 +75,10 @@
 # define m_realloc(p,s) _m_realloc(p,s,__FILE__,__LINE__)
 # define m_free(p) _m_free(p,__FILE__,__LINE__)
 #else
-# ifdef BBLIB_STATIC
-#  define m_alloc(n) malloc(n)
-#  define c_alloc(n) calloc(1,n)
-#  define m_free(v) free(v)
-#  define m_realloc(p,s) realloc(p,s)
-# endif
+# define m_alloc(n) malloc(n)
+# define c_alloc(n) calloc(1,n)
+# define m_free(v) free(v)
+# define m_realloc(p,s) realloc(p,s)
 # define m_alloc_check_leaks(title)
 # define m_alloc_check_memory()
 # define m_alloc_size() 0
@@ -224,13 +239,6 @@ BBLIB_EXPORT void m_alloc_dump_memory(void);
 BBLIB_EXPORT void m_alloc_check_memory(void);
 BBLIB_EXPORT void m_alloc_check_leaks(const char *title);
 BBLIB_EXPORT unsigned m_alloc_size(void);
-#else
-#ifndef BBLIB_STATIC
-BBLIB_EXPORT void *m_alloc(unsigned n);
-BBLIB_EXPORT void *c_alloc (unsigned n);
-BBLIB_EXPORT void  m_free(void *v);
-BBLIB_EXPORT void *m_realloc (void *v, unsigned s);
-#endif
 #endif /* BBOPT_MEMCHECK */
 
 /* ------------------------------------------------------------------------- */
