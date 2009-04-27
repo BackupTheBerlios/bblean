@@ -436,7 +436,7 @@ BOOL task_enum_func(const tasklist *icon, LPARAM lParam)
             SendMessageTimeout(hwnd, WM_GETICON,
                 ICON_BIG, 0, SMTO_ABORTIFHUNG|SMTO_BLOCK, 300, (DWORD_PTR*)&hIco);
             if (NULL==hIco)
-                hIco = (HICON)GetClassLong(hwnd, GCLP_HICON);
+                hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
             if (hIco)
                 item->hIcon = hIco;
         }

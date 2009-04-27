@@ -412,9 +412,9 @@ HICON get_ico(HWND hwnd)
     SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG,
         0, SMTO_ABORTIFHUNG|SMTO_NORMAL, 1000, (DWORD_PTR*)&hIco);
     if (NULL==hIco) {
-        hIco = (HICON)GetClassLong(hwnd, GCLP_HICONSM);
+        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICONSM);
     if (NULL==hIco) {
-        hIco = (HICON)GetClassLong(hwnd, GCLP_HICON);
+        hIco = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
     }}}
     return hIco;
 }
