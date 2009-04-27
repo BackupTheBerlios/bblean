@@ -115,11 +115,12 @@ public:
         RECT r = mr;
 #if 1
         // extend clickable area to screen edge
-        int b = (styleBorderWidth + styleBevelWidth);
-        int bar_top = m_bar->ypos - m_bar->mon_rect.top;
-        int bar_bottom = m_bar->mon_rect.bottom - m_bar->ypos;
-        if (bar_top + r.top <= b) r.top = 0;
-        if (bar_bottom - r.bottom <= b) r.bottom = bar_bottom;
+        int border = styleBorderWidth + styleBevelWidth;
+        if (r.top - m_bar->mon_top <= border)
+            r.top = m_bar->mon_top;
+
+        if (m_bar->mon_bottom - r.bottom <= border)
+            r.bottom = m_bar->mon_bottom;
 #endif
         if (my < r.top || my >= r.bottom)
             return 0;

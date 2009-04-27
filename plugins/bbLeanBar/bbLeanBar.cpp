@@ -195,6 +195,7 @@ struct barinfo : plugin_info
     bool show_kbd_layout;
     bool gesture_lock;
     bool full_screen_hidden ;
+    int mon_top, mon_bottom;
 
     HWND task_over_hwnd;
     HWND task_lock;
@@ -1540,8 +1541,13 @@ void barinfo::show_menu(bool pop)
 //===========================================================================
 void barinfo::pos_changed(void)
 {
-    this->near_top =
-        this->ypos < (this->mon_rect.bottom + this->mon_rect.top) / 2;
+    POINT pt;
+    pt.x = mon_rect.left;
+    pt.y = mon_rect.top;
+    ScreenToClient(hwnd, &pt);
+
+    mon_top = pt.y;
+    mon_bottom = pt.y + mon_rect.bottom - mon_rect.top;
 
     if (this->place != POS_User && this->place < POS_CenterLeft)
         this->old_place = this->place;
