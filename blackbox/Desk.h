@@ -28,7 +28,6 @@ void Desk_Exit(void);
 void Desk_Init(void);
 void ShowExplorer(void);
 void HideExplorer(void);
-int Wallpaper_Init(void);
 
 void Desk_new_background(const char *rootCommand);
 const char * Desk_extended_rootCommand(const char *p);

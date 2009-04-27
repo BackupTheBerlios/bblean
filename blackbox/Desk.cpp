@@ -175,6 +175,8 @@ void Desk_new_background(const char *p)
     if (hDesktopWnd)
         Desk_SetPosition();
     strcpy(Root.command, p);
+    if (usingVista && 0 == *p)
+        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDCHANGE);
 }
 
 //===========================================================================
@@ -208,6 +210,11 @@ ST LRESULT CALLBACK Desk_WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
             // dbg_printf("ncpaint: %x %x %x %x", hwnd, uMsg, wParam, lParam);
             // keep the window on bottom
             Desk_SetPosition();
+            break;
+
+        case WM_SETTINGCHANGE:
+            if (SPI_SETDESKWALLPAPER == wParam)
+                InvalidateRect(hwnd, NULL, FALSE);
             break;
 
         //====================
@@ -472,29 +479,6 @@ void ShowExplorer(void)
     dolist (p, basebarlist)
         ShowWindow(p->hwnd, SW_SHOW);
     freeall(&basebarlist);
-}
-
-//===========================================================================
-int Wallpaper_Init(void)
-{
-    char bgImage[MAX_PATH];
-
-    HKEY hk1;
-    DWORD type, size;
-    char *value = bgImage;
-    int ret = 0;
-
-    if (ERROR_SUCCESS ==
-        RegOpenKeyEx(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_READ, &hk1)) {
-        size = MAX_PATH;
-        if (ERROR_SUCCESS ==
-            RegQueryValueEx(hk1, "wallpaper", NULL, &type, (BYTE*)value, &size))
-            ret = 1;
-        RegCloseKey(hk1);
-    }
-    if (ret)
-        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)bgImage, SPIF_SENDCHANGE);
-    return ret;
 }
 
 //===========================================================================

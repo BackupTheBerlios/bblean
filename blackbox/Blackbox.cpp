@@ -563,7 +563,6 @@ void startup_blackbox(void)
     set_misc_options();
     Workspaces_Init();
     Tray_Init();
-    Wallpaper_Init();
     Desk_Init();
     Menu_Init();
     terminate_welcomescreen();
@@ -999,7 +998,6 @@ LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
         case WM_DISPLAYCHANGE:
             if (shutting_down)
                 break;
-            Wallpaper_Init();
             Desk_Reset(true);
             PostMessage(hwnd, BB_RECONFIGURE, 0, 0);
             break;
