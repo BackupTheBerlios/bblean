@@ -82,7 +82,6 @@ BBSETTING struct menu_setting {
 //====================
 // workspaces
 BBSETTING bool Settings_styleXPFix;
-BBSETTING bool Settings_restoreToCurrent;
 BBSETTING bool Settings_followActive;
 BBSETTING bool Settings_altMethod;
 BBSETTING int  Settings_workspaces;

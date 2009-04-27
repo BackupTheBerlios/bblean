@@ -525,8 +525,7 @@ ST void WS_BringToFront(HWND hwnd, bool to_current)
     windesk = vwm_get_desk(hwnd);
     if (windesk != currentScreen)
     {
-        if (false == to_current
-            && (FALSE == Settings_restoreToCurrent || FALSE == IsIconic(hwnd)))
+        if (false == to_current)
             switchToDesktop(windesk);
         else
             setDesktop(hwnd, currentScreen, false);
@@ -1269,18 +1268,11 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
         if (tl)
         {
             int windesk = vwm_get_desk(hwnd);
-            bool was_iconic = vwm_get_status(hwnd, VWM_ICONIC);
             tl->active = true;
             if (currentScreen == windesk)
             {
                 // in case the app has windows on other workspaces, this
                 // gathers them in the current
-                setDesktop(hwnd, currentScreen, false);
-            }
-            else
-            if (was_iconic && Settings_restoreToCurrent)
-            {
-                // make shure its in the current WS
                 setDesktop(hwnd, currentScreen, false);
             }
             else

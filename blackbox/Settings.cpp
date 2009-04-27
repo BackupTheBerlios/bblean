@@ -924,7 +924,6 @@ static const struct rccfg extrc_cfg[] = {
 
     { "blackbox.workspaces.followActive",      C_BOL, (void*)true,     &Settings_followActive },
     { "blackbox.workspaces.altMethod",         C_BOL, (void*)true,    &Settings_altMethod },
-    { "blackbox.workspaces.restoreToCurrent",  C_BOL, (void*)true,     &Settings_restoreToCurrent },
     { "blackbox.workspaces.styleXPFix",        C_BOL, (void*)false,    &Settings_styleXPFix },
 
     { "blackbox.options.disableTray",          C_BOL, (void*)false,    &Settings_disableTray },

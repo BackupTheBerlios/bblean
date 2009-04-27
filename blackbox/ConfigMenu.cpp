@@ -160,10 +160,9 @@ static const struct cfgmenu cfg_sub_snap[] = {
 };
 
 static const struct cfgmenu cfg_sub_workspace[] = {
-    { NLS0("Follow Active Task"),   "workspaces.followActive",      &Settings_followActive },
-    { NLS0("Restore To Current"),   "workspaces.restoreToCurrent",  &Settings_restoreToCurrent },
     { NLS0("Alternative Method"),   "workspaces.altMethod",         &Settings_altMethod },
     { NLS0("Style-XP Fix"),         "workspaces.styleXPFix",        &Settings_styleXPFix },
+    { NLS0("Follow Active Task"),   "workspaces.followActive",      &Settings_followActive },
     { NLS0("Recover Windows"),      "@BBCore.ShowRecoverMenu",      NULL },
     { NULL,NULL,NULL }
 };

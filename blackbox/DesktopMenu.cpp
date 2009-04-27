@@ -74,7 +74,7 @@ static Menu * build_task_folder(int desk, const char *title, bool popup)
     sprintf(buf, (-1 == desk)
         ? "Core_tasks_icons" : "Core_tasks_workspace%d", desk+1);
     m = MakeNamedMenu(title, buf, popup);
-    if (m) fill_task_folder(m, desk, Settings_restoreToCurrent?0:e_alltasks);
+    if (m) fill_task_folder(m, desk, e_alltasks);
     return m;
 }
 
