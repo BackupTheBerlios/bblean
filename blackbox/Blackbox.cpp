@@ -1256,6 +1256,7 @@ static const struct corebroam_table {
     { "Restore",                BB_WINDOWRESTORE,   e_lptask, 0 },
     { "Resize",                 BB_WINDOWSIZE,      e_lptask, 0 },
     { "Move",                   BB_WINDOWMOVE,      e_lptask, 0 },
+    { "Shade",                  BB_WINDOWSHADE,     e_lptask, 0 },
     // duplicates of the above -->
     { "RaiseWindow",            BB_WINDOWRAISE,     e_lptask, 0 },
     { "LowerWindow",            BB_WINDOWLOWER,     e_lptask, 0 },
@@ -1265,9 +1266,9 @@ static const struct corebroam_table {
     { "RestoreWindow",          BB_WINDOWRESTORE,   e_lptask, 0 },
     { "ResizeWindow",           BB_WINDOWSIZE,      e_lptask, 0 },
     { "MoveWindow",             BB_WINDOWMOVE,      e_lptask, 0 },
+    { "ShadeWindow",            BB_WINDOWSHADE,     e_lptask, 0 },
     // <--
 
-    { "ShadeWindow",            BB_WINDOWSHADE,     e_lptask, 0 },
     { "MaximizeVertical",       BB_WINDOWGROWHEIGHT,e_lptask, 0 },
     { "MaximizeHorizontal",     BB_WINDOWGROWWIDTH, e_lptask, 0 },
     { "ActivateWindow",         BB_BRINGTOFRONT,    e_lptask, 0},
