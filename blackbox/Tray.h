@@ -36,6 +36,7 @@ void Tray_SetEncoding(void);
 #ifdef INCLUDE_NIDS
 
 #define HWND32 DWORD
+#define HICON32 DWORD
 #define HANDLE32 DWORD
 
 // Blackbox private:
@@ -219,7 +220,7 @@ typedef struct _NIDNT_32 {
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
-    UINT hIcon;
+    HICON32 hIcon;
     WCHAR szTip[64];
 } NIDNT_32;
 
@@ -229,7 +230,7 @@ typedef struct _NID2K_32 {
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
-    UINT hIcon;
+    HICON32 hIcon;
     CHAR szTip[128];
     DWORD dwState;
     DWORD dwStateMask;
@@ -248,7 +249,7 @@ typedef struct _NID2KW_32 {
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
-    UINT hIcon;
+    HICON32 hIcon;
     WCHAR szTip[128];
     DWORD dwState;
     DWORD dwStateMask;
@@ -267,7 +268,7 @@ typedef struct _NID2KW6_32 {
     UINT uID;
     UINT uFlags;
     UINT uCallbackMessage;
-    UINT hIcon;
+    HICON32 hIcon;
     WCHAR szTip[128];
     DWORD dwState;
     DWORD dwStateMask;

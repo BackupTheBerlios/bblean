@@ -85,6 +85,7 @@ typedef struct systemTrayNode
     bool referenced;
     bool showTip;
     bool popup;
+    bool added;
     unsigned version;
     HICON orig_icon;
     systemTrayBalloon* pBalloon;
@@ -105,9 +106,6 @@ ST bool tray_on_top;
 ST bool tray_utf8;
 
 ST void RemoveTrayIcon(systemTrayNode *p, bool post);
-
-// private flag to indicate that a shared icon was not found
-#define SHARED_NOT_FOUND 0x80
 
 void LoadShellServiceObjects(void);
 void UnloadShellServiceObjects(void);
@@ -257,10 +255,8 @@ int ForwardTrayMessage(int icon_index, UINT message)
 
 ST void reset_icon(systemTrayNode *p)
 {
-    if (false == p->shared)
-    {
-        if (p->referenced)
-        {
+    if (false == p->shared) {
+        if (p->referenced) {
             systemTrayNode *s;
             dolist (s, trayIconList)
                 if (s->shared && s->orig_icon == p->orig_icon)
@@ -280,10 +276,10 @@ ST void reset_icon(systemTrayNode *p)
 
 ST void send_tray_message(systemTrayNode *p, unsigned uChanged, unsigned msg)
 {
-    if (uChanged && false == p->hidden) {
-        p->t.uChanged = uChanged;
-        MessageManager_Send(BB_TRAYUPDATE, (WPARAM)&p->t, msg);
-    }
+    if (p->hidden || 0 == uChanged)
+        return;
+    p->t.uChanged = uChanged;
+    MessageManager_Send(BB_TRAYUPDATE, (WPARAM)&p->t, msg);
 }
 
 //===========================================================================
@@ -320,100 +316,17 @@ ST bool convert_string(char *dest, const void *src, int nmax, bool is_unicode)
 }
 
 //===========================================================================
-// Function: ModifyTrayIcon
-//===========================================================================
 
-ST UINT ModifyTrayIcon(systemTrayNode *p, NIDBB *pNid)
-{
-    UINT uChanged = 0;
-
-    if ((pNid->uFlags & NIF_MESSAGE)
-        && (pNid->uCallbackMessage != p->t.uCallbackMessage)) {
-        p->t.uCallbackMessage = pNid->uCallbackMessage;
-        uChanged |= NIF_MESSAGE;
-    }
-
-    if ((pNid->uFlags & NIF_TIP)) {
-        if (convert_string(p->t.szTip, pNid->pTip,
-                sizeof p->t.szTip, pNid->is_unicode))
-            uChanged |= NIF_TIP;
-    }
-
-    if ((pNid->uFlags & NIF_INFO) && pNid->pInfo) {
-        systemTrayBalloon *b = p->pBalloon;
-        if (NULL == b)
-            p->pBalloon = b = c_new(systemTrayBalloon);
-
-        convert_string(b->szInfoTitle, pNid->pInfoTitle,
-            sizeof b->szInfoTitle, pNid->is_unicode);
-        convert_string(b->szInfo, pNid->pInfo,
-            sizeof b->szInfo, pNid->is_unicode);
-
-        b->dwInfoFlags = *pNid->pInfoFlags;
-        if (b->szInfo[0] || b->szInfoTitle[0]) {
-            uChanged |= NIF_INFO;
-            b->uInfoTimeout = imax(2000, *pNid->pVersion_Timeout);
-        } else {
-            b->uInfoTimeout = 0;
-        }
-    }
-
-    if ((pNid->uFlags & NIF_GUID) && pNid->pGuid) {
-#if 0//ndef BBTINY
-        if (Settings_LogFlag & LOG_TRAY) {
-            WCHAR* pOle; char s_guid[200];
-            StringFromCLSID(*pNid->pGuid, &pOle);
-            convert_string(s_guid, pOle, 200, true);
-            SHMalloc_Free(pOle);
-            log_printf((LOG_TRAY, "Tray: update guidItem: %s", s_guid));
-        }
-#endif
-        p->guidItem = *pNid->pGuid;
-    }
-
-    if (pNid->uFlags & NIF_SHOWTIP) {
-        p->showTip = true;
-    }
-
-    if ((pNid->uFlags & NIF_ICON)) {
-        if (p->shared) {
-            systemTrayNode *o;
-            dolist (o, trayIconList)
-                if (o->orig_icon == pNid->hIcon && false == o->shared)
-                    break;
-
-            if (NULL == o || NULL == o->orig_icon) {
-                uChanged |= SHARED_NOT_FOUND;
-            } else if (p->orig_icon != pNid->hIcon) {
-                p->t.hIcon = o->t.hIcon;
-                o->referenced = true;
-                p->orig_icon = pNid->hIcon;
-                uChanged |= NIF_ICON;
-            }
-        } else {
-            reset_icon(p);
-            if (pNid->hIcon) {
-                p->t.hIcon = CopyIcon(pNid->hIcon);
-                p->orig_icon = pNid->hIcon;
-            }
-            uChanged |= NIF_ICON;
-        }
-    }
-    return uChanged;
-}
-
-//===========================================================================
-
-ST void log_tray(DWORD trayCommand, NIDBB *pNid)
+ST void log_tray(DWORD trayCommand, NIDBB *pnid)
 {
     char class_name[100], tip[100];
     tip[0] = class_name[0] = 0;
 
-    GetClassName(pNid->hWnd, class_name, sizeof class_name);
+    GetClassName(pnid->hWnd, class_name, sizeof class_name);
 
     if ((trayCommand == NIM_ADD || trayCommand == NIM_MODIFY)
-        && (pNid->uFlags & NIF_TIP))
-        convert_string(tip, pNid->pTip, sizeof tip, pNid->is_unicode);
+        && (pnid->uFlags & NIF_TIP))
+        convert_string(tip, pnid->pTip, sizeof tip, pnid->is_unicode);
 
     log_printf((LOG_TRAY,
         "Tray: %s(%d) "
@@ -432,15 +345,15 @@ ST void log_tray(DWORD trayCommand, NIDBB *pNid)
         trayCommand==NIM_DELETE ? "del" :
         trayCommand==NIM_SETVERSION ? "ver" : "ukn",
         trayCommand,
-        pNid->hWnd, 0 != IsWindow(pNid->hWnd),
+        pnid->hWnd, 0 != IsWindow(pnid->hWnd),
         class_name,
 
-        pNid->uID,
-        pNid->uFlags,
-        pNid->pState ? pNid->pState[1] : 0,
-        pNid->pState ? pNid->pState[0] : 0,
-        pNid->uCallbackMessage,
-        pNid->hIcon,
+        pnid->uID,
+        pnid->uFlags,
+        pnid->pState ? pnid->pState[1] : 0,
+        pnid->pState ? pnid->pState[0] : 0,
+        pnid->uCallbackMessage,
+        pnid->hIcon,
         tip
         ));
 }
@@ -546,31 +459,19 @@ ST LRESULT TrayEvent(void *data, unsigned size)
 {
     DWORD trayCommand = ((SHELLTRAYDATA*)data)->dwMessage;
     void *pData = &((SHELLTRAYDATA*)data)->iconData;
-
     NIDBB nid;
-    unsigned uChanged;
     systemTrayNode *p;
 
-#ifdef _WIN64
-/*
-    The IsWow64Message function determines if the last message read from
-    the current thread's queue originated from a WOW64 process. (User32.dll)
-        BOOL IsWow64Message(void);
+    memset(&nid, 0, sizeof nid);
 
-    The IsWow64Process function determines whether the specified process
-    is running under WOW64. (Kernel32.dll)
-        BOOL IsWow64Process(HANDLE hProcess, PBOOL Wow64Process);
-*/
-    // bool isWin64Icon = !have_imp(pIsWow64Message) || !pIsWow64Message();
-    // if (false == isWin64Icon)
-    {
-        size                    = ((NIDNT_32*)pData)->cbSize        ;
-        nid.hWnd                = (HWND)((NIDNT_32*)pData)->hWnd    ;
-        nid.uID                 = ((NIDNT_32*)pData)->uID           ;
-        nid.uFlags              = ((NIDNT_32*)pData)->uFlags        ;
-        nid.uCallbackMessage    = ((NIDNT_32*)pData)->uCallbackMessage  ;
-        nid.hIcon        = (HICON)((NIDNT_32*)pData)->hIcon         ;
-        if (size >= sizeof(NID2KW_32)) {
+#ifdef _WIN64
+    size                    = ((NIDNT_32*)pData)->cbSize        ;
+    nid.hWnd                = (HWND)((NIDNT_32*)pData)->hWnd    ;
+    nid.uID                 = ((NIDNT_32*)pData)->uID           ;
+    nid.uFlags              = ((NIDNT_32*)pData)->uFlags        ;
+    nid.uCallbackMessage    = ((NIDNT_32*)pData)->uCallbackMessage  ;
+    nid.hIcon        = (HICON)((NIDNT_32*)pData)->hIcon         ;
+    if (size >= sizeof(NID2KW_32)) {
         nid.is_unicode          = true;
         nid.pInfoFlags          = &((NID2KW_32*)pData)->dwInfoFlags ;
         nid.pInfoTitle          = &((NID2KW_32*)pData)->szInfoTitle ;
@@ -580,7 +481,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pTip                = &((NID2KW_32*)pData)->szTip       ;
         if (size >= sizeof(NID2KW6_32))
             nid.pGuid           = &((NID2KW6_32*)pData)->guidItem   ;
-        } else if (size >= sizeof(NID2K_32)) {
+    } else if (size >= sizeof(NID2K_32)) {
         nid.is_unicode          = false;
         nid.pInfoFlags          = &((NID2K_32*)pData)->dwInfoFlags  ;
         nid.pInfoTitle          = &((NID2K_32*)pData)->szInfoTitle  ;
@@ -588,26 +489,18 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pInfo               = &((NID2K_32*)pData)->szInfo       ;
         nid.pState              = &((NID2K_32*)pData)->dwState      ;
         nid.pTip                = &((NID2K_32*)pData)->szTip        ;
-        } else {
+    } else {
         nid.is_unicode          = (size == sizeof(NIDNT_32))        ;
-        nid.pInfoFlags          = NULL;
-        nid.pInfoTitle          = NULL;
-        nid.pVersion_Timeout    = NULL;
-        nid.pInfo               = NULL;
-        nid.pState              = NULL;
         nid.pTip                = &((NIDNT_32*)pData)->szTip        ;
-        }
     }
-    // else
 #else
-    {
-        size                    = ((NIDNT*)pData)->cbSize           ;
-        nid.hWnd                = ((NIDNT*)pData)->hWnd             ;
-        nid.uID                 = ((NIDNT*)pData)->uID              ;
-        nid.uFlags              = ((NIDNT*)pData)->uFlags           ;
-        nid.uCallbackMessage    = ((NIDNT*)pData)->uCallbackMessage ;
-        nid.hIcon               = ((NIDNT*)pData)->hIcon            ;
-        if (size >= sizeof(NID2KW)) {
+    size                    = ((NIDNT*)pData)->cbSize           ;
+    nid.hWnd                = ((NIDNT*)pData)->hWnd             ;
+    nid.uID                 = ((NIDNT*)pData)->uID              ;
+    nid.uFlags              = ((NIDNT*)pData)->uFlags           ;
+    nid.uCallbackMessage    = ((NIDNT*)pData)->uCallbackMessage ;
+    nid.hIcon               = ((NIDNT*)pData)->hIcon            ;
+    if (size >= sizeof(NID2KW)) {
         nid.is_unicode          = true;
         nid.pInfoFlags          = &((NID2KW*)pData)->dwInfoFlags    ;
         nid.pInfoTitle          = &((NID2KW*)pData)->szInfoTitle    ;
@@ -617,7 +510,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pTip                = &((NID2KW*)pData)->szTip          ;
         if (size >= sizeof(NID2KW6))
             nid.pGuid           = &((NID2KW6*)pData)->guidItem      ;
-        } else if (size >= sizeof(NID2K)) {
+    } else if (size >= sizeof(NID2K)) {
         nid.is_unicode          = false;
         nid.pInfoFlags          = &((NID2K*)pData)->dwInfoFlags     ;
         nid.pInfoTitle          = &((NID2K*)pData)->szInfoTitle     ;
@@ -625,105 +518,183 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         nid.pInfo               = &((NID2K*)pData)->szInfo          ;
         nid.pState              = &((NID2K*)pData)->dwState         ;
         nid.pTip                = &((NID2K*)pData)->szTip           ;
-        } else {
+    } else {
         nid.is_unicode          = (size == sizeof(NIDNT))           ;
-        nid.pInfoFlags          = NULL;
-        nid.pInfoTitle          = NULL;
-        nid.pVersion_Timeout    = NULL;
-        nid.pInfo               = NULL;
-        nid.pState              = NULL;
         nid.pTip                = &((NIDNT*)pData)->szTip           ;
-        }
     }
 #endif
+
+    if (Settings_LogFlag & LOG_TRAY)
+        log_tray(trayCommand, &nid);
 
     // search the list
     dolist (p, trayIconList)
         if (p->t.hWnd == nid.hWnd && p->t.uID == nid.uID)
             break;
 
-    if (Settings_LogFlag & LOG_TRAY)
-        log_tray(trayCommand, &nid);
-
     if (NIM_DELETE == trayCommand) {
-        // NIM_DELETE does not care for a valid hwnd
         if (NULL == p)
             return FALSE;
         RemoveTrayIcon(p, true);
         return TRUE;
-    }
 
-    if (FALSE == IsWindow(nid.hWnd)) {
-        // has been seen even with NIM_ADD
-        if (p)
-            RemoveTrayIcon(p, true);
-        return FALSE;
-    }
+    } else if (NIM_MODIFY == trayCommand || NIM_ADD == trayCommand) {
 
-    if (p) {
-        nid.hidden = p->hidden;
-        nid.shared = p->shared;
-    } else {
-        nid.hidden = nid.shared = false;
-    }
+        UINT uChanged;
+        UINT bbTrayMessage;
 
-    if ((nid.uFlags & NIF_STATE) && nid.pState) {
-        if (nid.pState[1] & NIS_HIDDEN)
-            nid.hidden = 0 != (nid.pState[0] & NIS_HIDDEN);
-
-        if (nid.pState[1] & NIS_SHAREDICON)
-            nid.shared = 0 != (nid.pState[0] & NIS_SHAREDICON);
-    }
-
-    if (NIM_MODIFY == trayCommand) {
-        if (NULL == p)
+        if (FALSE == IsWindow(nid.hWnd)) {
+            // has been seen even with NIM_ADD
+            if (p)
+                RemoveTrayIcon(p, true);
             return FALSE;
-
-        p->hidden = nid.hidden;
-        if (p->shared != nid.shared) {
-            // just in case, dont know if it ever happens
-            reset_icon(p);
-            p->shared = nid.shared;
         }
 
-        uChanged = ModifyTrayIcon(p, &nid);
-        if (uChanged & SHARED_NOT_FOUND)
-            return FALSE; // icon remains unchanged
+        if (p) {
+            nid.hidden = p->hidden;
+            nid.shared = p->shared;
+        } else {
+            nid.hidden = nid.shared = false;
+        }
 
-        send_tray_message(p, uChanged, TRAYICON_MODIFIED);
-        return TRUE;
-    }
+        if ((nid.uFlags & NIF_STATE) && nid.pState) {
+            if (nid.pState[1] & NIS_HIDDEN)
+                nid.hidden = 0 != (nid.pState[0] & NIS_HIDDEN);
 
-    if (NIM_ADD == trayCommand) {
-        if (p)
-            return FALSE;
+            if (nid.pState[1] & NIS_SHAREDICON)
+                nid.shared = 0 != (nid.pState[0] & NIS_SHAREDICON);
+        }
 
-        p = c_new(systemTrayNode);
-        append_node(&trayIconList, p);
-        p->t.hWnd = nid.hWnd;
-        p->t.uID  = nid.uID;
+        if (p) {
+            if (NIM_ADD == trayCommand) {
+                if (p->added)
+                    return FALSE;
+                p->added = true;
+            }
+            if (p->shared != nid.shared)
+                // just in case, dont know if it ever happens
+                reset_icon(p);
+
+            bbTrayMessage = TRAYICON_MODIFIED;
+
+        } else {
+            if (NIM_MODIFY == trayCommand) {
+#if 0
+                if (nid.uFlags != (NIF_ICON|NIF_MESSAGE|NIF_TIP)
+                    || nid.shared
+                    || NULL == nid.hIcon)
+#endif
+                    return FALSE;
+            }
+            p = c_new(systemTrayNode);
+            append_node(&trayIconList, p);
+            p->t.hWnd = nid.hWnd;
+            p->t.uID  = nid.uID;
+            p->added = NIM_ADD == trayCommand;
+
+            bbTrayMessage = TRAYICON_ADDED;
+        }
+
         p->hidden = nid.hidden;
         p->shared = nid.shared;
+        uChanged = 0;
 
-        uChanged = ModifyTrayIcon(p, &nid);
-        if (uChanged & SHARED_NOT_FOUND) {
-            // shared icons with an invalid reference are not added
-            RemoveTrayIcon(p, false);
-            return FALSE;
+        /* check callback message */
+        if ((nid.uFlags & NIF_MESSAGE)
+            && (nid.uCallbackMessage != p->t.uCallbackMessage)) {
+            p->t.uCallbackMessage = nid.uCallbackMessage;
+            uChanged |= NIF_MESSAGE;
         }
 
-        send_tray_message(p, uChanged, TRAYICON_ADDED);
-        return TRUE;
-    }
+        /* check tooltip */
+        if ((nid.uFlags & NIF_TIP)) {
+            if (convert_string(p->t.szTip, nid.pTip,
+                    sizeof p->t.szTip, nid.is_unicode))
+                uChanged |= NIF_TIP;
+        }
 
-    if (NIM_SETVERSION == trayCommand) {
+        /* check balloon */
+        if ((nid.uFlags & NIF_INFO) && nid.pInfo) {
+            systemTrayBalloon *b = p->pBalloon;
+            if (NULL == b)
+                p->pBalloon = b = c_new(systemTrayBalloon);
+
+            convert_string(b->szInfoTitle, nid.pInfoTitle,
+                sizeof b->szInfoTitle, nid.is_unicode);
+            convert_string(b->szInfo, nid.pInfo,
+                sizeof b->szInfo, nid.is_unicode);
+
+            b->dwInfoFlags = *nid.pInfoFlags;
+            if (b->szInfo[0] || b->szInfoTitle[0]) {
+                uChanged |= NIF_INFO;
+                b->uInfoTimeout = imax(2000, *nid.pVersion_Timeout);
+            } else {
+                b->uInfoTimeout = 0;
+            }
+        }
+
+        /* check GUID item */
+        if ((nid.uFlags & NIF_GUID) && nid.pGuid) {
+#if 0 //ndef BBTINY
+            if (Settings_LogFlag & LOG_TRAY) {
+                WCHAR* pOle; char s_guid[200];
+                StringFromCLSID(*nid.pGuid, &pOle);
+                convert_string(s_guid, pOle, 200, true);
+                SHMalloc_Free(pOle);
+                log_printf((LOG_TRAY, "Tray: update guidItem: %s", s_guid));
+            }
+#endif
+            p->guidItem = *nid.pGuid;
+        }
+
+        if (nid.uFlags & NIF_SHOWTIP) {
+            p->showTip = true;
+        }
+
+        /* check icon */
+        if ((nid.uFlags & NIF_ICON)) {
+            if (p->shared) {
+                systemTrayNode *o;
+                dolist (o, trayIconList)
+                    if (o->orig_icon == nid.hIcon && false == o->shared)
+                        break;
+
+                if (NULL == o || NULL == o->orig_icon) {
+                    // shared icons with an invalid reference are not added
+                    RemoveTrayIcon(p, false);
+                    return FALSE;
+                }
+
+                if (p->orig_icon != nid.hIcon) {
+                    p->t.hIcon = o->t.hIcon;
+                    o->referenced = true;
+                    p->orig_icon = nid.hIcon;
+                    uChanged |= NIF_ICON;
+                }
+
+            } else {
+                reset_icon(p);
+                if (nid.hIcon) {
+                    p->t.hIcon = CopyIcon(nid.hIcon);
+                    p->orig_icon = nid.hIcon;
+                }
+                uChanged |= NIF_ICON;
+            }
+        }
+
+        /* notify plugins about change */
+        send_tray_message(p, uChanged, bbTrayMessage);
+        return p->added ? TRUE : FALSE;
+
+    } else if (NIM_SETVERSION == trayCommand) {
         if (NULL == p || NULL == nid.pVersion_Timeout)
             return FALSE;
         p->version = *nid.pVersion_Timeout;
         return TRUE;
-    }
 
-    return FALSE;
+    } else {
+        return FALSE;
+    }
 }
 
 //===========================================================================
@@ -851,6 +822,8 @@ ST DWORD WINAPI SSO_Thread(void *pv)
 
     // CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_NOOLE1DDE);
     CoInitialize(0); // win95 compatible
+
+    BBSleep(1000);
 
     if (usingVista)
         sso_load("stobject", "{35CEC8A3-2BE6-11D2-8773-92E220524153}");
@@ -1027,10 +1000,9 @@ void Tray_Init(void)
             TrayClockClass);
     }
 
-    broadcast_tbcreated();
-
     if (false == underExplorer)
         LoadShellServiceObjects();
+    broadcast_tbcreated();
 }
 
 void Tray_Exit(void)

@@ -562,12 +562,12 @@ void startup_blackbox(void)
     Settings_ReadStyleSettings();
     set_misc_options();
     Workspaces_Init(nostartup);
-    Tray_Init();
     Desk_Init();
     Menu_Init();
     terminate_welcomescreen();
     start_plugins();
-    SetTimer(BBhwnd, BB_RUNSTARTUP_TIMER, 1000, NULL);
+    Tray_Init();
+    SetTimer(BBhwnd, BB_RUNSTARTUP_TIMER, 2000, NULL);
 }
 
 //=====================================================
@@ -578,9 +578,9 @@ void shutdown_blackbox(void)
     shutting_down = true;
 
     kill_plugins();
+    Tray_Exit();
     Menu_Exit();
     Desk_Exit();
-    Tray_Exit();
     Workspaces_GatherWindows();
     Workspaces_Exit();
     set_focus_model("");
