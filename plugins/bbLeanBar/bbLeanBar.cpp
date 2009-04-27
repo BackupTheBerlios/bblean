@@ -690,12 +690,13 @@ void barinfo::make_cfg()
 
 int barinfo::get_text_width(const char *cp)
 {
-    HDC hdc = GetDC(hwnd); SIZE size;
+    HDC hdc = GetDC(hwnd);
+    RECT s = {0,0,0,0};
     HGDIOBJ oldfont = SelectObject(hdc, hFont);
-    GetTextExtentPoint32(hdc, cp, strlen(cp), &size);
+    bbDrawText(hdc, cp, &s, DT_CALCRECT|DT_NOPREFIX, 0);
     SelectObject(hdc, oldfont);
     ReleaseDC(hwnd, hdc);
-    return size.cx;
+    return s.right;
 }
 
 void barinfo::set_screen_info(void)
@@ -717,40 +718,39 @@ void barinfo::set_clock_string (void)
     time(&systemTime);
     struct tm *ltp = localtime(&systemTime);
 
-    // check for keyboard layout indicator -->
     char fmt_buffer[200];
-    char *fmt = strftimeFormat;
-    char *p = strstr(fmt, "%K");
-    show_kbd_layout = NULL != p;
+    const char *fmt = strftimeFormat;
+    const char *p = strstr(fmt, "%K");
+    bool seconds = strstr(fmt, "%S") || strstr(fmt, "%#S");
 
+    show_kbd_layout = false;
+
+    // check for keyboard layout indicator %K -->
     if (p)
     {
-        HWND CurApp = GetForegroundWindow();
-        DWORD idthd = GetWindowThreadProcessId(CurApp, NULL);
-        int lang_code = (int)LOWORD(GetKeyboardLayout(idthd));
-
-        char lang_string[16];
-        if (GetLocaleInfo(lang_code, LOCALE_SABBREVLANGNAME, lang_string, sizeof lang_string))
+        char lang_id[16];
+        int lang_code = LOWORD(GetKeyboardLayout(
+            GetWindowThreadProcessId(GetForegroundWindow(), NULL)
+            ));
+        if (GetLocaleInfo(lang_code, LOCALE_SABBREVLANGNAME, lang_id, sizeof lang_id))
         {
             strcpy(fmt_buffer, fmt);
-            memcpy(fmt_buffer + (p - fmt), strupr(lang_string), 2);
+            memcpy(fmt_buffer + (p - fmt), strupr(lang_id), 2);
             fmt = fmt_buffer;
+            seconds = show_kbd_layout = true;
         }
-        show_kbd_layout = true;
     }
     // <--------------------------------------
 
-    strftime(clockTime, sizeof clockTime, fmt, ltp);
+    WCHAR wfmt[200], result[200];
+    bbMB2WC(fmt, wfmt, sizeof wfmt);
+    wcsftime(result, sizeof result, wfmt, ltp);
+    bbWC2MB(result, clockTime, sizeof clockTime);
+
     clockWidth = get_text_width(clockTime);
 
     SYSTEMTIME lt;
     GetLocalTime(&lt);
-    bool seconds
-         = strstr(strftimeFormat, "%S")
-        || strstr(strftimeFormat, "%#S")
-        || show_kbd_layout
-        ;
-
     SetTimer(this->hwnd, CLOCK_TIMER, seconds
         ? 1100 - lt.wMilliseconds
         : 61000 - lt.wSecond * 1000,
@@ -946,7 +946,6 @@ LRESULT barinfo::wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
             this->NewTasklist();
             this->NewTraylist();
             this->update_windowlabel();
-            this->set_clock_string();
             this->update(UPD_NEW);
 
             break;
@@ -988,7 +987,6 @@ LRESULT barinfo::wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
             this->NewTasklist();
             this->NewTraylist();
             this->update_windowlabel();
-            this->set_clock_string();
             this->set_tbinfo();
             this->update(UPD_NEW);
             break;

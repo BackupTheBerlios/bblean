@@ -368,12 +368,19 @@ ST void Toolbar_setclock(void)
 
 //===========================================================================
 
-bool check_mouse(HWND hwnd)
+ST bool check_mouse(HWND hwnd)
 {
     POINT pt; RECT rct;
     GetCursorPos(&pt);
     GetWindowRect(hwnd, &rct);
     return FALSE != PtInRect(&rct, pt);
+}
+
+ST int get_text_extend(HDC hdc, const char *cp)
+{
+    RECT s = {0,0,0,0};
+    bbDrawText(hdc, cp, &s, DT_CALCRECT|DT_NOPREFIX, 0);
+    return s.right;
 }
 
 //===========================================================================
@@ -385,7 +392,7 @@ ST void PaintToolbar(HDC hdc, RECT *rcPaint)
 
     HDC buf;
     HGDIOBJ bufother, other_font;
-    SIZE size;
+    int size;
 
     int margin, border, border_margin, button_padding, middle_padding, two_buttons;
     int tbW, tbH, tbLabelW, tbLabelX, tbClockX, tbWinLabelX, tbWinLabelW;
@@ -400,13 +407,12 @@ ST void PaintToolbar(HDC hdc, RECT *rcPaint)
         Toolbar_hFont = CreateStyleFont(&mStyle.Toolbar);
     other_font = SelectObject(buf, Toolbar_hFont);
 
-    GetTextExtentPoint32(buf, Toolbar_CurrentTime, strlen(Toolbar_CurrentTime), &size);
-    size.cx += 6;
-    if (tbClockW < size.cx)
-        tbClockW = size.cx + 2*tbLabelIndent;
+    size = 6 + get_text_extend(buf, Toolbar_CurrentTime);
+    if (tbClockW < size)
+        tbClockW = size + 2*tbLabelIndent;
 
-    GetTextExtentPoint32(buf, Toolbar_WorkspaceName, strlen(Toolbar_WorkspaceName), &size);
-    tbLabelW = size.cx + 2*tbLabelIndent;
+    size = get_text_extend(buf, Toolbar_WorkspaceName);
+    tbLabelW = size + 2*tbLabelIndent;
 
     // The widest sets the width!
     tbLabelW = tbClockW = imax(tbH * 2, imax(tbLabelW, tbClockW));
