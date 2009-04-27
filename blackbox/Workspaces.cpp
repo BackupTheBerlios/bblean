@@ -1231,6 +1231,7 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
     switch (wParam & 0x7FFF) {
 
     //====================
+    case HSHELL_WINDOWREPLACING:
     case HSHELL_WINDOWCREATED: // 1
         // windows reshown by the vwm also trigger the HSHELL_WINDOWCREATED
         if (hwnd && NULL == tl)
@@ -1241,6 +1242,7 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
         break;
 
     //====================
+    case HSHELL_WINDOWREPLACED:
     case HSHELL_WINDOWDESTROYED: // 2
         // windows hidden by the vwm also trigger the HSHELL_WINDOWDESTROYED
         if (tl && is_valid_task(hwnd) != 2)
