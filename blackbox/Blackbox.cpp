@@ -686,10 +686,10 @@ void set_style(const char* filename)
 //===========================================================================
 // handle WM_COPYDATAs from bbStyleMakers
 
-int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, unsigned data_size)
+int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const void *data, unsigned data_size)
 {
-    //dbg_printf("handle_received_data %d %d %d", msg, wParam, data_size);
     if (BB_SETSTYLESTRUCT == msg) {
+        // dbg_printf("BB_SETSTYLESTRUCT %d %d %d (%d)", msg, wParam, data_size, STYLESTRUCTSIZE);
         if (SN_STYLESTRUCT == wParam && data_size >= STYLESTRUCTSIZE) {
             // bbStyleMaker 1.3
             StyleStruct *pss = &mStyle;

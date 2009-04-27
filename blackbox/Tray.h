@@ -32,10 +32,6 @@ int GetTraySize(void);
 systemTray* GetTrayIcon(int idx);
 void Tray_SetEncoding(void);
 
-#ifdef _WIN64
-extern BOOL (WINAPI* pIsWow64Message)(VOID);
-#endif
-
 //===========================================================================
 #ifdef INCLUDE_NIDS
 

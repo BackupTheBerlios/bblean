@@ -1945,7 +1945,7 @@ void set_section(struct dlg * dlg, int v)
     set_item(dlg, a_items[v_section]);
 }
 
-int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, unsigned data_size)
+int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const void *data, unsigned data_size)
 {
     struct getdata_info *gdi;
     if (msg != BB_SENDDATA)
@@ -1957,7 +1957,7 @@ int handle_received_data(HWND hwnd, UINT msg, WPARAM wParam, const char *data, u
         memcpy(gdi->dest, data, imin(sizeof (StyleStruct), data_size));
         break;
     case BB_GETSTYLE:
-        strcpy(gdi->dest, data);
+        strcpy(gdi->dest, (const char*)data);
         break;
     }
     return 1;

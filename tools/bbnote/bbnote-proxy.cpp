@@ -18,6 +18,7 @@
 // bbnote-proxy.cpp - plugin to notify bbnote about the current blackbox-style
 
 #include "BBApi.h"
+#include "bblib.h"
 #include "BBSendData.h"
 #include "StyleStruct.h"
 

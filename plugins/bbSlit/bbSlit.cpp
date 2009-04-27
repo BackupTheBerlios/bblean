@@ -22,7 +22,7 @@
 
 #include "BBApi.h"
 #include "bblib.h"
-#include "BBSenddata.h"
+#include "BBSendData.h"
 #include "bbPlugin.h"
 
 const char szVersion      [] = "bbSlit 1.17";
