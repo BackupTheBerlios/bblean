@@ -804,6 +804,9 @@ MDEFINE_GUID(CGID_ShellServiceObject, 0x000214D2L, 0, 0,0xC0,0,0,0,0,0,0,0x46);
 // {35CEC8A3-2BE6-11D2-8773-92E220524153}
 // {730F6CDC-2C86-11D2-8773-92E220524153}
 
+void LSDeactivateActCtx(HANDLE hActCtx,  DWORD_PTR* pulCookie);
+HANDLE LSActivateActCtxForClsid(REFCLSID rclsid, DWORD_PTR* pulCookie);
+
 ST int sso_load(const char *name, const char *guid)
 {
     WCHAR wszCLSID[200];
@@ -811,9 +814,13 @@ ST int sso_load(const char *name, const char *guid)
     IOleCommandTarget *pOCT = NULL;
     HRESULT hr;
     sso_list_t *t;
+    DWORD_PTR ulCookie;
+    HANDLE hContext;
 
     MultiByteToWideChar(CP_ACP, 0, guid, 1+strlen(guid), wszCLSID, array_count(wszCLSID));
     CLSIDFromString(wszCLSID, &clsid);
+
+    hContext = LSActivateActCtxForClsid(clsid, &ulCookie);
 
     hr = CoCreateInstance(
         COMREF(clsid),
@@ -844,6 +851,8 @@ ST int sso_load(const char *name, const char *guid)
             pOCT->Release();
         }
     }
+
+    LSDeactivateActCtx(hContext, &ulCookie);
     return 1;
 }
 
@@ -1064,4 +1073,118 @@ void Tray_Exit(void)
         RemoveTrayIcon(trayIconList, false);
 }
 
-//===========================================================================
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//
+// LSActivateActCtxForDll
+// Activates the custom activation context for the specified DLL
+//
+
+#ifndef ACTCTX_FLAG_RESOURCE_NAME_VALID
+#define ACTCTX_FLAG_RESOURCE_NAME_VALID 0x00000008
+typedef struct tagACTCTXA {
+    ULONG       cbSize;
+    DWORD       dwFlags;
+    LPCSTR      lpSource;
+    USHORT      wProcessorArchitecture;
+    LANGID      wLangId;
+    LPCSTR      lpAssemblyDirectory;
+    LPCSTR      lpResourceName;
+    LPCSTR      lpApplicationName;
+    HMODULE     hModule;
+} ACTCTX, *PACTCTX;
+#endif
+
+int CLSID_to_string(REFCLSID rclsid, LPSTR ptzBuffer, size_t cchBuffer)
+{
+    LPOLESTR pOleString = NULL;
+    int len;
+    HRESULT hr;
+
+    hr = ProgIDFromCLSID(rclsid, &pOleString);
+    if (FAILED(hr))
+        hr = StringFromCLSID(rclsid, &pOleString);
+    if (FAILED(hr) || NULL == pOleString)
+        return 0;
+    len = WideCharToMultiByte(CP_ACP, 0, pOleString, -1, ptzBuffer,
+        (int)cchBuffer, NULL, NULL);
+    CoTaskMemFree(pOleString);
+    return len;
+}
+
+HANDLE LSActivateActCtxForDll(LPCSTR pszDll, DWORD_PTR *pulCookie)
+{
+    HANDLE hContext;
+    ACTCTX act = { 0 };
+
+    HANDLE (WINAPI* fnCreateActCtx)(PACTCTX pCtx);
+    BOOL (WINAPI* fnActivateActCtx)(HANDLE hCtx, ULONG_PTR* pCookie);
+
+    if (!_load_imp(&fnCreateActCtx, "kernel32.dll", "CreateActCtxA")
+     || !_load_imp(&fnActivateActCtx, "kernel32.dll", "ActivateActCtx"))
+        return NULL;
+
+    act.cbSize = sizeof(act);
+    act.dwFlags = ACTCTX_FLAG_RESOURCE_NAME_VALID;
+    act.lpSource = pszDll;
+    act.lpResourceName = MAKEINTRESOURCE(123);
+
+    hContext = fnCreateActCtx(&act);
+    if (hContext == INVALID_HANDLE_VALUE)
+        return NULL;
+    if (fnActivateActCtx(hContext, pulCookie))
+        return hContext;
+    LSDeactivateActCtx(hContext, NULL);
+    return NULL;
+}
+
+//
+//  Activate the the custom manifest (if any) of the DLL that implements
+//  the COM object in question
+//
+
+HANDLE LSActivateActCtxForClsid(REFCLSID rclsid, DWORD_PTR *pulCookie)
+{
+    char szCLSID[39];
+    char szSubkey[MAX_PATH];
+    char szDll[MAX_PATH];
+    DWORD cbDll;
+    LONG lres;
+
+    LRESULT (WINAPI *pSHGetValue)(
+        HKEY hkey,
+        LPCSTR pszSubKey,
+        LPCSTR pszValue,
+        LPDWORD pdwType,
+        LPVOID pvData,
+        LPDWORD pcbData
+        );
+
+    if (!_load_imp(&pSHGetValue, "shlwapi.dll", "SHGetValueA"))
+        return NULL;
+
+    if (0 == CLSID_to_string(rclsid, szCLSID, sizeof szCLSID))
+        return NULL;
+
+    sprintf(szSubkey, "CLSID\\%s\\InProcServer32", szCLSID);
+    cbDll = sizeof(szDll);
+
+    lres = pSHGetValue(HKEY_CLASSES_ROOT, szSubkey, NULL, NULL, szDll, &cbDll);
+    if (lres != ERROR_SUCCESS)
+        return NULL;
+    return LSActivateActCtxForDll(szDll, pulCookie);
+}
+
+void LSDeactivateActCtx(HANDLE hActCtx, ULONG_PTR* pulCookie)
+{
+    BOOL (WINAPI* fnDeactivateActCtx)(DWORD dwFlags, ULONG_PTR ulc);
+    void (WINAPI* fnReleaseActCtx)(HANDLE hActCtx);
+
+    if (!_load_imp(&fnDeactivateActCtx, "kernel32.dll", "DeactivateActCtx")
+     || !_load_imp(&fnReleaseActCtx, "kernel32.dll", "ReleaseActCtx"))
+        return;
+    if (NULL == hActCtx)
+        return;
+    if (pulCookie)
+        fnDeactivateActCtx(0, *pulCookie);
+    fnReleaseActCtx(hActCtx);
+}

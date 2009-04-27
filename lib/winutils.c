@@ -49,17 +49,20 @@ void dbg_window(HWND hwnd, const char *fmt, ...)
     OutputDebugString(buffer);
 }
 
+int _load_imp(void *pp, const char *dll, const char *proc)
+{
+    HMODULE hm = GetModuleHandle(dll);
+    if (NULL == hm)
+        hm = LoadLibrary(dll);
+    if (hm)
+        *(FARPROC*)pp = GetProcAddress(hm, proc);
+    return 0 != *(DWORD_PTR*)pp;
+}
+
 int load_imp(void *pp, const char *dll, const char *proc)
 {
-    if (0 == *(DWORD_PTR*)pp) {
-        HMODULE hm = GetModuleHandle(dll);
-        if (NULL == hm)
-            hm = LoadLibrary(dll);
-        if (hm)
-            *(FARPROC*)pp = GetProcAddress(hm, proc);
-        if (0 == *(DWORD_PTR*)pp)
-            *(DWORD_PTR*)pp = 1;
-    }
+    if (0 == *(DWORD_PTR*)pp && !_load_imp(pp, dll, proc))
+        *(DWORD_PTR*)pp = 1;
     return have_imp(*(void**)pp);
 }
 

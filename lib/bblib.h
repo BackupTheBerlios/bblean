@@ -177,6 +177,7 @@ BBLIB_EXPORT void SetOnTop (HWND hwnd);
 BBLIB_EXPORT int is_frozen(HWND hwnd);
 BBLIB_EXPORT HWND window_under_mouse(void);
 BBLIB_EXPORT int load_imp(void *pp, const char *dll, const char *proc);
+BBLIB_EXPORT int _load_imp(void *pp, const char *dll, const char *proc);
 #define have_imp(pp) ((DWORD_PTR)pp > 1)
 
 BBLIB_EXPORT char* get_exe_path(HINSTANCE h, char* pszPath, int nMaxLen);
