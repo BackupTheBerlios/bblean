@@ -23,7 +23,7 @@
 #define _BBWORKSPACES_H_
 
 //===========================================================================
-void Workspaces_Init(void);
+void Workspaces_Init(int nostartup);
 void Workspaces_Exit(void);
 void Workspaces_Reconfigure(void);
 LRESULT Workspaces_Command(UINT msg, WPARAM wParam, LPARAM lParam);

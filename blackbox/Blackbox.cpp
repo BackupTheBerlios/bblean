@@ -561,7 +561,7 @@ void startup_blackbox(void)
     register_fonts();
     Settings_ReadStyleSettings();
     set_misc_options();
-    Workspaces_Init();
+    Workspaces_Init(nostartup);
     Tray_Init();
     Desk_Init();
     Menu_Init();

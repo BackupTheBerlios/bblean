@@ -112,7 +112,7 @@ void send_task_refresh(void);
 
 //===========================================================================
 
-void Workspaces_Init(void)
+void Workspaces_Init(int nostartup)
 {
     currentScreen   = 0;
     deskNames       = NULL;
@@ -122,7 +122,8 @@ void Workspaces_Init(void)
     WS_LoadStickyNamesList();
     Workspaces_GetScreenMetrics();
     vwm_init();
-    init_tasks();
+    if (nostartup)
+        init_tasks();
 }
 
 void Workspaces_Exit(void)
@@ -1165,6 +1166,7 @@ ST void exit_tasks(void)
 }
 
 //==================================
+/* Set workspace number from vwm */
 #if 0
 void workspaces_set_desk(void)
 {
@@ -1174,35 +1176,17 @@ void workspaces_set_desk(void)
 }
 #else
 /* Set workspace number from vwm and reorder the tasklist such that
-   1. tasks on higher workspace come after tasks on lower one and
-   2. tasks that have changed come after tasks that have not changed */
+   tasks on higher workspace come after tasks on lower ones */
 void workspaces_set_desk(void)
 {
-    struct tasklist *tl, *tn, **tpp, **ta;
-    int sn, n;
-    sn = nScreens * 2;
-    ta = (struct tasklist**)c_alloc(sn * sizeof *ta);
+    struct tasklist *tl, *tn, **tpp, *tr = NULL;
     for (tl = taskList; tl; tl = tn) {
-        tn = tl->next;
-        n = vwm_get_desk(tl->hwnd);
-        tpp = &ta[n*2];
-        if (tl->wkspc != n) {
-            tl->wkspc = n;
-            ++tpp;
-        }
-        append_node(tpp, tl);
+        tl->wkspc = vwm_get_desk(tl->hwnd);
+        for (tpp = &tr; *tpp && (*tpp)->wkspc <= tl->wkspc;)
+            tpp = &(*tpp)->next;
+        tn = tl->next, tl->next = *tpp, *tpp = tl;
     }
-    taskList = NULL;
-    tpp = &taskList;
-    for (n = 0; n < sn; ++n) {
-        if (NULL != (tl = ta[n])) {
-            *tpp = tl;
-            do {
-                tpp = &tl->next;
-            } while (NULL != (tl = *tpp));
-        }
-    }
-    m_free(ta);
+    taskList = tr;
 }
 #endif
 
@@ -1210,24 +1194,20 @@ void workspaces_set_desk(void)
 #if 0
 ST void debug_tasks(WPARAM wParam, HWND hwnd, int is_task)
 {
-    static const char * const msg[] = {
+    static const char * const actions[] = {
         "null", "add", "remove", "activateshell",
         "activate", "minmax", "redraw", "taskman",
-        "language", "sysmenu", "endtask"
+        "language", "sysmenu", "endtask", NULL,
+        NULL, "replaced", "replacing"
     };
 
     int n = wParam & 0x7FFF;
     char buffer[MAX_PATH];
+    const char *msg = n < array_count(actions) ? actions[n] : NULL;
+    if (!msg) msg = "xxx";
     GetAppByWindow(hwnd, buffer);
-
-    dbg_printf("[msg %d %s] hwnd=%x task=%d app=%s desk=%d",
-        wParam,
-        n < array_count(msg) ? msg[n] : "xxx",
-        hwnd,
-        is_task,
-        buffer,
-        vwm_get_desk(hwnd)
-        );
+    dbg_printf("msg %d [%s] hwnd=%x task=%d app=%s desk=%d",
+        wParam, msg, hwnd, is_task, buffer, vwm_get_desk(hwnd));
 }
 #else
 #define debug_tasks(a,b,c)
@@ -1257,6 +1237,7 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
         if (hwnd && NULL == tl)
         {
             AddTask(hwnd);
+            workspaces_set_desk();
         }
         break;
 
@@ -1414,12 +1395,8 @@ const struct tasklist *GetTaskListPtr(void)
 
 HWND GetTask(int index)
 {
-    if (index >= 0) {
-        struct tasklist *tl = (struct tasklist *)nth_node(taskList, index);
-        if (tl)
-            return tl->hwnd;
-    }
-    return NULL;
+    struct tasklist *tl = (struct tasklist *)nth_node(taskList, index);
+    return tl ? tl->hwnd : NULL;
 }
 
 //===========================================================================
