@@ -23,6 +23,7 @@ session.menu.mouseWheelFactor: 3
 session.menu.alpha.enabled: false
 session.menu.alpha.value: 216
 session.menu.onTop: false
+session.menu.sticky: true
 session.menu.snapWindow: true
 session.menu.pluginToggle: true
 session.menu.openDirection: right

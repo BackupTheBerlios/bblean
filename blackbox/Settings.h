@@ -67,6 +67,7 @@ BBSETTING struct menu_setting {
     int  maxWidth;
     char openDirection[20];
     bool onTop;
+    bool sticky;
     bool pluginToggle;
     bool showBroams;
     bool showHiddenFiles;

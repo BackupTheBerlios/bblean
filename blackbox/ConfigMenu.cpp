@@ -114,6 +114,7 @@ static const struct cfgmenu cfg_sub_menu[] = {
     { "", NULL, NULL },
     { NLS0("Always On Top"),        "menu.onTop",           &Settings_menu.onTop  },
     { NLS0("Snap To Edges"),        "menu.snapWindow",      &Settings_menu.snapWindow  },
+    { NLS0("On All Workspaces"),    "menu.sticky",          &Settings_menu.sticky  },
     { NLS0("Toggle With Plugins"),  "menu.pluginToggle",    &Settings_menu.pluginToggle  },
     { "", NULL, NULL },
     { NLS0("Show Bro@ms"),          "menu.showBro@ms",      &Settings_menu.showBroams },

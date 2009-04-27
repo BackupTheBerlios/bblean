@@ -967,6 +967,7 @@ static const struct rccfg bbrc_cfg[] = {
     { ".menu.alpha.enabled",       C_BOL, (void*)false,    &Settings_menu.alphaEnabled },
     { ".menu.alpha.value",         C_INT, (void*)255,      &Settings_menu.alphaValue },
     { ".menu.onTop",               C_BOL, (void*)false,    &Settings_menu.onTop },
+    { ".menu.sticky",              C_BOL, (void*)true,     &Settings_menu.sticky },
     { ".menu.snapWindow",          C_BOL, (void*)true,     &Settings_menu.snapWindow },
     { ".menu.pluginToggle",        C_BOL, (void*)true,     &Settings_menu.pluginToggle },
     { ".menu.openDirection",       C_STR, (void*)"right",  &Settings_menu.openDirection },

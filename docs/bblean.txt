@@ -490,10 +490,10 @@ ShowMenu Options: :
 @BBCore.ShowMenu -at x,y ...    : show menu at position x,y as specified
 @BBCore.ShowMenu -at rb x,y ... : align at position with right and/or bottom edge
 @BBCore.ShowMenu -key ...       : show menu at position as in blackbox.rc
+@BBCore.ShowMenu -toggle        : hide menu if it currently has focus
 @BBCore.ShowMenu -pinned ...    : make menu stay permanently
 @BBCore.ShowMenu -ontop ...     : make menu stay on top
 @BBCore.ShowMenu -notitle ...   : show title-less menu
-
 
 Windows: :
 @BBCore.PrevWindow          : activate previous window
@@ -866,7 +866,7 @@ bbkeys.rc:
 ..........
 @BBCore.ShowMenu will now always show at mouse position by default.
 To keep existing behaviour with menus invoked by the keyboard, use
-the -key switch:
+the -key or the -toggle switch:
 
     @BBCore.ShowMenu -key root
 

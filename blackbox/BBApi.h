@@ -748,12 +748,12 @@ extern "C" {
     #define BBMENU_RECT           0x0002 /* next arg is *pRect to show above/below */
     #define BBMENU_CENTER         0x0003 /* center menu on screen */
     #define BBMENU_CORNER         0x0004 /* align with corner on mouse */
-    #define BBMENU_POSMASK        0x0007 /* bit mask for above position flags */
+    #define BBMENU_POSMASK        0x0007 /* bit mask for above positions */
     #define BBMENU_KBD            0x0008 /* use position from blackbox.rc */
     #define BBMENU_XRIGHT         0x0010 /* x is menu's right */
     #define BBMENU_YBOTTOM        0x0020 /* y is menu's bottom */
     #define BBMENU_PINNED         0x0040 /* show menu initially pinned */
-    #define BBMENU_ONTOP          0x0080 /* show menu initially pinned */
+    #define BBMENU_ONTOP          0x0080 /* show menu initially on top */
     #define BBMENU_NOFOCUS        0x0100 /* dont set focus on menu */
     #define BBMENU_NOTITLE        0x0200 /* no title */
     #define BBMENU_MAXWIDTH       0x0400 /* next arg is maximal menu width */

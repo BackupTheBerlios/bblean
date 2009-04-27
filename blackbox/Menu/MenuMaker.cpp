@@ -380,7 +380,7 @@ bool MenuMaker_ShowMenu(int id, const char* param)
 {
     char buffer[MAX_PATH];
     Menu *m;
-    int x, y, n, flags;
+    int x, y, n, flags, toggle;
 
     static const char * const menu_string_ids[] = {
         "",
@@ -401,7 +401,8 @@ bool MenuMaker_ShowMenu(int id, const char* param)
         e_configuration,
     };
 
-    x = y = flags = n = 0;
+    x = y = flags = n = toggle = 0;
+
 
     switch (id)
     {
@@ -421,12 +422,14 @@ bool MenuMaker_ShowMenu(int id, const char* param)
                     param += ',' == *param;
                     y = atoi(NextToken(buffer, &param, NULL));
                     flags |= BBMENU_XY;
+                } else if (0 == strcmp(p, "-key")) {
+                    flags |= BBMENU_KBD;
+                } else if (0 == strcmp(p, "-toggle")) {
+                    toggle = 1;
                 } else if (0 == strcmp(p, "-pinned")) {
                     flags |= BBMENU_PINNED;
                 } else if (0 == strcmp(p, "-ontop")) {
                     flags |= BBMENU_ONTOP;
-                } else if (0 == strcmp(p, "-key")) {
-                    flags |= BBMENU_KBD;
                 } else if (0 == strcmp(p, "-notitle")) {
                     flags |= BBMENU_NOTITLE;
                 }
@@ -453,7 +456,7 @@ bool MenuMaker_ShowMenu(int id, const char* param)
 
     // If invoked by kbd and the menu currently has focus,
     // hide it and return
-    if ((flags & BBMENU_KBD) && Menu_ToggleCheck(param))
+    if (((flags & BBMENU_KBD) || toggle) && Menu_ToggleCheck(param))
         return false;
 
     //DWORD t1 = GetTickCount();

@@ -1600,7 +1600,8 @@ LRESULT Menu::wnd_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         //====================
         case WM_CREATE:
-            MakeSticky(hwnd);
+            if (Settings_menu.sticky)
+                MakeSticky(hwnd);
             break;
 
         case WM_DESTROY:
