@@ -516,11 +516,7 @@ ST void WS_BringToFront(HWND hwnd, bool to_current)
 {
     int windesk;
 
-    if (false == is_valid_task(hwnd))
-    {
-        CleanTasks();
-        return;
-    }
+    CleanTasks();
 
     windesk = vwm_get_desk(hwnd);
     if (windesk != currentScreen)
@@ -1137,7 +1133,8 @@ void CleanTasks(void)
 {
     struct tasklist **tl = &taskList;
     while (*tl) {
-        if (is_valid_task((*tl)->hwnd))
+        HWND hwnd = (*tl)->hwnd;
+        if (is_valid_task(hwnd) && GetWindowTextLength(hwnd))
             tl = &(*tl)->next;
         else
             RemoveTask(*tl);
