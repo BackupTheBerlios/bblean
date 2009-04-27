@@ -1724,7 +1724,8 @@ bool RunEntriesIn (HKEY root_key, const char* subpath, UINT flags)
     int f, index;
 
     sprintf(path, "Software\\Microsoft\\Windows\\CurrentVersion\\%s", subpath);
-    log_printf((LOG_STARTUP, "\tfrom registry: %s", path));
+    log_printf((LOG_STARTUP, "\tfrom registry: %s\\%s",
+        HKEY_LOCAL_MACHINE==root_key?"HKLM":"HKCU",path));
 
     f = (flags & RE_ONCE) ? KEY_READ|KEY_WRITE : KEY_READ;
     if (ERROR_SUCCESS != RegOpenKeyEx(root_key, path, 0, f, &hk1))
