@@ -127,6 +127,7 @@ BBSETTING bool Settings_shellContextMenu;
 BBSETTING bool Settings_UTF8Encoding;
 BBSETTING int Settings_contextMenuAdjust[2];
 BBSETTING int Settings_LogFlag;
+BBSETTING int Settings_oldTray;
 
 // feature select
 BBSETTING bool Settings_disableTray;

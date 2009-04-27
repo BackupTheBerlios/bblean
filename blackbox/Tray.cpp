@@ -90,6 +90,9 @@ typedef struct systemTrayNode
     HICON orig_icon;
     systemTrayBalloon* pBalloon;
     GUID guidItem;
+    HWND    hWnd;
+    UINT    uID;
+    UINT    uCallbackMessage;
     systemTray t;
 } systemTrayNode;
 
@@ -109,6 +112,11 @@ ST void RemoveTrayIcon(systemTrayNode *p, bool post);
 
 void LoadShellServiceObjects(void);
 void UnloadShellServiceObjects(void);
+
+// Carsomyr's tray redirect trick
+// (Vista compatible icons with older plugins, e.f. SystembarEx)
+ST int trayredirect_id;
+ST UINT trayredirect_message;
 
 //===========================================================================
 // API: GetTraySize
@@ -173,7 +181,7 @@ void CleanTray(void)
     systemTrayNode *p = trayIconList;
     while (p) {
         systemTrayNode *n = p->next;
-        if (FALSE == IsWindow(p->t.hWnd))
+        if (FALSE == IsWindow(p->hWnd))
             RemoveTrayIcon(p, true);
         p = n;
     }
@@ -188,45 +196,47 @@ ST void tray_notify(systemTrayNode *p, UINT message)
     if (p->version == 4) {
         POINT pt;
         GetCursorPos(&pt);
-        SendNotifyMessage(p->t.hWnd, p->t.uCallbackMessage,
-            MAKEWPARAM(pt.x, pt.y), MAKELPARAM(message, p->t.uID));
+        SendNotifyMessage(p->hWnd, p->uCallbackMessage,
+            MAKEWPARAM(pt.x, pt.y), MAKELPARAM(message, p->uID));
     } else {
-        SendNotifyMessage(p->t.hWnd, p->t.uCallbackMessage, p->t.uID, message);
+        SendNotifyMessage(p->hWnd, p->uCallbackMessage, p->uID, message);
     }
 }
 
-// Reroute the mouse message to the tray icon's host window...
-int ForwardTrayMessage(int icon_index, UINT message)
+ST int forward_tray_message(systemTrayNode *p, UINT message)
 {
-    systemTrayNode *p = nth_icon(icon_index);
-
-    if (NULL == p || FALSE == IsWindow(p->t.hWnd)) {
+    if (NULL == p || FALSE == IsWindow(p->hWnd)) {
         CleanTray();
         return 0;
     }
 
     if (WM_MOUSEMOVE != message) {
-        /* Move/resize the hidden "Shell_TrayWnd" accordingly to the plugin where the
-           mouseclick was on, since some tray-apps want to align their menu with it */
-        HWND hwnd; POINT pt; RECT r;
+        /* Move/resize the hidden "Shell_TrayWnd" accordingly to
+           the plugin where the mouseclick was on, since some tray-apps
+           want to align their menu with it */
+
+        HWND hwnd;
+        POINT pt;
+        RECT r;
 
         GetCursorPos(&pt);
         hwnd = WindowFromPoint(pt);
         if (is_bbwindow(hwnd)) {
             GetWindowRect(hwnd, &r);
             SetWindowPos(hTrayWnd, NULL,
-                r.left, r.top, r.right-r.left, r.bottom-r.top, SWP_NOACTIVATE|SWP_NOZORDER);
+                r.left, r.top, r.right-r.left, r.bottom-r.top,
+                SWP_NOACTIVATE|SWP_NOZORDER);
         }
 
         /* allow the tray-app to grab focus */
         if (have_imp(pAllowSetForegroundWindow))
             pAllowSetForegroundWindow(ASFW_ANY);
         else
-            SetForegroundWindow(p->t.hWnd);
+            SetForegroundWindow(p->hWnd);
     }
 
     tray_notify(p, message);
-    // dbg_printf("ForwardTrayMessage %x %x", p->t.hWnd, message);
+    // dbg_printf("ForwardTrayMessage %x %x", p->hWnd, message);
 
     if (p->version >= 3) {
         if (message == WM_RBUTTONUP)
@@ -247,6 +257,12 @@ int ForwardTrayMessage(int icon_index, UINT message)
     }
 
     return 1;
+}
+
+// Reroute the mouse message to the tray icon's host window...
+int ForwardTrayMessage(int icon_index, UINT message)
+{
+    return forward_tray_message(nth_icon(icon_index), message);
 }
 
 //===========================================================================
@@ -529,7 +545,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
 
     // search the list
     dolist (p, trayIconList)
-        if (p->t.hWnd == nid.hWnd && p->t.uID == nid.uID)
+        if (p->hWnd == nid.hWnd && p->uID == nid.uID)
             break;
 
     if (NIM_DELETE == trayCommand) {
@@ -588,10 +604,16 @@ ST LRESULT TrayEvent(void *data, unsigned size)
             }
             p = c_new(systemTrayNode);
             append_node(&trayIconList, p);
-            p->t.hWnd = nid.hWnd;
-            p->t.uID  = nid.uID;
+            p->hWnd = nid.hWnd;
+            p->uID  = nid.uID;
             p->added = NIM_ADD == trayCommand;
-
+            if (trayredirect_message) {
+                p->t.hWnd = hTrayWnd;
+                p->t.uID = ++trayredirect_id;
+            } else {
+                p->t.hWnd = p->hWnd;
+                p->t.uID  = p->uID;
+            }
             bbTrayMessage = TRAYICON_ADDED;
         }
 
@@ -601,8 +623,13 @@ ST LRESULT TrayEvent(void *data, unsigned size)
 
         /* check callback message */
         if ((nid.uFlags & NIF_MESSAGE)
-            && (nid.uCallbackMessage != p->t.uCallbackMessage)) {
-            p->t.uCallbackMessage = nid.uCallbackMessage;
+            && (nid.uCallbackMessage != p->uCallbackMessage)) {
+            p->uCallbackMessage = nid.uCallbackMessage;
+            if (trayredirect_message) {
+                p->t.uCallbackMessage = trayredirect_message;
+            } else {
+                p->t.uCallbackMessage = p->uCallbackMessage;
+            }
             uChanged |= NIF_MESSAGE;
         }
 
@@ -704,9 +731,27 @@ ST LRESULT TrayEvent(void *data, unsigned size)
 ST LRESULT CALLBACK TrayWndProc(
     HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    void *data;
-    unsigned size;
-    int id;
+    if (message == WM_COPYDATA) {
+        void *data;
+        unsigned size;
+        int id;
+
+        data = ((COPYDATASTRUCT*)lParam)->lpData;
+        size = ((COPYDATASTRUCT*)lParam)->cbData;
+        id = ((COPYDATASTRUCT*)lParam)->dwData;
+
+        if (id == 1)
+            return TrayEvent(data, size);
+        if (id == 0)
+            return AppBarEvent(data, size);
+#if 0
+        unsigned n;
+        dbg_printf("Tray: other WM_COPYDATA: %d", id);
+        for (n = 0; (n+1) * 4 <= size; ++n)
+            dbg_printf("   member %d: %08x", n, ((DWORD*)data)[n]);
+#endif
+        return FALSE;
+    }
 
     if (message == WM_WINDOWPOSCHANGED && tray_on_top) {
         SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0,
@@ -714,26 +759,17 @@ ST LRESULT CALLBACK TrayWndProc(
         return 0;
     }
 
-    if (message != WM_COPYDATA) {
-        //dbg_printf("other message: %x %x %x", message, wParam, lParam);
-        return DefWindowProc(hwnd, message, wParam, lParam);
+    if (message == trayredirect_message && message) {
+        systemTrayNode *p;
+        dolist (p, trayIconList)
+            if (p->t.uID == wParam)
+                break;
+        forward_tray_message(p, lParam);
+        return 0;
     }
 
-    data = ((COPYDATASTRUCT*)lParam)->lpData;
-    size = ((COPYDATASTRUCT*)lParam)->cbData;
-    id = ((COPYDATASTRUCT*)lParam)->dwData;
-
-    if (id == 1)
-        return TrayEvent(data, size);
-    if (id == 0)
-        return AppBarEvent(data, size);
-#if 0
-    unsigned n;
-    dbg_printf("Tray: other WM_COPYDATA: %d", id);
-    for (n = 0; (n+1) * 4 <= size; ++n)
-        dbg_printf("   member %d: %08x", n, ((DWORD*)data)[n]);
-#endif
-    return FALSE;
+    //dbg_printf("other message: %x %x %x", message, wParam, lParam);
+    return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 //===========================================================================
@@ -978,6 +1014,10 @@ void Tray_Init(void)
     }
 
     BBRegisterClass(trayClassName, TrayWndProc, 0);
+
+    if (Settings_oldTray)
+        trayredirect_message = RegisterWindowMessage("BBTrayMessage");
+
     hTrayWnd = CreateWindowEx(
         tray_on_top ? WS_EX_TOOLWINDOW|WS_EX_TOPMOST : WS_EX_TOOLWINDOW,
         trayClassName,
