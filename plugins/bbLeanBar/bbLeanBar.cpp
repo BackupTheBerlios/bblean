@@ -1015,15 +1015,13 @@ LRESULT barinfo::wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
             }
 
             this->NewTasklist();
-
+            if (false == ShowingExternalLabel)
+            {
+                this->update_windowlabel();
+                this->update(M_WINL);
+            }
             if (TASKITEM_MODIFIED == lParam)
             {
-                if (false == ShowingExternalLabel)
-                {
-                    this->update_windowlabel();
-                    this->update(M_WINL);
-                }
-
                 if (this->has_tasks)
                     this->update(M_TASKLIST);
             } else {
