@@ -17,7 +17,7 @@ BIN     = $(NAME).dll
 # -------------------------------------------
 # paths
 
-BBAPI   = ../../blackbox
+BBAPI   = .
 BBLIB   = $(BBAPI)/blackbox.lib
 DEFINES = -I$(BBAPI)
 
@@ -28,6 +28,10 @@ all : $(BIN)
 
 clean :
 	for %%f in ($(OBJ) $(BIN) *.pdb *.manifest) do if exist %%f del %%f
+
+# this makes blackbox.lib from libBlackbox.def
+$(BBLIB):
+	lib /out:$(BBLIB) /def:$(BBAPI)/libBlackbox.def
 
 # -------------------------------------------
 # compiler settings and rules
@@ -42,7 +46,7 @@ CFLAGS  = /O1 /W3 /nologo /Zi /MD /I$(BBAPI)
 LFLAGS  = /DLL /SUBSYSTEM:WINDOWS /NOLOGO /OPT:REF,ICF,NOWIN98 /DEBUG
 LIBS = kernel32.lib user32.lib gdi32.lib
 
-$(BIN): $(OBJ) $(RES) makefile-msc
+$(BIN): $(OBJ) $(RES) $(BBLIB)
 	$(LINK) $(LFLAGS) /OUT:$(BIN) $(OBJ) $(BBLIB) $(LIBS)
 	if exist $@.manifest mt /nologo /manifest $@.manifest /outputresource:$@;2
 	del $(NAME).exp

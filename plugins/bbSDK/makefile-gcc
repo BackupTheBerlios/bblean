@@ -17,7 +17,7 @@ OBJ     = $(NAME).obj
 # -------------------------------------------
 # paths
 
-BBAPI   = ../../blackbox
+BBAPI   = .
 BBLIB   = $(BBAPI)/libBlackbox.a
 DEFINES = -I$(BBAPI)
 

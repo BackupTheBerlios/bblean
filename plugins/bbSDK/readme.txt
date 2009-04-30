@@ -36,28 +36,21 @@
   Files:
   ======
 
-  # -- common --
   bbSDK.cpp                 Source code (works as C or C++)
   BBApi.h                   bbLean API header file
   readme.txt                This file
   bbSDK.dll                 The compiled plugin
 
-  # -- MINGW --
+  # for MINGW
   makefile-gcc              makefile for gnu make
   libblackbox.a             blackbox import library for mingw
   libblackbox.def           blackbox import definition file
-  bbSDK.dev                 DevCpp project file
   bbSDK.cbp                 CodeBlocks project file
 
-  # -- MSC --
+  # for MSC
   makefile-msc              makefile for MSC nmake
   blackbox.lib              blackbox import library for MSVC
   bbSDK.vcproj              VC8(Express) project file
-
-  # -- BCC55 --
-  makefile-bcc              makefile for borland free compiler
-  blackbox_bor.lib          blackbox import library for BCC
-  bbSDK.def                 export definition file
 
 
   Using the included makefiles:
@@ -71,29 +64,6 @@
 
   with msc:
     nmake -f makefile-msc
-
-  with bcc:
-    make -f makefile-bcc
-
-
-  Using IDEs:
-  ===========
-  Project files are included for
-  - DevCpp
-  - CodeBlocks
-  - MS VC8 Express Edition.
-
-
-  Free compilers:
-  ===============
-  MinGW:
-    http://www.mingw.org/
-
-  MS VC8 Express Edition:
-    http://msdn.microsoft.com/vstudio/express/visualc/download/
-
-  Borland free commandline compiler:
-    http://www.borland.com/products/downloads/download_cbuilder.html
 
 
   History:
