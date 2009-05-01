@@ -291,7 +291,7 @@ void ContextMenu::Copymenu (HMENU hm)
         if (MII.hSubMenu)
         {
             wc->HandleMenuMsg(WM_INITMENUPOPUP, (WPARAM)MII.hSubMenu, MAKELPARAM(n, FALSE));
-            if (usingVersion >= 0x601)
+            if (usingWin7)
                 BBSleep(10);
             CM = new ContextMenu(text_string, wc, MII.hSubMenu, 0);
         }

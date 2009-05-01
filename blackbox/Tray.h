@@ -282,5 +282,16 @@ typedef struct _NID2KW6_32 {
     GUID guidItem;
 } NID2KW6_32;
 
+struct NOTIFYICONIDENTIFIER_MSGV1
+{
+    DWORD dwMagic;
+    DWORD dwMessage;
+    DWORD cbSize;
+    DWORD dwPadding;
+    HWND32 hWnd;
+    UINT uID;
+    GUID guidItem;
+};
+
 #endif //defINCLUDE_NIDS
 #endif //ndef _BBTRAY_H_

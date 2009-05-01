@@ -272,24 +272,27 @@ public:
     //-----------------------------
     virtual void mouse_event(int mx, int my, int message, unsigned flags)
     {
-        struct itemlist *p;
-        class baritem *found = NULL;
-        dolist (p, items)
-            if (p->item->mouse_over(mx, my) > 0) {
-                found = p->item;
-                found->mouse_event(mx, my, message, flags);
-                found->mouse_in = true;
-                break;
-            }
-        dolist (p, items)
-            if (p->item->mouse_in && found != p->item) {
-                p->item->mouse_event(mx, my, WM_MOUSELEAVE, flags);
-                p->item->mouse_in = false;
-                break;
-            }
+        struct itemlist *p, *q;
 
-        if (NULL == found)
+        dolist (p, items)
+            if (p->item->mouse_over(mx, my) > 0)
+                break;
+
+        dolist (q, items)
+            if (q->item->mouse_in)
+                break;
+
+        if (q && q != p) {
+            q->item->mouse_event(mx, my, WM_MOUSELEAVE, flags);
+            q->item->mouse_in = false;
+        }
+
+        if (p) {
+            p->item->mouse_event(mx, my, message, flags);
+            p->item->mouse_in = true;
+        } else {
             menuclick(message, flags);
+        }
     }
 
     //-----------------------------
@@ -640,16 +643,9 @@ public:
     void settip()
     {
         systemTray* icon = m_bar->GetTrayIconEx(m_index);
-        if (icon)
-        {
+        if (icon) {
             SetToolTip(m_bar->hwnd, &mr, icon->szTip);
-            if (m_bar->balloonTips && (icon->uChanged & NIF_INFO))
-            {
-                systemTrayBalloon *b = GetTrayBalloon(m_bar->RealTrayIndex(m_index));
-                if (b) {
-                    make_bb_balloon(m_bar, icon, b, &mr);
-                }
-            }
+            make_bb_balloon(m_bar, icon, &mr);
         }
     }
 #endif
@@ -673,7 +669,10 @@ public:
             )
             InvalidateRect(m_bar->hwnd, &mr, FALSE);
 
-        m_bar->ForwardTrayMessageEx(m_index, message);
+        systemTrayIconPos pos;
+        pos.hwnd = m_bar->hwnd;
+        pos.r = mr;
+        ForwardTrayMessage(m_bar->RealTrayIndex(m_index), message, &pos);
     }
 };
 

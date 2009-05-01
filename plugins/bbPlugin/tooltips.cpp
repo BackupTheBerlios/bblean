@@ -192,7 +192,6 @@ void exit_bb_balloon(void)
 class bb_balloon : public plugin_info
 {
     systemTray icon;
-    systemTrayBalloon balloon;
     int msgtop;
     int padding;
     int x_icon;
@@ -201,7 +200,7 @@ class bb_balloon : public plugin_info
     bool finished;
 
 public:
-    bb_balloon(plugin_info * PI, systemTray *pIcon, systemTrayBalloon *pBalloon, RECT *r)
+    bb_balloon(plugin_info * PI, systemTray *picon, RECT *r)
     {
         hInstance   = PI->hInstance;
         mon_rect    = PI->mon_rect;
@@ -212,8 +211,7 @@ public:
         alphaEnabled = PI->alphaEnabled;
         alphaValue  = PI->alphaValue;
 
-        this->icon  = *pIcon;
-        this->balloon = *pBalloon;
+        this->icon = *picon;
         this->finished = false;
 
         x_icon = (r->left+r->right)/2;
@@ -250,7 +248,7 @@ private:
         draw_text(buf, &r1, &r2, DT_CALCRECT | DT_WORDBREAK, 0);
         DeleteDC(buf);
 
-        if (balloon.szInfoTitle[0])
+        if (icon.balloon.szInfoTitle[0])
             msgtop = r1.bottom + padding;
         else
             msgtop = 0;
@@ -288,9 +286,9 @@ private:
         HFONT hFont2 = CreateStyleFont(&F);
 
         HGDIOBJ otherfont = SelectObject(buf, hFont1);
-        bbDrawText(buf, balloon.szInfoTitle, r1, flags, TC);
+        bbDrawText(buf, icon.balloon.szInfoTitle, r1, flags, TC);
         SelectObject(buf, hFont2);
-        bbDrawText(buf, balloon.szInfo, r2, flags, TC);
+        bbDrawText(buf, icon.balloon.szInfo, r2, flags, TC);
         SelectObject(buf, otherfont);
         DeleteObject(hFont1);
         DeleteObject(hFont2);
@@ -317,7 +315,7 @@ private:
         SetBkMode(buf, TRANSPARENT);
         draw_text(buf, &r1, &r2, DT_LEFT | DT_WORDBREAK, pStyle->TextColor);
 
-        if (balloon.szInfoTitle[0])
+        if (icon.balloon.szInfoTitle[0])
         {
             int y = r2.top - padding + 1;
             HGDIOBJ oldPen = SelectObject(buf, CreatePen(PS_SOLID, 1, pStyle->TextColor));
@@ -349,7 +347,7 @@ private:
 
             case WM_CREATE:
                 Post(NIN_BALLOONSHOW);
-                SetTimer(hwnd, 2, balloon.uInfoTimeout, NULL);
+                SetTimer(hwnd, 2, icon.balloon.uInfoTimeout, NULL);
                 break;
 
             case WM_DESTROY:
@@ -380,12 +378,15 @@ private:
     }
 };
 
-void make_bb_balloon(plugin_info * PI, systemTray *pIcon, systemTrayBalloon *pBalloon, RECT *pr)
+void make_bb_balloon(plugin_info * PI, systemTray *picon, RECT *pr)
 {
-    RECT r = *pr;
-    ClientToScreen(PI->hwnd, (POINT*)&r.left);
-    ClientToScreen(PI->hwnd, (POINT*)&r.right);
-    new bb_balloon(PI, pIcon, pBalloon, &r);
+    if (picon && picon->balloon.uInfoTimeout) {
+        RECT r = *pr;
+        ClientToScreen(PI->hwnd, (POINT*)&r.left);
+        ClientToScreen(PI->hwnd, (POINT*)&r.right);
+        new bb_balloon(PI, picon, &r);
+        picon->balloon.uInfoTimeout = 0;
+    }
 }
 
 
@@ -409,19 +410,17 @@ void make_bb_balloon(plugin_info * PI, systemTray *pIcon, systemTrayBalloon *pBa
 class win_balloon
 {
     systemTray icon;
-    systemTrayBalloon balloon;
     HWND hwndBalloon;
     WNDPROC prev_wndproc;
     bool finished;
 
 public:
-    win_balloon(plugin_info * PI, systemTray *pIcon, systemTrayBalloon *pBalloon, RECT *r)
+    win_balloon(plugin_info * PI, systemTray *picon, RECT *r)
     {
         HWND hwndParent = PI->hwnd;
         HINSTANCE hInstance = PI->hInstance;
 
-        this->icon  = *pIcon;
-        this->balloon = *pBalloon;
+        this->icon = *picon;
         this->finished = false;
 
         int xpos = (r->left+r->right)/2;
@@ -433,7 +432,7 @@ public:
         ti.uFlags   = TTF_TRACK;
         ti.hwnd     = hwndParent;
         ti.uId      = 1;
-        ti.lpszText = balloon.szInfo;
+        ti.lpszText = icon.balloon.szInfo;
 
         hwndBalloon = CreateWindowEx(
             WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
@@ -449,13 +448,13 @@ public:
 
         SendMessage(hwndBalloon, TTM_SETMAXTIPWIDTH, 0, 270);
         SendMessage(hwndBalloon, TTM_ADDTOOL, 0, (LPARAM)&ti);
-        SendMessage(hwndBalloon, TTM_SETTITLEA, balloon.dwInfoFlags, (LPARAM)balloon.szInfoTitle);
+        SendMessage(hwndBalloon, TTM_SETTITLEA, icon.balloon.dwInfoFlags, (LPARAM)icon.balloon.szInfoTitle);
         SendMessage(hwndBalloon, TTM_TRACKPOSITION, 0, MAKELPARAM(xpos, ypos));
         SendMessage(hwndBalloon, TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
         SetWindowLongPtr(hwndBalloon, GWLP_USERDATA, (LONG_PTR)this);
         prev_wndproc = (WNDPROC)SetWindowLongPtr(hwndBalloon, GWLP_WNDPROC, (LONG_PTR)wndproc);
-        SetTimer(hwndBalloon, 700, balloon.uInfoTimeout, NULL);
+        SetTimer(hwndBalloon, 700, icon.balloon.uInfoTimeout, NULL);
         Post(NIN_BALLOONSHOW);
     }
 
@@ -508,13 +507,11 @@ private:
 class msg_balloon
 {
     systemTray icon;
-    systemTrayBalloon balloon;
 
 public:
-    msg_balloon(plugin_info *PI, systemTray *pIcon, systemTrayBalloon *pBalloon, RECT *r)
+    msg_balloon(plugin_info *PI, systemTray *picon, RECT *r)
     {
-        this->icon  = *pIcon;
-        this->balloon = *pBalloon;
+        this->icon = *picon;
         PostMessage(PI->hwnd, NIN_BALLOONSHOW, 0, (LPARAM)this);
     }
 
@@ -528,13 +525,13 @@ public:
             MB_ICONWARNING,
             MB_ICONERROR
         };
-        if (balloon.szInfoTitle[0])
-            sprintf(msg, "%s\n\n%s", balloon.szInfoTitle, balloon.szInfo);
+        if (icon.balloon.szInfoTitle[0])
+            sprintf(msg, "%s\n\n%s", icon.balloon.szInfoTitle, icon.balloon.szInfo);
         else
-            sprintf(msg, "%s", balloon.szInfo);
+            sprintf(msg, "%s", icon.balloon.szInfo);
 
         Post(NIN_BALLOONSHOW);
-        if (IDOK == MessageBox(NULL, msg, "Balloon Tip (Beta)", f[iminmax(balloon.dwInfoFlags, 0, 3)]|MB_OKCANCEL|MB_TOPMOST|MB_SETFOREGROUND))
+        if (IDOK == MessageBox(NULL, msg, "Balloon Tip (Beta)", f[iminmax(icon.balloon.dwInfoFlags, 0, 3)]|MB_OKCANCEL|MB_TOPMOST|MB_SETFOREGROUND))
             Post(NIN_BALLOONUSERCLICK);
         else
             Post(NIN_BALLOONTIMEOUT);

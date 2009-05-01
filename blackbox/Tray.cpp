@@ -60,11 +60,12 @@
 #define NIN_SELECT      WM_USER
 #define NINF_KEY        1
 #define NIN_KEYSELECT   (NIN_SELECT | NINF_KEY)
-
 #define NIN_BALLOONSHOW (WM_USER + 2)
 #define NIN_BALLOONHIDE (WM_USER + 3)
 #define NIN_BALLOONTIMEOUT (WM_USER + 4)
 #define NIN_BALLOONUSERCLICK (WM_USER + 5)
+#define NIN_POPUPOPEN (WM_USER + 6)
+#define NIN_POPUPCLOSE (WM_USER + 7)
 */
 
 //===========================================================================
@@ -82,17 +83,17 @@ typedef struct systemTrayNode
     struct systemTrayNode *next;
     bool hidden;
     bool shared;
-    bool referenced;
-    bool showTip;
-    bool popup;
     bool added;
+    int popup;
     unsigned version;
     HICON orig_icon;
-    systemTrayBalloon* pBalloon;
     GUID guidItem;
-    HWND    hWnd;
-    UINT    uID;
-    UINT    uCallbackMessage;
+    HWND hWnd;
+    UINT uID;
+    UINT uCallbackMessage;
+    unsigned uChanged;
+    int index;
+    POINT pt;
     systemTray t;
 } systemTrayNode;
 
@@ -107,6 +108,8 @@ ST systemTrayNode *trayIconList;
 // messages before explorer does.
 ST bool tray_on_top;
 ST bool tray_utf8;
+ST int tray_edge;
+ST HWND tray_mouseover;
 
 ST void RemoveTrayIcon(systemTrayNode *p, bool post);
 
@@ -118,6 +121,8 @@ void UnloadShellServiceObjects(void);
 ST int trayredirect_id;
 ST UINT trayredirect_message;
 
+// #define TRAY_SHOWPOPUPS
+
 //===========================================================================
 // API: GetTraySize
 //===========================================================================
@@ -127,8 +132,7 @@ int GetTraySize(void)
     systemTrayNode *p;
     int n = 0;
     dolist (p, trayIconList)
-        if (false == p->hidden)
-            n++;
+        p->index = p->hidden ? -1 : n++;
     return n;
 }
 
@@ -138,26 +142,17 @@ int GetTraySize(void)
 
 static systemTrayNode *nth_icon(int i)
 {
-    systemTrayNode *p; int n = 0;
+    systemTrayNode *p;
     dolist (p, trayIconList)
-        if (false == p->hidden && n++ == i)
-            return p;
-    return NULL;
+        if (i == p->index)
+            break;
+    return p;
 }
 
 systemTray* GetTrayIcon(int icon_index)
 {
     systemTrayNode *p = nth_icon(icon_index);
     return p ? &p->t : NULL;
-}
-
-systemTrayBalloon* GetTrayBalloon(int icon_index)
-{
-    systemTrayNode *p = nth_icon(icon_index);
-    if (!p || 0 == (p->t.uChanged & NIF_INFO))
-        return NULL;
-    p->t.uChanged &= ~NIF_INFO;
-    return p->pBalloon;
 }
 
 //===========================================================================
@@ -193,41 +188,72 @@ void CleanTray(void)
 
 ST void tray_notify(systemTrayNode *p, UINT message)
 {
-    if (p->version == 4) {
-        POINT pt;
-        GetCursorPos(&pt);
-        SendNotifyMessage(p->hWnd, p->uCallbackMessage,
-            MAKEWPARAM(pt.x, pt.y), MAKELPARAM(message, p->uID));
+    if (p->version >= 4) {
+        WPARAM wParam = MAKELPARAM(p->pt.x, p->pt.y);
+        LPARAM lParam = MAKELPARAM(message, p->uID);
+        SendNotifyMessage(p->hWnd, p->uCallbackMessage, wParam, lParam);
     } else {
         SendNotifyMessage(p->hWnd, p->uCallbackMessage, p->uID, message);
     }
 }
 
-ST int forward_tray_message(systemTrayNode *p, UINT message)
+ST int forward_tray_message(systemTrayNode *p, UINT message, systemTrayIconPos *pos)
 {
+    HWND hwnd;
+    systemTrayNode *q;
+
     if (NULL == p || FALSE == IsWindow(p->hWnd)) {
         CleanTray();
         return 0;
     }
 
-    if (WM_MOUSEMOVE != message) {
+    if (pos) {
+        p->pt.x = (pos->r.left + pos->r.right) / 2;
+        p->pt.y = (pos->r.top + pos->r.bottom) / 2;
+        hwnd = pos->hwnd;
+        ClientToScreen(hwnd, &p->pt);
+    } else {
+        GetCursorPos(&p->pt);
+        hwnd = WindowFromPoint(p->pt);
+        if (!is_bbwindow(hwnd))
+            hwnd = NULL;
+    }
+
+    if (hwnd && (message != WM_MOUSEMOVE || hwnd != tray_mouseover)) {
+
+        RECT r, m;
+        int x, y;
+
+        tray_mouseover = hwnd;
+        x = p->pt.x;
+        y = p->pt.y;
+
+        GetWindowRect(hwnd, &r);
+        GetMonitorRect(hwnd, &m, GETMON_FROM_WINDOW);
+        if (r.right - r.left > r.bottom - r.top) {
+            if (y - m.top < m.bottom - y)
+                tray_edge = ABE_TOP;
+            else
+                tray_edge = ABE_BOTTOM;
+        } else {
+            if (x - m.left < m.right - x)
+                tray_edge = ABE_LEFT;
+            else
+                tray_edge = ABE_RIGHT;
+        }
+
         /* Move/resize the hidden "Shell_TrayWnd" accordingly to
            the plugin where the mouseclick was on, since some tray-apps
            want to align their menu with it */
 
-        HWND hwnd;
-        POINT pt;
-        RECT r;
+        SetWindowPos(hTrayWnd, NULL,
+            r.left, r.top,
+            r.right-r.left, r.bottom-r.top,
+            SWP_NOACTIVATE|SWP_NOZORDER);
 
-        GetCursorPos(&pt);
-        hwnd = WindowFromPoint(pt);
-        if (is_bbwindow(hwnd)) {
-            GetWindowRect(hwnd, &r);
-            SetWindowPos(hTrayWnd, NULL,
-                r.left, r.top, r.right-r.left, r.bottom-r.top,
-                SWP_NOACTIVATE|SWP_NOZORDER);
-        }
+    }
 
+    if (message != WM_MOUSEMOVE) {
         /* allow the tray-app to grab focus */
         if (have_imp(pAllowSetForegroundWindow))
             pAllowSetForegroundWindow(ASFW_ANY);
@@ -235,34 +261,49 @@ ST int forward_tray_message(systemTrayNode *p, UINT message)
             SetForegroundWindow(p->hWnd);
     }
 
-    tray_notify(p, message);
-    // dbg_printf("ForwardTrayMessage %x %x", p->hWnd, message);
+    // dbg_printf("message %x %d %x", p->hWnd, p->uID, message);
 
-    if (p->version >= 3) {
-        if (message == WM_RBUTTONUP)
-            tray_notify(p, WM_CONTEXTMENU);
-#if 0
-        if (message == WM_MOUSEMOVE) {
-            if (false == p->popup)
-                tray_notify(p, NIN_POPUPOPEN), p->popup = true;
-        } else if (message == WM_MOUSELEAVE) {
-            tray_notify(p, NIN_POPUPCLOSE), p->popup = false;
-        } else {
-            systemTrayNode *q;
-            dolist (q, trayIconList)
-                if (q->popup)
-                    tray_notify(q, NIN_POPUPCLOSE), q->popup = false;
+    dolist (q, trayIconList)
+        if (q->popup && (q != p || message != WM_MOUSEMOVE)) {
+            tray_notify(q, NIN_POPUPCLOSE);
+            q->popup = 0;
+        }
+
+    if (p->version < 3) {
+        tray_notify(p, message);
+    } else {
+
+#ifdef TRAY_SHOWPOPUPS
+        if (message == WM_MOUSEMOVE && p->popup < 3) {
+            if (++p->popup == 3)
+                tray_notify(p, NIN_POPUPOPEN);
         }
 #endif
+        if (message == WM_RBUTTONUP) {
+            tray_notify(p, WM_CONTEXTMENU);
+            tray_notify(p, WM_RBUTTONUP);
+
+        } else if (message == WM_LBUTTONUP) {
+            if (usingWin7)
+                tray_notify(p, WM_LBUTTONDOWN);
+            tray_notify(p, WM_LBUTTONUP);
+            tray_notify(p, NIN_SELECT);
+
+        } else if (message == WM_LBUTTONDOWN) {
+            if (!usingWin7)
+                tray_notify(p, WM_LBUTTONDOWN);
+        } else {
+            tray_notify(p, message);
+        }
     }
 
     return 1;
 }
 
 // Reroute the mouse message to the tray icon's host window...
-int ForwardTrayMessage(int icon_index, UINT message)
+int ForwardTrayMessage(int icon_index, UINT message, systemTrayIconPos *pos)
 {
-    return forward_tray_message(nth_icon(icon_index), message);
+    return forward_tray_message(nth_icon(icon_index), message, pos);
 }
 
 //===========================================================================
@@ -272,13 +313,10 @@ int ForwardTrayMessage(int icon_index, UINT message)
 ST void reset_icon(systemTrayNode *p)
 {
     if (false == p->shared) {
-        if (p->referenced) {
-            systemTrayNode *s;
-            dolist (s, trayIconList)
-                if (s->shared && s->orig_icon == p->orig_icon)
-                    reset_icon(s);
-            p->referenced = false;
-        }
+        systemTrayNode *s;
+        dolist (s, trayIconList)
+            if (s->shared && s->orig_icon == p->orig_icon)
+                reset_icon(s);
         if (p->t.hIcon)
             DestroyIcon(p->t.hIcon);
     }
@@ -290,12 +328,12 @@ ST void reset_icon(systemTrayNode *p)
 // Function: send_tray_message
 //===========================================================================
 
-ST void send_tray_message(systemTrayNode *p, unsigned uChanged, unsigned msg)
+ST LRESULT send_tray_message(systemTrayNode *p, unsigned uChanged, unsigned msg)
 {
     if (p->hidden || 0 == uChanged)
-        return;
-    p->t.uChanged = uChanged;
-    MessageManager_Send(BB_TRAYUPDATE, (WPARAM)&p->t, msg);
+        return 0;
+    p->uChanged = uChanged;
+    return MessageManager_Send(BB_TRAYUPDATE, MAKEWPARAM(p->index, uChanged), msg);
 }
 
 //===========================================================================
@@ -305,8 +343,6 @@ ST void send_tray_message(systemTrayNode *p, unsigned uChanged, unsigned msg)
 ST void RemoveTrayIcon(systemTrayNode *p, bool post)
 {
     reset_icon(p);
-    if (p->pBalloon)
-        m_free(p->pBalloon);
     remove_node(&trayIconList, p);
     if (post)
         send_tray_message(p, NIF_ICON, TRAYICON_REMOVED);
@@ -410,14 +446,6 @@ LRESULT AppBarEvent(void *data, unsigned size)
 
     abd = (APPBARDATAV1*)data;
 
-#if 0
-    dbg_window((HWND)((APPBARDATAV1*)abd)->hWnd, "appevent");
-    dbg_printf("%d %d %d", sizeof(APPBARDATAV1), sizeof(APPBARMSGDATAV1),
-        offsetof(APPBARMSGDATAV1,dwMessage)) ;
-    dbg_printf("%d %d %d", sizeof(APPBARDATAV2), sizeof(APPBARMSGDATAV2),
-        offsetof(APPBARMSGDATAV2,dwMessage)) ;
-#endif
-
     switch (size) {
     case sizeof(APPBARMSGDATAV1):
         p_message = &((APPBARMSGDATAV1*)abd)->dwMessage;
@@ -436,7 +464,11 @@ LRESULT AppBarEvent(void *data, unsigned size)
         return 0;
     }
 
-    // dbg_printf("AppBarEventV%d message:%d hwnd:%x pid:%d shmem:%x size:%d", size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem, size);
+/*
+    dbg_printf("AppBarEventV%d message:%d hwnd:%x pid:%d shmem:%x size:%d",
+        size == sizeof(APPBARMSGDATAV2) ? 2 : 1, *p_message, abd->hWnd, *p_pid, *p_shmem, size);
+    dbg_window((HWND)abd->hWnd, "appevent window");
+*/
 
     log_printf((LOG_TRAY, "AppBarEventV%d message:%d hwnd:%x pid:%d shmem:%x size:%d",
         size == sizeof(APPBARMSGDATAV2) ? 2 : 1,
@@ -457,12 +489,9 @@ LRESULT AppBarEvent(void *data, unsigned size)
         return FALSE; //7
 
     case ABM_GETTASKBARPOS: //5
-        memcpy(&abd_ret, abd, sizeof abd_ret);
+        abd_ret = *abd;
+        abd_ret.uEdge = tray_edge;
         GetWindowRect(hTrayWnd, &abd_ret.rc);
-        if (abd_ret.rc.top < VScreenX + VScreenHeight/2)
-            abd_ret.uEdge = ABE_TOP;
-        else
-            abd_ret.uEdge = ABE_BOTTOM;
         return pass_back(*p_pid, (HANDLE)*p_shmem, &abd_ret, sizeof abd_ret);
     }
 
@@ -477,6 +506,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
     void *pData = &((SHELLTRAYDATA*)data)->iconData;
     NIDBB nid;
     systemTrayNode *p;
+    UINT bbTrayMessage, uChanged, ret;
 
     memset(&nid, 0, sizeof nid);
 
@@ -548,17 +578,26 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         if (p->hWnd == nid.hWnd && p->uID == nid.uID)
             break;
 
-    if (NIM_DELETE == trayCommand) {
+    switch (trayCommand) {
+
+    case NIM_SETVERSION:
+        if (NULL == p || NULL == nid.pVersion_Timeout)
+            return FALSE;
+        p->version = *nid.pVersion_Timeout;
+#ifdef TRAY_SHOWPOPUPS
+        if (p->version >= 4 && 0 == (nid.uFlags & NIF_SHOWTIP))
+            p->t.szTip[0] = 0;
+#endif
+        return TRUE;
+
+    case NIM_DELETE:
         if (NULL == p)
             return FALSE;
         RemoveTrayIcon(p, true);
         return TRUE;
 
-    } else if (NIM_MODIFY == trayCommand || NIM_ADD == trayCommand) {
-
-        UINT uChanged;
-        UINT bbTrayMessage;
-
+    case NIM_MODIFY:
+    case NIM_ADD:
         if (FALSE == IsWindow(nid.hWnd)) {
             // has been seen even with NIM_ADD
             if (p)
@@ -588,16 +627,13 @@ ST LRESULT TrayEvent(void *data, unsigned size)
                 p->added = true;
             }
             if (p->shared != nid.shared)
-                // just in case, dont know if it ever happens
                 reset_icon(p);
-
             bbTrayMessage = TRAYICON_MODIFIED;
 
         } else {
             if (NIM_MODIFY == trayCommand) {
 #if 0
                 if (nid.uFlags != (NIF_ICON|NIF_MESSAGE|NIF_TIP)
-                    || nid.shared
                     || NULL == nid.hIcon)
 #endif
                     return FALSE;
@@ -609,7 +645,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
             p->added = NIM_ADD == trayCommand;
             if (trayredirect_message) {
                 p->t.hWnd = hTrayWnd;
-                p->t.uID = ++trayredirect_id;
+                p->t.uID = ++trayredirect_id & 0x7fff;
             } else {
                 p->t.hWnd = p->hWnd;
                 p->t.uID  = p->uID;
@@ -620,6 +656,7 @@ ST LRESULT TrayEvent(void *data, unsigned size)
         p->hidden = nid.hidden;
         p->shared = nid.shared;
         uChanged = 0;
+        ret = p->added;
 
         /* check callback message */
         if ((nid.uFlags & NIF_MESSAGE)
@@ -640,42 +677,15 @@ ST LRESULT TrayEvent(void *data, unsigned size)
                 uChanged |= NIF_TIP;
         }
 
-        /* check balloon */
-        if ((nid.uFlags & NIF_INFO) && nid.pInfo) {
-            systemTrayBalloon *b = p->pBalloon;
-            if (NULL == b)
-                p->pBalloon = b = c_new(systemTrayBalloon);
-
-            convert_string(b->szInfoTitle, nid.pInfoTitle,
-                sizeof b->szInfoTitle, nid.is_unicode);
-            convert_string(b->szInfo, nid.pInfo,
-                sizeof b->szInfo, nid.is_unicode);
-
-            b->dwInfoFlags = *nid.pInfoFlags;
-            if (b->szInfo[0] || b->szInfoTitle[0]) {
-                uChanged |= NIF_INFO;
-                b->uInfoTimeout = imax(2000, *nid.pVersion_Timeout);
-            } else {
-                b->uInfoTimeout = 0;
-            }
+#ifdef TRAY_SHOWPOPUPS
+        if (p->version >= 4 && 0 == (nid.uFlags & NIF_SHOWTIP)) {
+            p->t.szTip[0] = 0;
         }
+#endif
 
         /* check GUID item */
         if ((nid.uFlags & NIF_GUID) && nid.pGuid) {
-#if 0 //ndef BBTINY
-            if (Settings_LogFlag & LOG_TRAY) {
-                WCHAR* pOle; char s_guid[200];
-                StringFromCLSID(*nid.pGuid, &pOle);
-                convert_string(s_guid, pOle, 200, true);
-                SHMalloc_Free(pOle);
-                log_printf((LOG_TRAY, "Tray: update guidItem: %s", s_guid));
-            }
-#endif
             p->guidItem = *nid.pGuid;
-        }
-
-        if (nid.uFlags & NIF_SHOWTIP) {
-            p->showTip = true;
         }
 
         /* check icon */
@@ -692,10 +702,9 @@ ST LRESULT TrayEvent(void *data, unsigned size)
                     return FALSE;
                 }
 
-                if (p->orig_icon != nid.hIcon) {
+                if (p->orig_icon != o->orig_icon) {
+                    p->orig_icon = o->orig_icon;
                     p->t.hIcon = o->t.hIcon;
-                    o->referenced = true;
-                    p->orig_icon = nid.hIcon;
                     uChanged |= NIF_ICON;
                 }
 
@@ -709,19 +718,93 @@ ST LRESULT TrayEvent(void *data, unsigned size)
             }
         }
 
+        /* check balloon */
+        if ((nid.uFlags & NIF_INFO) && nid.pInfo) {
+
+            convert_string(p->t.balloon.szInfoTitle, nid.pInfoTitle,
+                sizeof p->t.balloon.szInfoTitle, nid.is_unicode);
+
+            convert_string(p->t.balloon.szInfo, nid.pInfo,
+                sizeof p->t.balloon.szInfo, nid.is_unicode);
+
+            p->t.balloon.dwInfoFlags = *nid.pInfoFlags;
+            p->t.balloon.uInfoTimeout = 0;
+
+            if (p->t.balloon.szInfo[0] || p->t.balloon.szInfoTitle[0]) {
+                p->t.balloon.uInfoTimeout = iminmax(*nid.pVersion_Timeout, 4000, 20000);
+                uChanged |= NIF_ICON;
+            }
+        }
+
         /* notify plugins about change */
         send_tray_message(p, uChanged, bbTrayMessage);
-        return p->added ? TRUE : FALSE;
+        return ret;
 
-    } else if (NIM_SETVERSION == trayCommand) {
-        if (NULL == p || NULL == nid.pVersion_Timeout)
-            return FALSE;
-        p->version = *nid.pVersion_Timeout;
-        return TRUE;
-
-    } else {
+    default:
         return FALSE;
     }
+}
+
+//===========================================================================
+ST LRESULT TrayInfoEvent(void *data, unsigned size)
+{
+    struct NOTIFYICONIDENTIFIER_MSGV1* s = (NOTIFYICONIDENTIFIER_MSGV1*)data;
+
+    systemTrayNode *p;
+    dolist (p, trayIconList)
+        if (IsEqualIID(p->guidItem, s->guidItem))
+            break;
+#if 0
+    char s_guid[40];
+    guid_to_string(&s->guidItem, s_guid);
+    dbg_printf("%x %d %d %d %04x %d - %04x %s",
+        s->dwMagic,
+        s->dwMessage,
+        s->cbSize,
+        s->dwPadding,
+        s->hWnd,
+        s->uID,
+        p ? (unsigned)p->hWnd : 0,
+        s_guid
+        );
+    if (p)
+        dbg_window(p->hWnd, "TrayInfoEvent window");
+
+#endif
+
+    if (NULL == p)
+        return 0;
+
+    if (s->dwMessage == 2) {
+        return MAKELONG(16,16);
+    }
+
+    if (s->dwMessage == 1) {
+        return MAKELPARAM(p->pt.x, p->pt.y);
+    }
+
+    return 0;
+}
+
+ST LRESULT TrayTestEvent(void *data, unsigned size)
+{
+#if 0
+    char s_guid[40];
+    guid_to_string((GUID*)data, s_guid);
+
+    char buffer[1000];
+    unsigned n, x;
+    x = sprintf(buffer, "size: %04x", size);
+    for (n = 0; n < size && x < sizeof buffer - 10; ++n) {
+        if (0 == n % 16)
+            x += sprintf(buffer + x, "\n%02x: ", n);
+        else if (0 == n % 4)
+            buffer[x++] = ' ';
+        x += sprintf(buffer + x, " %02x", ((unsigned char*)data)[n]);
+    }
+    dbg_printf("%s\n%s\n", buffer, s_guid);
+#endif
+    return 0;
 }
 
 //===========================================================================
@@ -740,17 +823,16 @@ ST LRESULT CALLBACK TrayWndProc(
         size = ((COPYDATASTRUCT*)lParam)->cbData;
         id = ((COPYDATASTRUCT*)lParam)->dwData;
 
-        if (id == 1)
-            return TrayEvent(data, size);
+        if (size >= sizeof (DWORD)
+            && ((SHELLTRAYDATA*)data)->dwMagic == 0x34753423) {
+            if (id == 1)
+                return TrayEvent(data, size);
+            if (id == 3)
+                return TrayInfoEvent(data, size);
+        }
         if (id == 0)
             return AppBarEvent(data, size);
-#if 0
-        unsigned n;
-        dbg_printf("Tray: other WM_COPYDATA: %d", id);
-        for (n = 0; (n+1) * 4 <= size; ++n)
-            dbg_printf("   member %d: %08x", n, ((DWORD*)data)[n]);
-#endif
-        return FALSE;
+        return TrayTestEvent(data, size);
     }
 
     if (message == WM_WINDOWPOSCHANGED && tray_on_top) {
@@ -764,7 +846,7 @@ ST LRESULT CALLBACK TrayWndProc(
         dolist (p, trayIconList)
             if (p->t.uID == wParam)
                 break;
-        forward_tray_message(p, lParam);
+        forward_tray_message(p, lParam, NULL);
         return 0;
     }
 
@@ -1023,9 +1105,7 @@ void Tray_Init(void)
     }
 
     BBRegisterClass(trayClassName, TrayWndProc, 0);
-
-    if (Settings_oldTray)
-        trayredirect_message = RegisterWindowMessage("BBTrayMessage");
+    trayredirect_message = RegisterWindowMessage("BBTrayMessage");
 
     hTrayWnd = CreateWindowEx(
         tray_on_top ? WS_EX_TOOLWINDOW|WS_EX_TOPMOST : WS_EX_TOOLWINDOW,
@@ -1072,6 +1152,35 @@ void Tray_Exit(void)
     while (trayIconList)
         RemoveTrayIcon(trayIconList, false);
 }
+
+//===========================================================================
+/* stuff incoming on Win-7 with WM_COPYDATA:dwData = 2
+
+ {68DDBB56-9D1D-4FD9-89C5-C0DA2A625392} UnexpectedShutdownReason
+
+ size: 0014
+ 00:  56 bb dd 68  1d 9d d9 4f  89 c5 c0 da  2a 62 53 92
+ 10:  02 00 00 00
+
+ {7849596A-48EA-486E-8937-A2A3009F31A9} PostBootReminder object
+
+ size: 0014
+ 00:  6a 59 49 78  ea 48 6e 48  89 37 a2 a3  00 9f 31 a9
+ 10:  02 00 00 00
+
+ {900C0763-5CAD-4A34-BC1F-40CD513679D5} User Account Control Check Service
+
+ size: 0014
+ 00:  63 07 0c 90  ad 5c 34 4a  bc 1f 40 cd  51 36 79 d5
+ 10:  03 00 00 00
+
+ {FBEB8A05-BEEE-4442-804E-409D6C4515E9} ShellFolder for CD Burning
+
+ size: 0014
+ 00:  05 8a eb fb  ee be 42 44  80 4e 40 9d  6c 45 15 e9
+ 10:  02 00 00 00
+
+*/
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //

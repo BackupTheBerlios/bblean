@@ -773,20 +773,6 @@ extern "C" {
     /* A plugin can register BB_TRAYUPDATE to receive notification about
        changes with tray icons */
 
-    typedef struct systemTray
-    {
-        HWND    hWnd;
-        UINT    uID;
-        UINT    uCallbackMessage;
-        HICON   hIcon;
-        char    szTip[256];
-        UINT    uChanged;  /* NIF_XXX flags of last update */
-    } systemTray;
-
-    API_EXPORT int GetTraySize(void);
-    API_EXPORT systemTray* GetTrayIcon(int icon_index);
-    API_EXPORT int ForwardTrayMessage(int icon_index, UINT message);
-
     typedef struct systemTrayBalloon
     {
         UINT    uInfoTimeout;
@@ -795,7 +781,26 @@ extern "C" {
         char    szInfo[256];
     } systemTrayBalloon;
 
-    API_EXPORT systemTrayBalloon* GetTrayBalloon(int icon_index);
+    typedef struct systemTray
+    {
+        HWND    hWnd;
+        UINT    uID;
+        UINT    uCallbackMessage;
+        HICON   hIcon;
+        char    szTip[256];
+        systemTrayBalloon balloon;
+    } systemTray;
+
+    API_EXPORT int GetTraySize(void);
+    API_EXPORT systemTray* GetTrayIcon(int icon_index);
+
+    typedef struct systemTrayIconPos
+    {
+        HWND hwnd; /* the plugin's hwnd */
+        RECT r; /* icon rectangle on plugin's hwnd */
+    } systemTrayIconPos;
+
+    API_EXPORT int ForwardTrayMessage(int icon_index, UINT message, systemTrayIconPos *pos);
 
     /* ------------------------------------ */
     /* Task items access */

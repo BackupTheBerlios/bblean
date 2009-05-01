@@ -204,6 +204,7 @@ struct icon_box : public plugin_info
 
     int activeIcon;
     int capturedIcon;
+    int mouse_in;
     int activeTemp;
     bool is_single_task;
     bool no_items;
@@ -477,7 +478,12 @@ struct tray_box : icon_box
     int MouseAction(HWND hwnd, unsigned message, WPARAM wParam, POINT *p, int index)
     {
         if (index > 0)
-            ForwardTrayMessage(index-1, message);
+        {
+            systemTrayIconPos pos;
+            pos.hwnd = this->hwnd;
+            GetIconRect(index-1, &pos.r);
+            ForwardTrayMessage(index-1, message, &pos);
+        }
         return 0;
     }
 };
@@ -1074,17 +1080,8 @@ void icon_box::Paint(HDC hdc)
         iconRect.bottom += iconPadding;
         SetToolTip(this->hwnd, &iconRect, icon->szTip);
 
-        if (MODE_TRAY == my_Folder.mode && BBVERSION_LEAN==BBVersion)
-        {
-            systemTray *t = GetTrayIcon(i);
-            if (t && (t->uChanged & NIF_INFO))
-            {
-                systemTrayBalloon *b = GetTrayBalloon(i);
-                if (b) {
-                    make_bb_balloon(this, t, b, &iconRect);
-                }
-            }
-        }
+        if (MODE_TRAY == my_Folder.mode)
+            make_bb_balloon(this, GetTrayIcon(i), &iconRect);
     }
 }
 
@@ -1100,16 +1097,22 @@ int icon_box::MouseEvent(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, 
     pt.y = (short)HIWORD(lParam);
     index = CheckMouse(pt);
 
+    if (index != mouse_in) {
+        if (mouse_in > 0)
+            this->MouseAction(hwnd, WM_MOUSELEAVE, wParam, &pt, mouse_in);
+        mouse_in = index;
+    }
+
     switch (action) {
     case 0: // down
         capturedIcon = index;
         if (my_Folder.mode != MODE_PAGER)
             activeIcon = index;
         mouse_down = pt;
+        this->MouseAction(hwnd, message, wParam, &pt, index);
         break;
 
     case 1: // move
-
         active = index;
         if (MK_CONTROL & wParam) {
             active = 0;
@@ -1139,22 +1142,28 @@ int icon_box::MouseEvent(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, 
                 index = capturedIcon;
             }
         }
+        this->MouseAction(hwnd, message, wParam, &pt, index);
         break;
 
-    default: // up
+    case 2: // up
         if (dragging) {
             dragging = false;
             SetCursor(LoadCursor(NULL, IDC_ARROW));
             wParam = message;
             message = BBIB_DROP;
             index = capturedIcon;
-        }
-        break;
-    }
-
-    if (index == capturedIcon || dragging)
+        } else if (index != capturedIcon)
+            break;
         this->MouseAction(hwnd, message, wParam, &pt, index);
+        break;
 
+    case 3: // leave
+        break;
+
+    default:
+        return 0;
+
+    }
     return index;
 }
 

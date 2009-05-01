@@ -50,7 +50,7 @@ unsigned WM_ShellHook;
 bool usingNT;
 bool usingXP;
 bool usingVista;
-int usingVersion;
+bool usingWin7;
 bool underExplorer;
 bool PluginsHidden;
 bool multimon;
@@ -283,7 +283,7 @@ void set_os_info(void)
         // dbg_printf("hex_version %x", hex_version);
         usingXP = hex_version >= 0x501;
         usingVista = hex_version >= 0x600;
-        usingVersion = hex_version;
+        usingWin7 = hex_version >= 0x601;
     }
 }
 

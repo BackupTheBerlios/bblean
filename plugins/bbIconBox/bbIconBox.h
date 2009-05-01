@@ -121,7 +121,6 @@ winStruct *get_winstruct(Desk *f, int index);
 
 void free_task_list(void);
 void new_task_list(void);
-void start_balloon(plugin_info * mPI, systemTray *pIcon, systemTrayBalloon *b, RECT iconRect);
 
 // ---------------------------------------------
 /* experimental: */

@@ -159,7 +159,6 @@ struct barinfo : plugin_info
     int taskMaxWidth            ;
     bool currentOnly            ;
     bool task_with_border       ;
-    bool balloonTips            ;
     bool autoFullscreenHide     ;
     bool setDesktopMargin      ;
     bool sendToSwitchTo         ;
@@ -388,11 +387,6 @@ struct barinfo : plugin_info
         return GetTrayIcon(RealTrayIndex(i));
     }
 
-    void ForwardTrayMessageEx(int i, unsigned message)
-    {
-        ForwardTrayMessage(RealTrayIndex(i), message);
-    }
-
     // -----------------------------------------------
 
     // get icon node from index, counting only visibles
@@ -577,7 +571,7 @@ struct barinfo : plugin_info
                 continue;
             if (0 == icon->szTip[0]) {
                 //dbg_printf("fakemouse \"%s\" : %d", tn->class_name, tn->uID);
-                ForwardTrayMessage(tn->index, WM_MOUSEMOVE);
+                ForwardTrayMessage(tn->index, WM_MOUSEMOVE, NULL);
                 ++f;
             }
             tn->tip_checked = true;
@@ -649,7 +643,6 @@ void barinfo::make_cfg()
     {  "strftimeFormat" ,   R_STR, (void*)"%a %d %H:%M",  &strftimeFormat },
 
     {  "smallIcons" ,       R_BOL, (void*)true,           &smallIcons },
-    {  "balloonTips" ,      R_BOL, (void*)true,           &balloonTips },
     {  "autoFullscreenHide",R_BOL, (void*)false,          &autoFullscreenHide },
     {  "setDesktopMargin"  ,R_BOL, (void*)true,          &setDesktopMargin },
     {  "sendToSwitchTo"    ,R_BOL, (void*)false,          &sendToSwitchTo },
@@ -684,9 +677,6 @@ void barinfo::make_cfg()
     //--------
     { "Special",                "", CFG_SUB, NULL },
     //--------
-#ifndef NO_TIPS
-    { "Enable Balloon Tips",    "enableBalloonTips",    0, &balloonTips  },
-#endif
     { "Detect Fullscreen App",  "autoFullscreenHide",   0, &autoFullscreenHide  },
     { "Set Desktop Margin",   "setDesktopMargin",     0, &setDesktopMargin  },
     { "SendTo Switches Workspace", "sendToSwitchTo",       0, &sendToSwitchTo  },
@@ -1070,7 +1060,7 @@ LRESULT barinfo::wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
             //dbg_printf("BB_TRAYUPDATE %x %d", wParam, lParam);
             if (TRAYICON_MODIFIED == lParam)
             {
-                unsigned uChanged = ((systemTray*)wParam)->uChanged;
+                unsigned uChanged = HIWORD(wParam);
                 if (NIF_TIP == uChanged || NIF_INFO == uChanged) {
                     this->pLeanBar->settip();
                 } else {

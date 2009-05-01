@@ -94,10 +94,7 @@ void MessageManager_Register(HWND hwnd, const UINT* messages, bool add)
             append_node (&msgs, mm);
             // these are the messages that expect return values and
             // are handled differently in 'MessageManager_Send()'
-            mm->send_mode =
-                BB_DRAGTODESKTOP == msg
-                || BB_GETBOOL == msg
-                ;
+            mm->send_mode = BB_DRAGTODESKTOP == msg || BB_GETBOOL == msg;
         }
 
         if (add) {
