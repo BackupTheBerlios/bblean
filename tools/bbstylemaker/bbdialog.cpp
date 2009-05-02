@@ -29,6 +29,8 @@ WNDPROC prvlineproc;
 void dlg_save_config(struct dlg *dlg);
 void dlg_load_config(struct dlg *dlg);
 
+#define DLG_SCALE 100
+
 /*----------------------------------------------------------------------------*/
 void do_sound(int f)
 {
@@ -161,14 +163,14 @@ void fix_button (struct button *bp)
     int dy = bp->dlg->dy;
     int title_h = bp->dlg->title_h;
 
-    bp->x = bp->x0 * dx / 100;
-    bp->y = bp->y0  * dy / 100 + title_h;
+    bp->x = bp->x0 * dx / DLG_SCALE;
+    bp->y = bp->y0  * dy / DLG_SCALE + title_h;
 #if 0
-    bp->w = (bp->x0 + bp->w0) * dx / 100 - bp->x;
-    bp->h = (bp->y0 + bp->h0) * dy / 100 + title_h - bp->y;
+    bp->w = (bp->x0 + bp->w0) * dx / DLG_SCALE - bp->x;
+    bp->h = (bp->y0 + bp->h0) * dy / DLG_SCALE + title_h - bp->y;
 #else
-    bp->w = (bp->w0 * dx + 50) / 100;
-    bp->h = (bp->h0 * dy + 50) / 100;
+    bp->w = (bp->w0 * dx + 50) / DLG_SCALE;
+    bp->h = (bp->h0 * dy + 50) / DLG_SCALE;
 #endif
     if ((bp->typ == BN_CHK
             || (bp->typ == BN_BTN && (bp->f & BN_EXT)))
@@ -230,8 +232,8 @@ void fix_dlg (struct dlg *dlg)
             + 2*(gui_style.MenuTitle.marginWidth
                     + gui_style.MenuTitle.borderWidth);
 
-    dlg->w = dlg->w_orig * dlg->dx / 100;
-    dlg->h = dlg->h_orig * dlg->dy / 100 + dlg->title_h;
+    dlg->w = dlg->w_orig * dlg->dx / DLG_SCALE;
+    dlg->h = dlg->h_orig * dlg->dy / DLG_SCALE + dlg->title_h;
 
     for (bp = dlg->bn_ptr; bp; bp = bp->next) {
         fix_button(bp);
@@ -427,8 +429,8 @@ void resize_dlg(struct dlg *dlg)
     dlg->x = r.left;
     dlg->y = r.top;
     GetClientRect(dlg->hwnd, &r);
-    dlg->dx = r.right * 100 / dlg->w_orig;
-    dlg->dy = r.bottom * 100 / dlg->h_orig;
+    dlg->dx = r.right * DLG_SCALE / dlg->w_orig;
+    dlg->dy = r.bottom * DLG_SCALE / dlg->h_orig;
     fix_dlg(dlg);
 }
 
@@ -483,8 +485,8 @@ LRESULT CALLBACK dlg_dlg_proc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
         WINDOWPOS *wp = (WINDOWPOS*)lParam;
         if (dlg->config)
         {
-            dlg->w_orig = wp->cx * 100 / dlg->dx;
-            dlg->h_orig = (wp->cy - dlg->title_h) * 100 / dlg->dy;
+            dlg->w_orig = wp->cx * DLG_SCALE / dlg->dx;
+            dlg->h_orig = (wp->cy - dlg->title_h) * DLG_SCALE / dlg->dy;
             dlg->w = wp->cx;
             dlg->h = wp->cy;
             invalidate_dlg(dlg);
@@ -1187,8 +1189,8 @@ int dlg_mouse(struct dlg* dlg, UINT msg, WPARAM wParam, LPARAM lParam)
         if (bp) {
 
             if (dlg->config) {
-                int dx = (mx - dlg->tx) * 100 / dlg->dx;
-                int dy = (my - dlg->ty) * 100 / dlg->dy;
+                int dx = (mx - dlg->tx) * DLG_SCALE / dlg->dx;
+                int dy = (my - dlg->ty) * DLG_SCALE / dlg->dy;
                 invalidate_button(bp);
                 if (dlg->sizing) {
                     bp->w0 = imax(4, dlg->sx + dx);
@@ -1344,8 +1346,8 @@ int bb_msgbox(HWND hwnd, const char *s, const char *t, int f)
     dlg->typ = D_BOX;
     dlg->bn_ptr->str = s;
     dlg->box_flags = f;
-    dlg->dx = 100;
-    dlg->dy = 100;
+    dlg->dx = DLG_SCALE;
+    dlg->dy = DLG_SCALE;
 
     if (0==make_dlg_wnd(dlg, hwnd, -1, -1, t, msg_proc))
         return IDCANCEL;

@@ -60,8 +60,8 @@
 
     TOKEN(SLT_FRM)
 
-    TOKEN(MIS_INF)
     TOKEN(MIS_ROT)
+    TOKEN(MIS_INF)
     TOKEN(CMD_CFG)
     TOKEN(CMD_RST)
 

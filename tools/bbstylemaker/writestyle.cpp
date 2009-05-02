@@ -60,7 +60,6 @@ char *rgb_string(char *buffer, COLORREF value)
 #include "utils.cpp"
 #include "rcfile.cpp"
 #include "readroot.cpp"
-#define __BBSM__
 #define BBSETTINGS_INTERNAL
 #include "Settings.h"
 
@@ -725,7 +724,7 @@ int make_fontstring(StyleItem *si, char *out)
     w = si->FontWeight;
 
     *tp = 0;
-    if (0 == p[0])
+    if (0 == p[0] && 1 != fontMode)
         return 0;
 
     if (4 == fontMode) {

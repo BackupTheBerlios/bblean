@@ -4,12 +4,11 @@
 # Put this file in the same directory as bbStyleMaker.exe
 #
 
-
 # ----------------------------------------------------------------
 # styleinfo defaults:
 
 # author
-bbstylemaker.style.author: <edit bbStyleMaker.rc to set your name>
+bbstylemaker.style.author: <set your name in bbstylemaker.rc>
 
 # date format - see the bblean docs for date formats
 bbstylemaker.date.format: %d %b %Y

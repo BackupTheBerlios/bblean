@@ -56,13 +56,12 @@ typedef struct NStyleItem
     COLORREF disabledColor;
     bool bordered;
     bool FontShadow; /* xoblite */
-    bool is_070;
-    COLORREF shadowColor;
 
-    /* Important: keep structure size (total: 300) */
-    char reserved[96];
+    char reserved[102]; /* keep sizeof(StyleItem) = 300 */
 
     /* ------------------------- */
+    bool is_070;
+
     struct style_ref {
         struct {
             COLORREF Color;
@@ -122,25 +121,21 @@ typedef struct NStyleStruct
     NStyleItem windowFrameFocus;
     NStyleItem windowFrameUnfocus;
 
+    NStyleItem Slit;
+
     COLORREF borderColor;
     int borderWidth;
     int bevelWidth;
     int handleHeight;
-
     char menuBullet[16];
     char menuBulletPosition[16];
     char rootCommand[ROOTCOMMAND_SIZE];
-
-    //bool bulletUnix;
-    //bool metricsUnix;
-    bool is_070;
     bool menuTitleLabel;
     bool menuNoTitle;
 
-    NStyleItem Slit;
-
     struct rootinfo rootInfo;
     NStyleItem rootStyle;
+    bool is_070;
 
 } NStyleStruct;
 

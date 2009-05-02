@@ -33,5 +33,4 @@ NO_BBLIB = 1
 
 include $(TOP)/build/makefile.inc
 
-$(OBJ) : bblib.h
-winutils.obj pidl.obj : bbshell.h
+$(OBJ) : $(wildcard *.h)

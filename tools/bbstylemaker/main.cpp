@@ -90,13 +90,13 @@ StyleStruct gui_style;
 
 const char *fname(const char *path);
 void set_style_defaults(NStyleStruct *pss, int f);
+#define SSD_OPT_SENDBB 0
 #define SSD_OPT_FIRST 1
-#define SSD_OPT_SENDBB 2
-#define SSD_OPT_CMP 4
-#define SSD_OPT_WRITE 8
+#define SSD_OPT_WRITE 2
 
 // blackbox window
 HWND BBhwnd;
+StyleStruct bb_style;
 
 // bbStyleMaker.rc
 char rcpath[MAX_PATH];
@@ -177,7 +177,6 @@ bool v_all_border;
 int v_colorsel_set;
 bool v_upd_all;
 int style_version;
-bool style_bullet_unix;
 int v_hsl;
 int v_changed;
 int v_root_changed;
@@ -282,8 +281,8 @@ const struct button main_buttons[] = {
 
 { "frame"         , BN_CHK   , SLT_FRM  ,  10, 194,  74,  14, BN_RAD|BN_GRP|BN_ON },
 
-{ "styleinfo"     , BN_CHK   , MIS_INF  ,  10, 194,  74,  14, BN_RAD|BN_GRP },
-{ "bsetroot"      , BN_CHK   , MIS_ROT  ,  10, 210,  74,  14, BN_RAD },
+{ "bsetroot"      , BN_CHK   , MIS_ROT  ,  10, 194,  74,  14, BN_RAD|BN_GRP },
+{ "styleinfo"     , BN_CHK   , MIS_INF  ,  10, 210,  74,  14, BN_RAD },
 { "edit rc"       , BN_BTN   , CMD_CFG  ,  12, 270,  68,  16, 0 },
 { "reload rc"     , BN_BTN   , CMD_RST  ,  12, 290,  68,  16, 0 },
 
@@ -496,6 +495,8 @@ void copy_item_o(StyleItem *to, NStyleItem *from)
 
 void copy_to_N(NStyleStruct *to, StyleStruct *from)
 {
+    memset(to, 0, sizeof *to);
+
     COPYITEM_N(to, from, Toolbar);
     COPYITEM_N(to, from, ToolbarButton);
     COPYITEM_N(to, from, ToolbarButtonPressed);
@@ -525,7 +526,6 @@ void copy_to_N(NStyleStruct *to, StyleStruct *from)
     COPYCHAR(to, from, menuBullet);
     COPYCHAR(to, from, menuBulletPosition);
     COPYCHAR(to, from, rootCommand);
-
     COPYBOOL(to, from, is_070);
     COPYBOOL(to, from, menuTitleLabel);
     COPYBOOL(to, from, menuNoTitle);
@@ -587,11 +587,6 @@ void copy_from_N(StyleStruct *to, NStyleStruct *from)
     to->windowFrameFocusColor = from->windowFrameFocus.borderColor;
     to->windowFrameUnfocusColor = from->windowFrameUnfocus.borderColor;
     to->frameWidth = from->windowFrameFocus.borderWidth;
-
-    to->bulletUnix = style_bullet_unix;
-    to->metricsUnix = true;
-    to->toolbarAlpha = 255;
-    to->menuAlpha = 255;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -858,6 +853,7 @@ void get_bbstyle(HWND hwnd)
     const char *p;
 
     NStyleStruct *pss = &work_style;
+    StyleStruct *b = &bb_style;
     StyleStruct ss;
 
     // get style's filename
@@ -873,17 +869,18 @@ void get_bbstyle(HWND hwnd)
 
     // get StyleStruct
     if (BBhwnd) {
-        bbgetdata(hwnd, BB_GETSTYLESTRUCT, &ss);
-        style_bullet_unix = ss.bulletUnix;
-        style_version = ss.Toolbar.nVersion;
-        if (style_version < 1)
-            style_version = 1;
+        bbgetdata(hwnd, BB_GETSTYLESTRUCT, b);
+        style_version = imax(1, b->Toolbar.nVersion);
+        ss = *b;
     } else {
-        style_bullet_unix = true;
         style_version = 1;
+        memset(b, 0, sizeof *b);
+        b->toolbarAlpha = b->menuAlpha = 255;
+        b->bulletUnix = b->metricsUnix = false;
     }
 
     //t1 = GetTickCount();
+
     readstyle(work_stylefile, &ss, 1);
     copy_to_N(pss, &ss);
     bsetroot_parse(pss, pss->rootCommand);
@@ -995,7 +992,7 @@ NStyleItem * get_style_item(int v_section, int v_item)
 
     case 5:
         switch (v_item) {
-            case 1: return &pss->rootStyle;
+            case 0: return &pss->rootStyle;
         }
         break;
     }
@@ -1140,7 +1137,7 @@ void set_item_defaults(NStyleItem *pSI, int flags)
     if (pSI->Font[0])
         pSI->validated |= V_FON|V_FHE|V_FWE;
 
-    if (flags & (SSD_OPT_CMP|SSD_OPT_WRITE))
+    if (flags & SSD_OPT_WRITE)
     {
         strcpy(pSI->Font, RFONT(pSI)->Font);
         pSI->FontHeight = RFONT(pSI)->FontHeight;
@@ -1162,25 +1159,24 @@ void set_style_defaults(NStyleStruct *pss, int flags)
 {
     NStyleItem *pSI;
 
-    for (pSI = &pss->Toolbar; pSI <= &pss->windowButtonUnfocus; ++pSI)
-        set_item_defaults(pSI, flags);
-    set_item_defaults(&pss->Slit, flags);
+    pss->windowFrameUnfocus.borderWidth =
+        pss->windowFrameFocus.borderWidth;
 
-    if (0 == (flags & (SSD_OPT_CMP|SSD_OPT_WRITE))) {
-        set_item_defaults(&pss->windowFrameFocus, flags);
-        set_item_defaults(&pss->windowFrameUnfocus, flags);
-    }
+    for (pSI = &pss->Toolbar; pSI <= &pss->Slit; ++pSI)
+        set_item_defaults(pSI, flags);
+
     if (style_version < 3) {
         pss->windowButtonFocus.validated &= ~V_MAR;
         pss->ToolbarButton.validated &= ~V_MAR;
         pss->MenuHilite.validated &= ~V_MAR;
     }
+
     if (pss->MenuTitle.parentRelative)
         pss->menuTitleLabel = false;
     else
         pss->menuNoTitle = false;
 
-    if (flags & (SSD_OPT_CMP|SSD_OPT_WRITE)) {
+    if (flags & SSD_OPT_WRITE) {
         make_bsetroot_string(pss, pss->rootCommand, 1);
         if (0 == strcmp(ref_rootCommand, pss->rootCommand))
             strcpy(pss->rootCommand, ref_style.rootCommand);
@@ -1245,15 +1241,15 @@ void upd_bb(void)
     static bool sa, sb, sc;
     int flags, mask, all;
 
-    StyleStruct ss;
     NStyleStruct *pss = &work_style;
+    StyleStruct *b = &bb_style;
 
     if (NULL == BBhwnd)
         return;
 
     set_style_defaults(pss, SSD_OPT_SENDBB);
-    copy_from_N(&ss, pss);
-    BBSendData(BBhwnd, BB_SETSTYLESTRUCT, SN_STYLESTRUCT, &ss, sizeof(StyleStruct));
+    copy_from_N(b, pss);
+    BBSendData(BBhwnd, BB_SETSTYLESTRUCT, SN_STYLESTRUCT, b, sizeof(StyleStruct));
 
     flags = 0;
     all = v_upd_all;
@@ -1269,7 +1265,7 @@ void upd_bb(void)
         flags |= BBRG_MENU;
 
     mask = all ? 1|2|4|8|16 : 0;
-    if (v_section != 5 || v_item == 1)
+    if (v_section != 5 || v_item == 0)
         mask |= 1<<v_section;
 
     sa = sb = sc = false;
@@ -1310,7 +1306,7 @@ void upd_bb(void)
         if (style_version < 3) {
             HWND hSlit = FindWindow("BBSlit", NULL);
             if (hSlit)
-                BBSendData(hSlit, BB_SETSTYLESTRUCT, SN_SLIT, &ss.Slit, sizeof(ss.Slit));
+                BBSendData(hSlit, BB_SETSTYLESTRUCT, SN_SLIT, &b->Slit, sizeof(b->Slit));
         }
         // --------------------------------------
     }
@@ -1319,7 +1315,7 @@ void upd_bb(void)
         // --------------------------------------
         if (style_version < 4) {
             char buffer[MAX_PATH + 100];
-            sprintf(buffer, "@BBCore.rootCommand %s", ss.rootCommand);
+            sprintf(buffer, "@BBCore.rootCommand %s", b->rootCommand);
             BBSendData(BBhwnd, BB_BROADCAST, 0, buffer, -1);
         } else
         // --------------------------------------
@@ -1448,21 +1444,21 @@ void set_P0(void)
 
 int is_style_changed(void)
 {
-    NStyleStruct ss1, ss2;
+    NStyleStruct n1, n2;
+
     if (-1 == v_changed)
         return 0;
 
     if (1 == v_changed)
         return 1;
 
-    ss1 = work_style;
-    ss2 = ref_style;
-    set_style_defaults(&ss1, SSD_OPT_CMP);
-    set_style_defaults(&ss2, SSD_OPT_CMP);
-    if (0 != memcmp(&ss1, &ss2, offsetof(NStyleStruct, rootInfo)))
-        return 1;
-    return 0;
+    n1 = work_style;
+    n2 = ref_style;
 
+    set_style_defaults(&n1, SSD_OPT_WRITE);
+    set_style_defaults(&n2, SSD_OPT_WRITE);
+
+    return 0 != memcmp(&n1, &n2, offsetof(NStyleStruct, rootInfo));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1688,15 +1684,15 @@ void configure_interface(struct dlg *dlg)
     // menu bullet selected
     bool f_bullet = s == 1 && i == 3;
     // info page selected
-    bool f_info = s == 5 && i == 0;
+    bool f_info = s == 5 && i == 1;
     // bsetroot page selected
-    bool f_root = s == 5 && i == 1;
+    bool f_root = s == 5 && i == 0;
 
     // item has text
     bool f_text = s == 0 ? i != 1 && i != 2
             : s == 1 ? i != 3
             : f_win ? i == 1
-            : s == 5 ? i == 1 && work_style.rootInfo.mod
+            : f_root ? 0 != work_style.rootInfo.mod
             : false;
     // item has pic (buttons & menu frame)
     bool f_pic = s == 0 ? i == 1 || i == 2
@@ -1712,8 +1708,7 @@ void configure_interface(struct dlg *dlg)
         && (s == 0 ? i != 0 :
             s == 1 ? i != 1 :
             f_win ? i != 0 && i != 2 :
-            s == 5 ? i == 1 :
-            false);
+            f_root);
     // item is parentrelative
     bool is_pr = can_pr && P0->parentRelative;
     // enable selection of gradient types
@@ -1745,7 +1740,7 @@ void configure_interface(struct dlg *dlg)
     show_section(dlg, MEN_TIT, MEN_NTI, s==1);
     show_section(dlg, WIN_TIT, WIN_FRM, f_win);
     show_section(dlg, SLT_FRM, SLT_FRM, s==4);
-    show_section(dlg, MIS_INF, MIS_ROT, s==5);
+    show_section(dlg, MIS_ROT, MIS_INF, s==5);
 
     show_section(dlg, GRD_RCT, INF_RCT-1, false == f_info);
     show_section(dlg, INF_RCT, INF_LN5, f_info);
@@ -1781,13 +1776,8 @@ void configure_interface(struct dlg *dlg)
             break;
 
         case 5:
-            check_radio(dlg, i + MIS_INF);
+            check_radio(dlg, i + MIS_ROT);
             if (i == 0) {
-                for (i = 0; i < 5; ++i)
-                    set_button_text(dlg, INF_LN1+i, style_info[i]);
-                return;
-            }
-            if (i == 1) {
                 struct rootinfo *ri = &work_style.rootInfo;
                 check_button(dlg, ROT_MOD, ri->mod);
                 enable_button(dlg, ROT_MOD, false == is_pr);
@@ -1806,6 +1796,12 @@ void configure_interface(struct dlg *dlg)
                     check_radio(dlg, ROT_TIL);
                     check_button(dlg, ROT_TIL, false);
                 }
+                break;
+            }
+            if (i == 1) {
+                for (i = 0; i < 5; ++i)
+                    set_button_text(dlg, INF_LN1+i, style_info[i]);
+                return;
             }
             break;
     }
@@ -2076,7 +2072,7 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
             goto quit;
 
         case VK_TAB:
-            if (v_section == 5 && v_item == 0)
+            if (v_section == 5 && v_item == 1)
                 set_button_focus(dlg, INF_LN1);
             break;
         }
@@ -2225,7 +2221,7 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
             i = save_style(hwnd, f == CMD_SAV ? 1 : 2);
             if (2 == i) {
                 set_section(dlg, 5);
-                set_item(dlg, 0);
+                set_item(dlg, 1);
             }
             break;
 
@@ -2249,7 +2245,7 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
 
         case CMD_REV:
             if (style_version < 4
-              || (v_section == 5 && v_item == 1 && work_style.rootInfo.bmp)) {
+              || (v_section == 5 && v_item == 0 && work_style.rootInfo.bmp)) {
                 if (BBhwnd) {
                     v_changed = -1;
                     PostMessage(BBhwnd, BB_RECONFIGURE, 0, 0);
@@ -2506,9 +2502,9 @@ LRESULT CALLBACK main_dlg_proc (struct dlg *dlg, HWND hwnd, UINT msg, WPARAM wPa
             break;
 
         // -------------------------------------------------------
-        case MIS_INF:
         case MIS_ROT:
-            set_item(dlg, f-MIS_INF);
+        case MIS_INF:
+            set_item(dlg, f-MIS_ROT);
             break;
 
         // -------------------------------------------------------

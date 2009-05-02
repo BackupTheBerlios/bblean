@@ -139,7 +139,7 @@ void make_bsetroot_string(NStyleStruct *pss, char *out, int all)
         t = r->wpstyle;
 
         if (WP_NONE != t)
-            x += sprintf(out+x, " %s", get_root_switch(t + (E_tile - 2 - 1)));
+            x += sprintf(out+x, " %s", get_root_switch(E_tile + 2*(t-WP_TILE)));
 
         if (strchr(r->wpfile, ' '))
             x += sprintf(out+x, " \"%s\"", r->wpfile);

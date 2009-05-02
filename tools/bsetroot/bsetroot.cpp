@@ -215,7 +215,7 @@ int WINAPI WinMain(
             bmp_width  = image_getwidth(Img);
             bmp_height = image_getheight(Img);
 
-            if (r->scale) {
+            if (r->scale && r->scale != 100) {
                 int w = bmp_width * r->scale / 100;
                 int h = bmp_height * r->scale / 100;
                 image_resample(&Img, w, h);

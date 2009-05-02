@@ -33,6 +33,7 @@ void init_root(struct rootinfo *r)
     r->type = B_SOLID;
     r->sat = 255;
     r->hue = 0;
+    r->scale = 100;
 }
 
 void delete_root(struct rootinfo *r)
@@ -42,7 +43,7 @@ void delete_root(struct rootinfo *r)
 
 const char *get_root_switch(int n)
 {
-    return switches[n];
+    return n >= E_solid && n < E_last ? switches[n-E_solid] : "";
 }
 
 ST int next_token(struct rootinfo *r)

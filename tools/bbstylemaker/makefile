@@ -12,6 +12,8 @@ OBJ = \
   Settings.obj \
   resource.res
 
+DEFINES = -D __BBSM__
+
 INSTALL_IF_NEW = bbstylemaker.rc
 INSTALL_FILES = $(BIN) -as docs/bbstylemaker.txt readme.txt
 

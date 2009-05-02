@@ -45,13 +45,14 @@ enum
     Einterlaced,
 
     E_tile      , E_t         ,
-    E_full      , E_f         ,
     E_center    , E_c         ,
+    E_full      , E_f         ,
     E_bitmap    , E_hue       , E_sat       ,
     Etile       , Ecenter     , Estretch    ,
 
     E_scale, E_save, E_convert, E_vdesk, E_help, E_quiet,
     E_prefix, E_path,
+    E_last
 };
 
 #ifdef BBLIB_COMPILING
@@ -64,8 +65,8 @@ static const char *switches[] =
     "interlaced",
 
     "-tile",        "-t",
-    "-full",        "-f",
     "-center",      "-c",
+    "-full",        "-f",
     "-bitmap",      "-hue",         "-sat",
     "tile",         "center",       "stretch",
 
