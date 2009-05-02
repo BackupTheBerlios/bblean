@@ -21,6 +21,7 @@ CLEAN_FILES = \
   docs/bbnote.* \
   bbstylemaker.rc \
   docs/bbstylemaker.txt \
+  docs/nls-c.txt \
   bsetroot.rc \
   docs/bsetroot.* \
   docs/*.bmp \

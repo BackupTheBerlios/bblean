@@ -2,14 +2,12 @@
 # bblean 1.17 - extensions.rc
 
 # Lines starting with # or ! are ignored
-# Items marked with + are configurable from the menu
-
 
 # -----------------------------------------------------
 # Favorite Tool
 
 # The default editor for menu, styles and settings
-blackbox.editor: notepad.exe
+blackbox.editor: bbnote.exe
 
 
 # -----------------------------------------------------
@@ -56,6 +54,7 @@ blackbox.workspaces.styleXPFix: false
 # Automatically switch workspace to active task
 blackbox.workspaces.followActive: true
 
+
 # -----------------------------------------------------
 # Desktop settings
 
@@ -72,7 +71,7 @@ blackbox.desktop.marginRight: -1
 
 # Edge and Plugin Snap
 blackbox.snap.threshold: 7
-blackbox.snap.padding: 2
+blackbox.snap.padding: 4
 blackbox.snap.toPlugins: true
 
 
@@ -101,7 +100,7 @@ blackbox.desktop.AltRightClick: @BBCore.ShowMenu configuration
 
 
 # -----------------------------------------------------
-# Miscellaneous options
+# Miscellaneous options (uncomment to use)
 
 # command for double left click on a folder in the menu
 ! blackbox.options.openFolderCommand: explorer.exe /e,"%1"
@@ -114,6 +113,10 @@ blackbox.desktop.AltRightClick: @BBCore.ShowMenu configuration
 
 # enable some debug output during startup (to "blackbox.log"):
 ! blackbox.options.log: startup tray
+
+# use unicode for filenames and UTF-8 for menus
+! blackbox.options.UTF8Encoding: false
+
 
 # -----------------------------------------------------
 # System dependent Tweak

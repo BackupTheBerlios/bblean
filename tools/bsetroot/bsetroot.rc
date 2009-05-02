@@ -6,6 +6,7 @@
 # Paths containing spaces need to have quotes.
 
 # Example: (uncomment to use)
-! -quiet
 ! -path c:\some\path\to\images
 ! -path c:\another\path\to\images
+
+-quiet

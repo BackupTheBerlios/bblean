@@ -26,9 +26,10 @@ session.menu.onTop: false
 session.menu.sticky: true
 session.menu.snapWindow: true
 session.menu.pluginToggle: true
-session.menu.openDirection: right
+session.menu.openDirection: bullet
 session.menu.sortbyExtension: true
 session.menu.drawSeparators: true
+session.menu.dropShadows: false
 
 # - the slit -
 session.screen0.slit.placement: TopRight

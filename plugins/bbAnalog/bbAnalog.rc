@@ -11,4 +11,4 @@ bbanalog.alpha.enabled: false
 bbanalog.alpha.value: 192
 bbanalog.orientation: vertical
 bbanalog.antiAliasing: true
-bbAnalog.Size: 47
+bbAnalog.Size: 43

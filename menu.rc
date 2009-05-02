@@ -44,6 +44,7 @@
         # Also note that relative paths refer to the blackbox directory
         [exec] (Documentation) {docs\bblean.htm}
         [exec] (Install/Uninstall) {bsetshell.exe}
+        [exec] (bbStyleMaker) {bbstylemaker.exe}
         [nop]
         [reconfig] (Reconfigure)
         [restart] (Restart)

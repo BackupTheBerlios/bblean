@@ -17,4 +17,4 @@ bbSlit.puzzle: true
 bbSlit.alignment: 2
 bbSlit.basewidth: 50
 bbSlit.clickRaise: true
-bbSlit.setMargin: true
+bbSlit.setMargin: false
