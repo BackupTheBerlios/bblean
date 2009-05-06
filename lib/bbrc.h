@@ -45,15 +45,12 @@ struct fil_list
 
 struct rcreader_init
 {
+    struct fil_list *rc_files;
     void (*write_error)(const char *filename);
-    void (*set_flush_timer)(int t);
-
     char dos_eol;
     char translate_065;
-
     char found_last_value;
-    struct fil_list *rc_files;
-
+    char used, timer_set;
 };
 
 BBLIB_EXPORT void init_rcreader(struct rcreader_init *init);

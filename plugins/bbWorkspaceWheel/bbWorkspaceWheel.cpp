@@ -81,10 +81,10 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 ;
 
             if (delta > 0)
-                PostMessage(BBhwnd, BB_WORKSPACE, BBWS_DESKRIGHT, 1);
+                PostMessage(BBhwnd, BB_WORKSPACE, BBWS_DESKLEFT, 1);
             else
             if (delta < 0)
-                PostMessage(BBhwnd, BB_WORKSPACE, BBWS_DESKLEFT, 1);
+                PostMessage(BBhwnd, BB_WORKSPACE, BBWS_DESKRIGHT, 1);
 
             return TRUE;
         }

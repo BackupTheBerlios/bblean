@@ -23,24 +23,13 @@
 
 #define ST static
 
-ST void fn_write_error(const char *filename)
-{
-}
-
-ST void fn_set_flush_timer (int n)
-{
-}
-
 ST struct rcreader_init g_rc =
 {
-    fn_write_error,             // void (*write_error)(const char *filename);
-    fn_set_flush_timer,         // void (*set_flush_timer)(int t);
-
-    true,                       // char dos_eol;
-    true,                       // char translate_065;
-
-    0,                          // char found_last_value;
-    NULL                        // struct fil_list *rc_files;
+    NULL,   // struct fil_list *rc_files;
+    NULL,   // void (*write_error)(const char *filename);
+    true,   // char dos_eol;
+    true,   // char translate_065;
+    0,      // char found_last_value;
 };
 
 void bb_rcreader_init(void)

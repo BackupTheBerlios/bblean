@@ -70,21 +70,13 @@ ST void fn_write_error(const char *filename)
         "Error: Could not open \"%s\" for writing."), filename);
 }
 
-ST void fn_set_flush_timer (int n)
-{
-    //SetTimer(BBhwnd, BB_RESETREADER_TIMER, n, NULL);
-}
-
 ST struct rcreader_init g_rc =
 {
-    fn_write_error,             // void (*write_error)(const char *filename);
-    fn_set_flush_timer,         // void (*set_flush_timer)(int t);
-
-    true,                       // char dos_eol;
-    false,                      // char translate_065;
-
-    0,                          // char found_last_value;
-    NULL                        // struct fil_list *rc_files;
+    NULL,               // struct fil_list *rc_files;
+    fn_write_error,     // void (*write_error)(const char *filename);
+    true,               // char dos_eol;
+    false,              // char translate_065;
+    0                   // char found_last_value;
 };
 
 void bb_rcreader_init(void)

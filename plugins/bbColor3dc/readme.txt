@@ -1,6 +1,6 @@
 
   ---------------------------------------------------------------------
-  bbColor3dc 1.1
+  bbColor3dc v1.3
 
   bbColor3dc is a plugin for Blackbox for Windows
   copyright © 2004-2009 grischka
@@ -116,6 +116,9 @@
 
   ---------------------------------------------------------------------
   History:
+
+  [2009-04-12] version 1.3
+    - released with bbLean 1.17
 
   [2004-08-27] version 1.1
     - now looks for a "3dc" section in the style itself.

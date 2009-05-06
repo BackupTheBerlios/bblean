@@ -1030,10 +1030,6 @@ LRESULT CALLBACK MainWndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
                     exec_command(ReadString(extensionsrcPath(NULL), "blackbox.startup.run", NULL));
                     break;
 
-                case BB_RESETREADER_TIMER:
-                    reset_rcreader();
-                    break;
-
                 case BB_TASKUPDATE_TIMER:
                     Menu_Update(MENU_UPD_TASKS);
                     break;

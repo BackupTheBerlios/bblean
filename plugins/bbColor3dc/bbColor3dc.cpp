@@ -388,17 +388,15 @@ void set_flat_color(struct colors_style *cs, StyleItem *s1)
 
 void get_style_colors (COLORREF *cr_buffer)
 {
-//    StyleItem menu_frame            = *(StyleItem*)pGetSettingPtr(SN_MENUFRAME        );  
 //    StyleItem menu_title            = *(StyleItem*)pGetSettingPtr(SN_MENUTITLE        );  
-//    StyleItem menu_hilite           = *(StyleItem*)pGetSettingPtr(SN_MENUHILITE       );  
+    StyleItem menu_frame            = *(StyleItem*)pGetSettingPtr(SN_MENUFRAME        );  
+    StyleItem menu_hilite           = *(StyleItem*)pGetSettingPtr(SN_MENUHILITE       );  
     StyleItem window_focus_title    = *(StyleItem*)pGetSettingPtr(SN_WINFOCUS_TITLE   );  
     StyleItem window_focus_label    = *(StyleItem*)pGetSettingPtr(SN_WINFOCUS_LABEL   );  
     StyleItem window_unfocus_title  = *(StyleItem*)pGetSettingPtr(SN_WINUNFOCUS_TITLE );  
     StyleItem window_unfocus_label  = *(StyleItem*)pGetSettingPtr(SN_WINUNFOCUS_LABEL );  
 //    StyleItem window_focus_handle   = *(StyleItem*)pGetSettingPtr(SN_WINFOCUS_HANDLE  );
 //    StyleItem window_focus_grip     = *(StyleItem*)pGetSettingPtr(SN_WINFOCUS_GRIP    );
-    COLORREF border_color           = *(COLORREF*) pGetSettingPtr(SN_BORDERCOLOR      );
-    int border_width                = *(int*)      pGetSettingPtr(SN_BORDERWIDTH      );
 
     static struct colors_style colors_style [] =
     {
@@ -440,10 +438,12 @@ void get_style_colors (COLORREF *cr_buffer)
     set_gradient_colors(colors_style+0, &window_focus_label, &window_focus_title);
     set_gradient_colors(colors_style+3, &window_unfocus_label, &window_unfocus_title);
 
-#if 0
-    set_flat_color(colors_style+8, &menu_hilite);
+    //set_flat_color(colors_style+8, &menu_hilite);
     set_flat_color(colors_style+10, &menu_frame);
-#endif
+
+    if (menu_frame.borderWidth) {
+        colors_style[14].cr = menu_frame.borderColor;
+    }
 
 #if 0
     set_flat_colors(colors_style+6, &menu_frame);
@@ -462,18 +462,11 @@ void get_style_colors (COLORREF *cr_buffer)
     colors_style[19].cr = shade_color(c2,  40);
 #endif
 
-    if (border_width)
-    {
-        //colors_style[12].cr =
-        //colors_style[13].cr =
-        colors_style[14].cr = border_color;
-    }
-
     // -----------------------------------
     for (i = 0; i < NSTYLES; i++)
         if ((COLORREF)-1 != colors_style[i].cr)
         {
-            for (int n = 0; n < NCOLORS-1; ++n)
+            for (int n = 0; n < NCOLORS; ++n)
                 if (cr_ids[n] == colors_style[i].id)
                 {
                     cr_buffer[n] = colors_style[i].cr;
@@ -502,11 +495,14 @@ bool parse_3dc(FILE *fp, COLORREF *cr_buffer)
             continue;
         }
 
-        if (COLOR_DESKTOP != color_trans_3dcc[n])
-            cr_buffer[i++] = atoi(se);
-
+        cr_buffer[i] = atoi(se);
+#if 0
+        if (COLOR_DESKTOP == color_trans_3dcc[n])
+            cr_buffer[i] = cr_original[i];
+#endif
         if (++n == NCOLORS)
             break;
+        ++i;
     }
     fclose(fp);
     return n >= NCOLORS-5;
@@ -679,12 +675,9 @@ void syscolor_backup(void)
     int n = 0, i = 0;
     do {
         int t = color_trans_3dcc[n];
-        if (COLOR_DESKTOP != t)
-        {
-            cr_ids[i] = t;
-            cr_original[i] = GetSysColor(t);
-            ++i;
-        }
+        cr_ids[i] = t;
+        cr_original[i] = GetSysColor(t);
+        ++i;
     }
     while (++n<NCOLORS);
     colors_changed = 0;
@@ -696,7 +689,7 @@ void syscolor_restore(void)
         return;
     COLORREF cr_buffer[NCOLORS];
     memmove(cr_buffer, cr_original, sizeof cr_buffer);
-    SetSysColors(NCOLORS-1, cr_ids, cr_buffer);
+    SetSysColors(NCOLORS, cr_ids, cr_buffer);
     colors_changed = 0;
 }
 
@@ -717,7 +710,7 @@ void syscolor_apply(void)
         get_style_colors(cr_buffer);  // set colors from style
         colors_changed = 1;
     }
-   SetSysColors(NCOLORS-1, cr_ids, cr_buffer);
+   SetSysColors(NCOLORS, cr_ids, cr_buffer);
 }
 
 //===========================================================================
@@ -812,7 +805,7 @@ void syscolor_read(const char *filename_3dc)
         return;
 
     colors_changed = 3;
-    SetSysColors(NCOLORS-1, cr_ids, cr_buffer);
+    SetSysColors(NCOLORS, cr_ids, cr_buffer);
 }
 
 void syscolor_setcolor(const char * p)

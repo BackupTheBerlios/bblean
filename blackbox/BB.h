@@ -95,10 +95,9 @@ extern char defaultrc_path[];
 #endif
 
 /* Blackbox window timers */
-#define BB_RESETREADER_TIMER    1
-#define BB_TASKUPDATE_TIMER     2
-#define BB_RUNSTARTUP_TIMER     3
-#define BB_ENDSTARTUP_TIMER     4
+#define BB_RUNSTARTUP_TIMER     1
+#define BB_ENDSTARTUP_TIMER     2
+#define BB_TASKUPDATE_TIMER     3
 
 /* SetDesktopMargin internal flags */
 #define BB_DM_REFRESH -1

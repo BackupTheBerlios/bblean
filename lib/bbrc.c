@@ -47,7 +47,6 @@ int set_translate_065(int f)
     return r;
 }
 
-
 ST struct lin_list *search_line(
     struct fil_list *fl, const char *key, int fwild, LONG *p_seekpos);
 
@@ -361,6 +360,31 @@ void reset_rcreader(void)
 }
 
 /* ------------------------------------------------------------------------- */
+
+ST VOID CALLBACK reset_reader_proc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+    if (g_rc) {
+        if (g_rc->used) {
+            g_rc->used = 0;
+            return;
+        }
+        reset_rcreader();
+        g_rc->timer_set = 0;
+    }
+    // dbg_printf("reset_reader %x %x %x %d", hwnd, uMsg, idEvent, dwTime);
+    KillTimer(hwnd, idEvent);
+}
+
+ST void set_reader_timer(void)
+{
+    if (g_rc->timer_set)
+        return;
+    // dbg_printf("set_reader_timer");
+    SetTimer(NULL, 0, 10, reset_reader_proc);
+    g_rc->timer_set = 1;
+}
+
+/* ------------------------------------------------------------------------- */
 // helpers
 
 char *read_file_into_buffer (const char *path, int max_len)
@@ -583,15 +607,9 @@ struct fil_list *read_file(const char *filename)
     h = calc_hash(hashname, filename, &k, 0);
     k = k + 1;
     for (flp = &g_rc->rc_files; NULL!=(fl=*flp); flp = &fl->next)
-        if (fl->hash==h && 0==memcmp(hashname, fl->path+fl->k, k))
+        if (fl->hash==h && 0==memcmp(hashname, fl->path+fl->k, k)) {
+            ++g_rc->used;
             return fl; //... return cached line list.
-
-    if (NULL == g_rc->rc_files) {
-#ifdef DEBUG_READER
-        dbg_printf("SET READER-TIMER");
-#endif
-        if (g_rc->set_flush_timer)
-            g_rc->set_flush_timer(10);
     }
 
     // allocate a _new file structure, the filename is
@@ -606,6 +624,7 @@ struct fil_list *read_file(const char *filename)
 #ifdef DEBUG_READER
     dbg_printf("reading file %s", fl->path);
 #endif
+    set_reader_timer();
 
     buf = read_file_into_buffer(fl->path, 0);
     if (NULL == buf) {
