@@ -129,8 +129,7 @@ const char* ReadValue(const char* path, const char* szKey, long *ptr)
     return read_value(path, szKey, ptr);
 }
 
-// obsolete API: FoundLastValue
-EXTERN_C API_EXPORT
+// API: FoundLastValue
 int FoundLastValue(void)
 {
     return found_last_value();

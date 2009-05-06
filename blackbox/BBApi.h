@@ -470,6 +470,9 @@ extern "C" {
        until the next Read/Write call. For later usage, you need to copy the string
        into a place within your code. */
 
+    API_EXPORT int FoundLastValue(void);
+    /* Returns: 0=not found, 1=found exact value, 2=found matching wildcard */
+
     /* Write Settings */
     API_EXPORT void WriteBool(const char* fileName, const char* szKey, bool value);
     API_EXPORT void WriteInt(const char* fileName, const char* szKey, int value);

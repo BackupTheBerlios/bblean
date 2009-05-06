@@ -2180,7 +2180,7 @@ void Menu_Reconfigure(void)
     // item height, indent
 
     ffh = get_fontheight(MenuInfo.hFrameFont);
-    itemHeight = MHilite->marginWidth + ffh;
+    itemHeight = MHilite->marginWidth + ffh + 2*MHilite->borderWidth;
 
     // xxx old behaviour xxx
     if (false == mStyle.is_070 && 0 == (MHilite->validated & V_MAR))

@@ -645,9 +645,10 @@ restart:
             // --- Margins ---
             case C_MAR:
                 if (p) {
-                    si->marginWidth = atoi(p);
-                    break;
-                }
+                    if (sn != SN_MENUHILITE || found_last_value() == 1) {
+                        si->marginWidth = atoi(p);
+                        break;
+                    }}
 
                 // --- default margins, a sensible issue ---
                 switch (sn) {
@@ -672,7 +673,7 @@ restart:
                     break;
                 case SN_MENUHILITE:
                     if (is_070)
-                        si->marginWidth = 3;
+                        si->marginWidth = 2;
                     else
                         si->marginWidth = pStyle->bevelWidth+2;
                     break;

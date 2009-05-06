@@ -703,7 +703,7 @@ const char* read_value(const char* path, const char* szKey, long *ptr)
     if (tl)
         r = tl->str + tl->k;
 
-    g_rc->found_last_value = !!tl;
+    g_rc->found_last_value = tl ? (tl->is_wild ? 2 : 1) : 0;
 
 #ifdef DEBUG_READER
     { static int rcc; dbg_printf("read_value %d %s:%s <%s>", ++rcc, path, szKey, r); }
