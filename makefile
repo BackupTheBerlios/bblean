@@ -13,8 +13,7 @@ INSTALL_IF_NEW = \
 
 INSTALL_FILES = \
   -subdir fonts . \
-  -subdir styles . \
-    lean_blue \
+  -subdir styles lean_blue \
   -subdir backgrounds .
 
 CLEAN_FILES = \

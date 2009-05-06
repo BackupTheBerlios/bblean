@@ -253,4 +253,7 @@ typedef struct {
 #define WTS_SESSION_LOCK 0x7
 #define WTS_SESSION_UNLOCK 0x8
 
+#define MENUITEMINFO_SIZE_0400 \
+    ((DWORD_PTR)&((MENUITEMINFO*)NULL)->cch + sizeof((MENUITEMINFO*)NULL)->cch)
+
 #endif //ndef _WIN0X500_H_

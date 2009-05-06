@@ -329,7 +329,8 @@ skip:
         //====================
         // everything else is converted to a '@BBCore.xxx' broam
         core_broam:
-            f = sprintf(buffer, "@BBCore.%s", strlwr(command));
+            f = sprintf(buffer, "@bbCore.%s", command);
+            strlwr(buffer+8);
             if (p_data[0])
                 sprintf(buffer + f, " %s", p_data);
             pItem = MakeMenuItem(pMenu, label[0]?label:command, buffer, false);

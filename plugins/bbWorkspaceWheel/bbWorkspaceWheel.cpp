@@ -61,7 +61,7 @@ typedef struct {
     POINT pt;
     HWND hwnd;
     UINT wHitTestCode;
-    DWORD dwExtraInfo;
+    DWORD_PTR dwExtraInfo;
     DWORD mouseData;
 } MOUSEHOOKSTRUCTEX_;
 

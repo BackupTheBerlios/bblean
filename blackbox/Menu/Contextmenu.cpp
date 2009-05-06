@@ -28,24 +28,6 @@
 #include <shlobj.h>
 #include <shellapi.h>
 
-typedef struct _MENUITEMINFO_400
-{
-    UINT     cbSize;
-    UINT     fMask;
-    UINT     fType;         // used if MIIM_TYPE (4.0) or MIIM_FTYPE (>4.0)
-    UINT     fState;        // used if MIIM_STATE
-    UINT     wID;           // used if MIIM_ID
-    HMENU    hSubMenu;      // used if MIIM_SUBMENU
-    HBITMAP  hbmpChecked;   // used if MIIM_CHECKMARKS
-    HBITMAP  hbmpUnchecked; // used if MIIM_CHECKMARKS
-    DWORD    dwItemData;    // used if MIIM_DATA
-    LPSTR    dwTypeData;    // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
-    UINT     cch;           // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
-#if 0 // (WINVER >= 0x0500)
-    HBITMAP  hbmpItem;      // used if MIIM_BITMAP
-#endif /* WINVER >= 0x0500 */
-} MENUITEMINFO_0400;
-
 #ifndef CMF_CANRENAME
 #define CMF_CANRENAME 16
 #endif
@@ -261,19 +243,23 @@ void ContextMenu::Copymenu (HMENU hm)
     MENUITEMINFO MII;
     Menu *CM;
     MenuItem *CI;
+    bool sep = false;
 
     static int (WINAPI *pGetMenuStringW)(HMENU,UINT,LPWSTR,int,UINT);
 
     for (c = GetMenuItemCount(hm),n = 0; n < c; n++)
     {
-        memset(&MII, 0, sizeof(MII));
-        MII.cbSize = sizeof(MENUITEMINFO_0400); // to make this work on win95
+        memset(&MII, 0, sizeof MII);
+        if (usingXP)
+            MII.cbSize = sizeof MII;
+        else
+            MII.cbSize = MENUITEMINFO_SIZE_0400; // to make this work on win95
+
         MII.fMask  = MIIM_DATA|MIIM_ID|MIIM_SUBMENU|MIIM_TYPE;
         GetMenuItemInfo (hm, n, TRUE, &MII);
         id = MII.wID;
 
         text_string[0] = 0;
-
         if (0 == (MII.fType & MFT_OWNERDRAW)) {
             if (usingNT
              && load_imp(&pGetMenuStringW, "user32.dll", "GetMenuStringW")) {
@@ -285,7 +271,7 @@ void ContextMenu::Copymenu (HMENU hm)
             }
         }
 
-        //char buffer[100]; sprintf(buffer, "%d %s", id, text_string); strcpy(text_string, buffer);
+        //char buffer[100]; sprintf(buffer, "%d <%s>", id, text_string); strcpy(text_string, buffer);
 
         CM = NULL;
         if (MII.hSubMenu)
@@ -294,17 +280,18 @@ void ContextMenu::Copymenu (HMENU hm)
             if (usingWin7)
                 BBSleep(10);
             CM = new ContextMenu(text_string, wc, MII.hSubMenu, 0);
+
         }
         else
         if (MII.fType & MFT_SEPARATOR)
         {
-#if 0
-            if (Settings_menu.drawSeparators)
-                MakeMenuNOP(this, NULL);
-#endif
+            sep = true;
             continue;
         }
-
+#if 0
+        if (sep)
+            MakeMenuNOP(this, NULL), sep = false;
+#endif
         CI = new ContextItem(CM, text_string, id, MII.dwItemData, MII.fType);
         AddMenuItem(CI);
     }

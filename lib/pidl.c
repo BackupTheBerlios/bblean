@@ -24,63 +24,9 @@
 #define false 0
 #define true 1
 
-static char defaultrc_path[MAX_PATH];
-static int Settings_UTF8Encoding;
-
+const char *defaultrcPath(void);
 int bbMB2WC(const char *src, WCHAR *wstr, int len);
 int bbWC2MB(const WCHAR *src, char *str, int len);
-
-/* ----------------------------------------------------------------------- */
-
-void bbshell_set_utf8(int f)
-{
-    Settings_UTF8Encoding = f;
-}
-
-void bbshell_set_defaultrc_path(const char *s)
-{
-    strcpy (defaultrc_path, s);
-}
-
-#ifndef BBLIB_STATIC
-int bbMB2WC(const char *src, WCHAR *wstr, int len)
-{
-    int x, n;
-    for (x = -1;;) {
-        n = MultiByteToWideChar(
-                Settings_UTF8Encoding ? CP_UTF8 : CP_ACP,
-                0, src, x, wstr, len
-                );
-        if (n)
-            return n;
-        if (x < 0)
-            x = len;
-        if (--x == 0)
-            break;
-    }
-    wstr[0] = 0;
-    return 0;
-}
-
-int bbWC2MB(const WCHAR *src, char *str, int len)
-{
-    int x, n;
-    for (x = -1;;) {
-        n = WideCharToMultiByte(
-                Settings_UTF8Encoding ? CP_UTF8 : CP_ACP,
-                0, src, x, str, len, NULL, NULL
-                );
-        if (n)
-            return n;
-        if (x < 0)
-            x = len;
-        if (--x == 0)
-            break;
-    }
-    str[0] = 0;
-    return 0;
-}
-#endif
 
 /* ----------------------------------------------------------------------- */
 int GetIDListSize(LPCITEMIDLIST pidl)
@@ -548,7 +494,7 @@ int get_csidl(const char **pPath)
 LPITEMIDLIST get_folder_pidl (const char *path)
 {
     char temp[MAX_PATH], basedir[MAX_PATH], buffer[MAX_PATH];
-    const char *tail_p;
+    const char *tail_p, *rcdir;
     int id;
     LPITEMIDLIST pID1, pID;
 
@@ -570,8 +516,8 @@ LPITEMIDLIST get_folder_pidl (const char *path)
 
     if (NO_CSIDL == id || CSIDL_BLACKBOX == id || CSIDL_CURTHEME == id)
     {
-        if (CSIDL_CURTHEME == id && defaultrc_path[0])
-            strcpy(basedir, defaultrc_path);
+        if (CSIDL_CURTHEME == id && !!(rcdir = defaultrcPath()))
+            strcpy(basedir, rcdir);
         else
             get_exe_path(NULL, basedir, sizeof basedir);
         strcpy(temp, join_path(buffer, basedir, tail_p));
@@ -688,7 +634,7 @@ char *replace_shellfolders_from_base(
 {
     char temp[MAX_PATH];
     char basedir[MAX_PATH];
-    const char *tail_p;
+    const char *tail_p, *rcdir;
     int id;
     LPITEMIDLIST pID;
     HRESULT hr;
@@ -707,8 +653,8 @@ char *replace_shellfolders_from_base(
     if (NO_CSIDL == id || CSIDL_BLACKBOX == id || CSIDL_CURTHEME == id)
     {
         if (NULL == basepath || NO_CSIDL != id) {
-            if (CSIDL_CURTHEME == id && defaultrc_path[0])
-                basepath = defaultrc_path;
+            if (CSIDL_CURTHEME == id && !!(rcdir = defaultrcPath()))
+                basepath = rcdir;
             else
                 basepath = get_exe_path(NULL, basedir, sizeof basedir);
         }

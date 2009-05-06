@@ -60,7 +60,8 @@ int main(int argc, char **argv)
     char *cp;
     short pt, ver, dpi[2], align, num_files;
     int resource_table_len, non_resident_name_len, resident_name_len;
-    unsigned short resource_table_off, resident_name_off, module_ref_off, non_resident_name_off, fontdir_off, font_off;
+    unsigned short resource_table_off, resident_name_off, module_ref_off, non_resident_name_off, fontdir_off;
+    unsigned font_off;
     char resident_name[200] = "";
     int fontdir_len = 2;
     char non_resident_name[200] = "";
@@ -143,7 +144,7 @@ int main(int argc, char **argv)
     NE_hdr.ne_enttab = NE_hdr.ne_modtab;
     NE_hdr.ne_nrestab = non_resident_name_off;
     NE_hdr.ne_align = 4;
-    NE_hdr.ne_exetyp = NE_OSFLAGS_WINDOWS;
+    NE_hdr.ne_exetyp = 2;//NE_OSFLAGS_WINDOWS;
     NE_hdr.ne_expver = 0x400;
 
     fontdir_off = (non_resident_name_off + non_resident_name_len + 15) & ~0xf;
@@ -171,7 +172,7 @@ int main(int argc, char **argv)
 
     rc_name.offset = fontdir_off >> 4;
     rc_name.length = (fontdir_len + 15) >> 4;
-    rc_name.flags = NE_SEGFLAGS_MOVEABLE | NE_SEGFLAGS_PRELOAD;
+    rc_name.flags = 0xc00 | NE_SEGFLAGS_MOVEABLE | NE_SEGFLAGS_PRELOAD;
     rc_name.id = resident_name_off - sizeof("FONTDIR") - NE_hdr.ne_rsrctab;
     rc_name.handle = 0;
     rc_name.usage = 0;
@@ -187,7 +188,7 @@ int main(int argc, char **argv)
 
         rc_name.offset = font_off >> 4;
         rc_name.length = len >> 4;
-        rc_name.flags = NE_SEGFLAGS_MOVEABLE | NE_SEGFLAGS_SHAREABLE | NE_SEGFLAGS_DISCARDABLE;
+        rc_name.flags = 0xc00 | NE_SEGFLAGS_MOVEABLE | NE_SEGFLAGS_SHAREABLE | NE_SEGFLAGS_DISCARDABLE;
         rc_name.id = res;
         rc_name.handle = 0;
         rc_name.usage = 0;

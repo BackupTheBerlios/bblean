@@ -254,14 +254,9 @@ Menu *CfgMenuMaker(const char *title, const char *defbroam, const struct cfgmenu
                 checked = *(bool*)v;
             }
 
-            if (v == &Settings_smartWallpaper
-                && (false == Settings_enableBackground || NULL == hDesktopWnd))
-                disabled = true;
-            else if (v == &Settings_styleXPFix && Settings_altMethod)
-                disabled = true;
-            else if (v == &Settings_menu.dropShadows && false == usingXP)
-                disabled = true;
-
+            disabled = (v == &Settings_styleXPFix && Settings_altMethod)
+                    || (v == &Settings_menu.dropShadows && false == usingXP)
+                    ;
             pItem = MakeMenuItem(pMenu, item_text, cmd, checked && false == disabled);
         }
         else if (v)

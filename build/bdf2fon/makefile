@@ -4,15 +4,7 @@
 TOP = ../..
 
 # ---------------------------------------------------------------
-ifndef PROG
-
-all :
-all.progs clean.progs :
-	$(MAKE) $* PROG=1
-	$(MAKE) $* PROG=2
-
-# ---------------------------------------------------------------
-else ifeq "$(PROG)" "1"
+ifeq "$(PROG)" "1"
 
 BIN = bdf2fnt.exe
 OBJ = bdf2fnt.obj
@@ -24,6 +16,14 @@ else ifeq "$(PROG)" "2"
 BIN = fnt2fon.exe
 OBJ = fnt2fon.obj
 SUBSYSTEM = CONSOLE
+
+# ---------------------------------------------------------------
+else
+
+all :
+all.progs clean.progs :
+	$(MAKE) $* PROG=1
+	$(MAKE) $* PROG=2
 
 endif
 # ---------------------------------------------------------------

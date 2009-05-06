@@ -564,9 +564,10 @@ void startup_blackbox(void)
     Workspaces_Init(nostartup);
     Desk_Init();
     Menu_Init();
-    terminate_welcomescreen();
     start_plugins();
     Tray_Init();
+    BBSleep(0);
+    terminate_welcomescreen();
     SetTimer(BBhwnd, BB_RUNSTARTUP_TIMER, 2000, NULL);
 }
 
@@ -587,7 +588,6 @@ void shutdown_blackbox(void)
     set_opaquemove(save_opaquemove);
     SystemParametersInfo(SPI_SETWORKAREA, 0, (PVOID)&OldDT, 0);
     unregister_fonts();
-
     DestroyWindow(BBhwnd);
 }
 
@@ -641,8 +641,6 @@ void set_misc_options(void)
 
     set_focus_model(Settings_focusModel);
     set_opaquemove(Settings_opaqueMove);
-    bbshell_set_utf8(Settings_UTF8Encoding);
-
     SetDesktopMargin(NULL, BB_DM_REFRESH, 0);
     p = ReadString(extensionsrcPath(NULL), "blackbox.options.locale:", "");
     if (NULL == setlocale(LC_TIME, p))
@@ -2003,8 +2001,6 @@ static void reset_rcpaths(void)
     menurc_path[0] = 0;
     pluginrc_path[0] = 0;
     stylerc_path[0] = 0;
-
-    bbshell_set_defaultrc_path(defaultrc_path);
 }
 
 static const char* bbPath(const char* new_name, char* path, const char* default_name)
@@ -2015,6 +2011,11 @@ static const char* bbPath(const char* new_name, char* path, const char* default_
     if (0 == path[0] && default_name)
         FindRCFile(path, default_name, hMainInstance);
     return path;
+}
+
+const char *defaultrcPath(void)
+{
+    return defaultrc_path[0] ? defaultrc_path : NULL;
 }
 
 //===========================================================================

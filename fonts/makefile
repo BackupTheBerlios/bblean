@@ -26,22 +26,23 @@ BDF2FNT = $(call BSL,$(TOP)/build/bdf2fon/bdf2fnt)
 FNT_FILES = $(patsubst %,%.fnt,$(ARTWIZ_FONTS))
 FON_FILES = $(patsubst %,%.fon,$(ARTWIZ_FONTS))
 
-# ALL = $(FON_FILES)
-ALL = $(FNT_FILES)
+ALL = $(FON_FILES)
+# ALL = $(FNT_FILES)
 
 INSTALL_FILES = -to fonts $(ALL) README.TXT
 CLEAN_FILES = $(FON_FILES) $(FNT_FILES)
 
 all: $(ALL)
 
-%.fon : %.fnt
-	$(FNT2FON) $< $@
-%.fnt : %.bdf
-	$(BDF2FNT) $< $@ $*
 %.fnt : %.de.bdf
 	$(BDF2FNT) $< $@ $*
 %.fnt : %.se.bdf
 	$(BDF2FNT) $< $@ $*
+%.fnt : %.bdf
+	$(BDF2FNT) $< $@ $*
+
+%.fon : %.fnt
+	$(FNT2FON) $< $@
 
 .SUFFIXES : .fon .fnt
 

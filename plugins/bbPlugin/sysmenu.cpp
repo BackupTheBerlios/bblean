@@ -28,11 +28,8 @@
 
 #define ST static
 
+char usingNT, usingXP;
 static const char sys_command[] = "SysCommand %p,%x";
-
-#define MENUITEMINFO_SIZE_0400 \
-    ((DWORD_PTR)&((MENUITEMINFO*)NULL)->cch + sizeof((MENUITEMINFO*)NULL)->cch)
-
 
 ST HMENU get_sysmenu(HWND Window)
 {
@@ -140,30 +137,23 @@ bool sysmenu_exists()
 
 void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysBroam)
 {
+    char text_string[128], *p, id_temp[200];
+    MENUITEMINFO MII;
     int n, c;
-    int usingXP = 0 == (GetVersion() & 0x80000000);
-
     static int (WINAPI *pGetMenuStringW)(HMENU,UINT,LPWSTR,int,UINT);
 
-    if (NULL == pGetMenuStringW)
-        *(FARPROC*)&pGetMenuStringW = GetProcAddress(GetModuleHandle("user32.dll"), "GetMenuStringW");
-
-    c = GetMenuItemCount (hm);
-    for (n = 0; n < c; n++)
+    for (c = GetMenuItemCount (hm), n = 0; n < c; n++)
     {
-        MENUITEMINFO info;
-        memset(&info, 0, sizeof(info));
+        memset(&MII, 0, sizeof MII);
         if (usingXP)
-            info.cbSize = sizeof(info);
+            MII.cbSize = sizeof MII;
         else
-            info.cbSize = MENUITEMINFO_SIZE_0400; // to make this work on win95
+            MII.cbSize = MENUITEMINFO_SIZE_0400; // to make this work on win95
+        MII.fMask  = MIIM_DATA|MIIM_ID|MIIM_SUBMENU|MIIM_TYPE|MIIM_STATE;
+        GetMenuItemInfo (hm, n, TRUE, &MII);
 
-        info.fMask  = MIIM_DATA|MIIM_ID|MIIM_SUBMENU|MIIM_TYPE|MIIM_STATE;
-        GetMenuItemInfo (hm, n, TRUE, &info);
-
-        char text_string[128];
-
-        if (pGetMenuStringW) {
+        if (usingNT
+            && load_imp(&pGetMenuStringW, "user32.dll", "GetMenuStringW")) {
             WCHAR wstr[128];
             pGetMenuStringW(hm, n, wstr, array_count(wstr), MF_BYPOSITION);
             bbWC2MB(wstr, text_string, sizeof text_string);
@@ -172,33 +162,29 @@ void copymenu (Menu *m, HWND hwnd, HMENU hm, bool sep, int *id, const char *sysB
         }
 
         // dbg_printf("string: <%s>", text_string);
-        char *p = text_string;
-        while (*p) {
+        for (p = text_string; *p; ++p)
             if ('\t' == *p)
                 *p = ' ';
-            p++;
-        }
 
-        if (info.hSubMenu)
+        if (MII.hSubMenu)
         {
-            //XXX SendMessage(hwnd, WM_INITMENUPOPUP, (WPARAM)info.hSubMenu, MAKELPARAM(n, TRUE));
-            char temp[200];
-            Menu *s = MakeNamedMenu(text_string, getsysmenu_id(temp, id), true);
-            copymenu(s, hwnd, info.hSubMenu, false, id, sysBroam);
+            //XXX SendMessage(hwnd, WM_INITMENUPOPUP, (WPARAM)MII.hSubMenu, MAKELPARAM(n, TRUE));
+            Menu *s = MakeNamedMenu(text_string, getsysmenu_id(id_temp, id), true);
+            copymenu(s, hwnd, MII.hSubMenu, false, id, sysBroam);
             if (sep)
                 MakeMenuNOP(m, NULL), sep = false;
             MakeSubmenu(m, s, text_string);
         }
         else
-        if (info.fType & MFT_SEPARATOR)
+        if (MII.fType & MFT_SEPARATOR)
         {
             sep = true;
         }
         else
-        if (!(info.fState & MFS_DISABLED) && !(info.fState & MFS_GRAYED))
+        if (!(MII.fState & MFS_DISABLED) && !(MII.fState & MFS_GRAYED))
         {
             char broam[256];
-            sprintf(broam, sysBroam, hwnd, info.wID);
+            sprintf(broam, sysBroam, hwnd, MII.wID);
             if (sep)
                 MakeMenuNOP(m, NULL), sep = false;
             MakeMenuItem(m, text_string, broam, false);
@@ -223,6 +209,11 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
     bool is_in_current;
     int n, workspace;
     bool bbLeanSkin = 0 != strstr(plugin_broam, "Skin");
+
+    unsigned ver = GetVersion(),
+    usingNT = (ver & 0x80000000) == 0;
+    usingXP =  usingNT && (ver & 0xFF) >= 5;
+
 #if 0
     if (bbLeanSkin)
         return false;

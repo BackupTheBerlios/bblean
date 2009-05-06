@@ -1079,10 +1079,10 @@ void Settings_ReadRCSettings(void)
     const char *p, *extrc, *bbrc;
 
 #ifdef __BBCORE__
+    defaultrc_path[0] = 0;
     p = ReadString(extensionsrcPath(NULL), "blackbox.theme:", "");
     if (p[0] && 0 != stricmp(p, "default")) {
         FindRCFile(defaultrc_path, p, NULL);
-        bbshell_set_defaultrc_path(defaultrc_path);
     }
 #endif
 

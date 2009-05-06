@@ -1182,6 +1182,7 @@ void Tray_Exit(void)
 
 */
 
+#ifndef BBTINY
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //
 // LSActivateActCtxForDll
@@ -1297,3 +1298,4 @@ void LSDeactivateActCtx(HANDLE hActCtx, ULONG_PTR* pulCookie)
         fnDeactivateActCtx(0, *pulCookie);
     fnReleaseActCtx(hActCtx);
 }
+#endif

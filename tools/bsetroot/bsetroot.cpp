@@ -391,7 +391,7 @@ HIMG DesktopGradient(struct rootinfo *r, int width, int height)
     si.type = r->type,
     si.Color = r->color1,
     si.ColorTo = r->color2,
-    si.interlaced = r->interlaced,
+    si.interlaced = !!r->interlaced,
     si.bevelstyle = r->bevelstyle,
     si.bevelposition = r->bevelposition;
     si.parentRelative = false;
@@ -551,7 +551,10 @@ int load_bmp(const char *filename, HIMG *pImg, string_node *searchpaths, const c
             p = join_path(path, searchpaths->str, file_basename(filename));
             searchpaths = searchpaths->next;
             break;
-        case 3:  // try backgrounds/file, at last
+        case 3:  // try backgrounds/path
+            p = join_path(path, "backgrounds", filename);
+            break;
+        case 4:  // try backgrounds/file
             p = join_path(path, "backgrounds", file_basename(filename));
             break;
         default: // give up

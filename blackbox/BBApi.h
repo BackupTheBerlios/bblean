@@ -515,6 +515,7 @@ extern "C" {
     API_EXPORT const char* menuPath(const char* menurcFileName ISNULL);
     API_EXPORT const char* plugrcPath(const char* pluginrcFileName ISNULL);
     API_EXPORT const char* stylePath(const char* styleFileName ISNULL);
+    API_EXPORT const char *defaultrcPath(void);
 
     /* As configured in exensions.rc: */
     API_EXPORT void GetBlackboxEditor(/*OUT*/ char* editor);
