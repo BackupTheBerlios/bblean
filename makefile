@@ -48,6 +48,7 @@ all.progs clean.progs :
 	$(call MAKE_CORE,lib)
 	$(call MAKE_CORE,blackbox)
 	$(call MAKE_CORE,blackbox/Hooks)
+	$(call MAKE_CORE,build/fuzzydoc)
 	$(call MAKE_CORE,docs)
 
 	$(call MAKE_PLUGIN,bbKeys)

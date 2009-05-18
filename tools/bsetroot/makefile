@@ -466,7 +466,7 @@ CLEAN_FILES = bsetroot.htm
 
 all : bsetroot.htm
 
-bsetroot.htm : bsetroot.txt
+bsetroot.htm : bsetroot.txt ../../docs/bblean_style.css
 	-$(FUZZY) bsetroot.txt
 
 include $(TOP)/build/makefile.inc

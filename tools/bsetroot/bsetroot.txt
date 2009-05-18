@@ -10,12 +10,12 @@
    http://bb4win.org/
 
    Based on bsetroot for Blackbox on Linux by Brad Hughes.
-   bsetroot 2.1 uses CxImage 5.11.
-   Supported image formats: bmp png jpg gif.
 
  bsetroot is free software, released under the GNU General Public
- License (GPL version 2). For details see:
- http://www.fsf.org/licenses/gpl.html
+ License (GPL version 2). See: http://www.fsf.org/licenses/gpl.html
+
+ bsetroot 2.1 uses CxImage 5.11. Supported image formats:
+ bmp png jpg gif.
 
 
  Introduction
@@ -293,16 +293,8 @@
     title       = bsetroot.readme
     version     = 2.1
     template    = tpl_simple
-    cssfile     = bblean_style.css
-    styles      = \
-        dt,dl{margin:2} dl{margin-bottom:10} \
-        pre{color:#aaa;background:none} \
-        p,h3,dl,dt,li,.simple_toc .t2{font-family:verdana,tahoma,arial} \
-        body{padding:20px}b{color:aaa;font-weight:bold} \
-        table.simple_body,table.simple_toc{width:600}
-    header      = \
-        <span class="bb2">bsetroot</span>&nbsp;\
-        <span class="bb3">2.1</span>
+    cssfile     = ../../docs/bblean_style.css
+    header      = <span class="bb2">bsetroot</span>&nbsp;<span class="bb3">2.1</span>
     numbers = true
  [endfuzzy]
  -------------------------------------------------------------------

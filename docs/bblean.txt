@@ -1,5 +1,4 @@
 ****************************************************************************
-
 bbLean
 ******
 
@@ -16,7 +15,7 @@ bbLean is based stylistically on the
 Blackbox_window_manager<http://blackboxwm.sourceforge.net/>
 for the X Window System by Brad Hughes.
 
-
+****************************************************************************
 Quick Start
 ===========
 
@@ -29,19 +28,18 @@ Later:
 - Checkout the universe of plugins available for Blackbox for Windows.
 - You may want to set bbLean as default_shell. See -> 'Install as Shell'.
 
-
-
+****************************************************************************
 User Interface
 ==============
 
-The Blackbox for Windows shell consists of the following UI elements:
+The Blackbox for Windows shell consists of the following elements:
 - Desktop   - the background of the screen
 - Toolbar   - the undispensible representative of all members of the blackbox family
 - Menus     - configurables, predefined ones and folder listings.
 - Keyboard  - Hotkeys for various action, implememted in the bbKeys plugin.
 - Many others, available as plugins.
 
-
+****************************************************************************
 Desktop
 -------
 Mouse event:                        Effect:
@@ -51,13 +49,12 @@ left-click                          : hide menus / bring pinned menus on top
 
 These and other desktop mouse-clicks are configurable in extensions.rc.
 
-
 Drop_Image:                         Display mode:
 no modifier                         : centered
 with shift held down                : stretched
 with control held down              : tiled
 
-
+****************************************************************************
 Toolbar
 -------
 Mouse event:                        Effect:
@@ -72,7 +69,7 @@ The toolbar may be turned on or off from Configuration->Misc. Please note
 that what you see in the default installation is not the toolbar but bbLeanBar.
 See readme.txt and bbLeanBar.rc in the plugins/bbLeanBar folder.
 
-
+****************************************************************************
 bbLeanBar
 ---------
 on taskentry : :
@@ -107,7 +104,7 @@ ctrl-right                          : bbleanbar options menu
 ctrl-left-drag                      : move the bar
 ctrl-left-double-click              : reset the bar to its previous location
 
-
+****************************************************************************
 Menus
 -------
 Mouse event:                        Effect:
@@ -127,7 +124,6 @@ mouse wheel / drag scroll-button    : scroll long menus
 (*) This command is configurable in extensions.rc, for instance:
 
     blackbox.options.openFolderCommand: explorer.exe /e,"%1"
-
 
 Keyboard navigation:                Effect:
 up/down/left/right arrows           : navigate
@@ -151,7 +147,6 @@ the keyboard. The LWIN and RWIN key shortcuts work only if bbLean
 is installed as default shell.
 
 Hold down control for faster progress with the -number+ items.
-
 
 Keyboard
 --------
@@ -217,7 +212,7 @@ Win + E:                    Exec explorer.exe /e,c:\  (explorer window)
 Win + Pause:                Exec control.exe sysdm.cpl (system properties)
 Win + Home:                 Exec docs\bblean.htm (bbLean documentation)
 
-
+****************************************************************************
 Plugins
 -------
 
@@ -274,9 +269,7 @@ Kana's plugins require bbcmd.dll from his website.
 You can put these into the system32 directory or into the same directory
 as blackbox.exe.
 
-
 ****************************************************************************
-
 Details
 *******
 
@@ -355,7 +348,6 @@ Shutdown commands: :
 
     [logoff -q] (Log Out)
 
-
 External commands: :
 [run] (label)               : show the windows 'run' dialog
 [exec] (label) {command}    : run a program (*) or execute a broam<Broadcast Messages>.
@@ -367,9 +359,7 @@ External commands: :
     [exec] (label) { -workspace2 : program args ... }
     [exec] (label) { -hidden : program args ... }
 
-
 ****************************************************************************
-
 Backgrounds
 ===========
 
@@ -390,7 +380,6 @@ Also any processing of the rootCommand may be disabled in
 'Configuration->Graphics'.
 
 ****************************************************************************
-
 Desktop Margins
 ===============
 
@@ -410,7 +399,6 @@ may be set manually in extensions.rc like:
     blackbox.desktop.2.marginLeft: ...
 
 ****************************************************************************
-
 Sticky Windows
 ==============
 
@@ -422,7 +410,6 @@ Click 'Show Appnames' from 'Configuration->Misc.' to get a list of
 the currently running tasks and their internal names. 
   
 ****************************************************************************
-
 Install as Shell
 ============
 
@@ -441,7 +428,6 @@ Notes:
 - When running bbLean over explorer the systray icons won't show in many cases.
 
 ****************************************************************************
-
 CommandLine
 ===========
 
@@ -454,7 +440,6 @@ Switches: :
 -exec <@broam>:  Send broadcast message to running shell
 
 ****************************************************************************
-
 Broadcast Messages
 ==================
 
@@ -579,7 +564,6 @@ Other: :
 @BBCore.showRecoverMenu     : display a menu that can be used to recover hidden windows
                               after a crash while alternate workspace method was enabled.
                               Use with care.
-// @BBCore.crash               : crash blackbox.
 
 Configuration: :
 @BBCfg.plugin.load_<plugin>         : load/unload a plugin
@@ -595,7 +579,6 @@ bbLeanBar if loaded and do nothing otherwise:
 Use the *Show Bro@ms* option in Configuration->Menus to view other
 broadcast messages for core configuration and plugins.
 
-
 Mini-Script
 ............
 
@@ -605,9 +588,7 @@ separated by '|'s and may be broams or external executables.
 
     @Script [@SomeBroam | some_prog arguments | @AnotherBroam]
 
-
 ****************************************************************************
-
 Hotkeys
 =======
 
@@ -638,9 +619,7 @@ Available actions:
 Default Hotkey Bindings:
 - Read -> here<Keyboard>.
 
-
 ****************************************************************************
-
 Clock Formatting
 ================
  
@@ -696,14 +675,15 @@ is for example: us, uk, jp, ...)
 
     blackbox.options.locale: <locale-id>
 
-
 ****************************************************************************
-
 Hacks
 =====
 
-Some options in *extensions.rc* are supported to disable parts of the
-bbLean shell for special purposes:
+Experimental options in extensions.rc
+......................................
+
+Some options are supported to disable parts of the bbLean shell for
+special purposes:
 
 Option : Default : Description :
 blackbox.options.hideExplorer   : true  : hide desktop icons when run under explorer (Q)
@@ -716,7 +696,9 @@ blackbox.options.shellContextMenu : false : use plain grey context menu (right-c
 blackbox.options.disableDesk    : false : do not create an own desktop window (Q)
 blackbox.options.desktopHook    : false : use deskhook.dll to receive desktop clicks (Q) (D)
 
-(Q) Quit and restart the shell to apply
+(R) Restart the shell to apply -
+(Q) Quit and restart the shell to apply -
+(L) Logout and login again to apply
 
 (D) deskhook.dll can be used in combination with no own desktop window to receive mouse
 clicks on the explore desktop background. deskhook.dll is not part of the binary package,
@@ -740,9 +722,7 @@ blackbox.appearance.bullet.bitmap :     : bitmap for menu bullets. See "docs/men
 (Q) Quit and restart the shell to apply -
 (L) Logout and login again to apply
 
-
 ****************************************************************************
-
 Issues
 ======
 
@@ -811,7 +791,6 @@ Windows 95:
  You might need to install msvcrt.dll.
 
 ****************************************************************************
-
 Info
 ****
 
@@ -829,9 +808,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.
 
 [Figure bblean_logo.png]
 
-     
 ****************************************************************************
-
 Links
 ===== 
 
@@ -853,9 +830,7 @@ Theo                : http://theo.host.sk/ ?gone?
 Ysuke               : http://zzbb.hp.infoseek.co.jp/
 Pitris              : http://pitris.org/BBlean
 
-
 ****************************************************************************
-
 Upgrade Notes
 =============
 
@@ -886,91 +861,28 @@ bsetroot.rc:
 ..............
 Now uses simple searchpaths instead of wildcards. See bsetroot.rc
 
-
+****************************************************************************
 Changes
 =======
 
-11 Apr 2009 - bbLean 1.17
-
-All parts:
-- bbLean is now more precise with the blackboxwm 0.70 style conventions.
-  (also accepts the *appearance wildcard which it didn't previously)
-
-Menus:
-- Menu separators: [sep] or [nop] with no label. Automatic color.
-- Menu drop shadows: See Menu->Blackbox->Configuration->Menus.
-- New menu-title appearances: 'parentrelative', 'label' or 'hidden'.
-- On the fly sort modes for file menus: Hit Ctrl+[nets] to sort by:
-    n(ame), e(xtension), t(ime), s(ize)
-- Show menu at position: @BBCore.ShowMenu -at [rb] x,y ...
-- More options to @BBCore.ShowMenu: -key -toggle -pinned -ontop -notitle
-- Custom menu bullets (See 'docs/menu-bullets.bmp').
-   In extensions.rc: blackbox.appearance.bullet.bitmap: menu-bullets.bmp
-
-Fonts:
-- bbLean will now automatically register all .fnt|fon|ttf fonts in the
-    blackbox/fonts folder. No need to install them.  Restart blackbox to
-    let changes take effect.
-
-Set as Shell:
-- Removed the built-in installer in favour of the external bsetshell tool
-
-Blackbox:
-- New option: extensions.rc: blackbox.options.locale: ... (suggested by nocd5)
-- New broams '@BBCore.MoveWindowToWS/SendWindowToWS #n' (patch by kwark)
-- New switch '-in <workdir>' to run commands. Available with menus,
-    broams and bbKeys
-- Unicode display for filenames, application titles and menu entries
-    extensions.rc: blackbox.options.UTF8Encoding: true/false
+20 May 2009 - bbLean 1.17
+.........................
+- bbLean is more precise with the blackboxwm 0.70 style conventions.
+- Automatically registers all .fnt|fon|ttf fonts in blackbox/fonts
+- Detects whether startup items have been run (win 2k/xp/vista)
+- Optional UTF-8 support with filenames, application titles and menu entries
+- Switch '-in <workdir>' to run commands.
 - Translation file for messages and menus
-    extensions.rc: blackbox.options.translation: <nls-file>
-
-Bug Fixes:
-- Fixed desktop margins to properly load at startup (reported by sigit)
-- Fixed calls to 'blackbox editor' for paths with spaces (reported by erh)
-- Runs startup items properly for non-admin accounts
-- Detects automatically whether startup items have been run (win 2k/xp/vista)
-- Support for vista's systemtray peculiarities
-
-bbLeanSkin:
-- Window menus including 'Send To Workspace'.
-- Button pixmap now may be set with a broam
-- Added ysuke's application icon (thanks ysuke)
-- No handle/grips with maximized windows and dialog boxes
-
-bbLeanBar:
-- Window menus including 'Send To Workspace'.
-- Special format letter %K for keyboard layout display in the clock string
-    (idea from Alex3D)
-- The clicks on the clock now apply the settings for desktop clicks in
-    extensions.rc.
-- Tray icons in full color on mouse-hover
-- Mouse gesture on task to move to next/previous workspace (like SystembarEx).
-    Click a task, hold, move quickly to the right/left, release.
-- hide tray icons feature:
-
-        shift-right-click   : on icon       : toggle hidden
-        ctrl-right-click    : on tray zone  : show icon menu
-        right-click         : on currentOnly button : toggle all hidden icons
-
-bbKeys:
-- 'winkeyhook' not longer needed
-- -nolabel and -debug options can be used in bbKeys.rc
-- instead of "WithAction(ExecCommand), DoThis(<command>)" you can now
-    use simply "WithAction(Exec <command>)"
-
-bbIconBox:
-- Drag & Drop applications between workspace boxes.
-
-Features by absence:
-- font-shadows, menu-icons, process-kill-menu, volume-control, ...
-    (Well, this is bbLean after all).
-
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+- Menus: separators, drop shadows, custom bullets, new title appearances
+  (label, notitle), sort folders, more options for @bbCore.ShowMenu
+- bbLeanBar: window menus, move to workspace with mouse gesture,
+    hide tray icons feature, %K special format for keyboard layout
+- bbLeanSkin: display icon, broam to set custom buttons
+- bbKeys: no more 'winkeyhook', -debug and -nolabel options (bbKeys.rc)
+- bbIconBox: new pager box, drag & drop applications between boxes
 
 02 Mai 2005 - bbLean 1.16
+.........................
 - Ability to show alternate menus (See Details->Bro@ms->@BBCore->Menu).
 - Configurable desktop mouse-clicks (in extensions.rc)
 - New semantics to merge folders: [path] (label) {folder1|folder2}
@@ -978,6 +890,7 @@ Features by absence:
 - New workspace code
 
 22 Feb 2004 - bbLean 1.12 U1
+.........................
 - Global font override option, see extensions.rc
 - Some multimon fixes, mostly untested though
 - bbKeys - no more crashes with long commands
@@ -985,6 +898,7 @@ Features by absence:
 - bbLeanSkin - added titlebar click options
 
 10 Jan 2004 - bbLean 1.10
+.........................
 - Drag & drop from and to menus.
 - Keyboard navigation for menus.
 - All menu commands available as bro@ms
@@ -996,6 +910,7 @@ Features by absence:
 - Task flashing support
 
 09 Sep 2003 - bbLean 1.00
+.........................
 - Transparency for menus and bars.
 - Scroll button for menus
 - Force menu bullet orientation.
@@ -1003,23 +918,28 @@ Features by absence:
 - New version, new name!
 
 12 Jul 2003 - bb008lc update
+.........................
 - New gradient code. Better Elliptic gradients and sunken bevels.
 - Sharpened the 'diamond' bullet.
 - Workspaces and desktop are preserved on restart.
 - Toolbar display can be disabled for key commands.
 
 07 Jul 2003 - bb008lc update
+.........................
 - BBSystemBar got a 'show current tasks only' option.
 
 27 Jun 2003 - bb008lc update
+.........................
 - Workspaces remember their top window
 - Toolbarclock is less self - resizing
 
 16 Jun 2003 - bb008lc update
+.........................
 - The systray icon code has been reworked. Thanks to Roger for
   running several tests.
 
 01 Jun 2003 - bb008lc update
+.........................
 - bb008lc has been made fit for xp-pro. Thanks to Pete for
   running numerous tests.
 - Menues 'not always on top' option.
@@ -1028,14 +948,17 @@ Features by absence:
   for this menu only.
 
 23 May 2003 - bb008lc update
+.........................
 - Clean up, removed unused configuration items.
 
 10 May 2003 - bb008lc update
+.........................
 - Added parsing for <styleitem>.fontweight.
 - Added some experimental parsing for *nix type font desriptions.
 - Made any wildcards in styles work
 
 22 Apr 2003 - bb008lc, first release
+.........................
 - bb008lc is a lean build for Blackbox for Windows. It is fully compatible
   to current 0.90 builds and plugins
 - New menu code
@@ -1046,6 +969,7 @@ Features by absence:
 - Full access to large folders
 
 Jan 2003
+.........................
 - grischka found Blackbox for Windows.
 
 // [See bb4win-changes.txt]
@@ -1063,11 +987,11 @@ Jan 2003
         <span class="bb1">bb</span>\
         <span class="bb2">Lean</span>&nbsp;\
         <span class="bb3">1.17</span>
-    //styles      = h1,h2,h3{text-align:right}
     template    = tpl_frame
     cssfile     = bblean_style.css
-    //numbers     = true
+    //numbers   = true
     //tocmode     = list
+    //styles       = .frame_toc h1 {text-align:left}
 
 [endfuzzy]
 ****************************************************************************
