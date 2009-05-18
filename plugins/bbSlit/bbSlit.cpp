@@ -29,8 +29,8 @@ const char szVersion      [] = "bbSlit 1.17";
 const char szAppName      [] = "bbSlit";
 const char szInfoVersion  [] = "1.17";
 const char szInfoAuthor   [] = "grischka";
-const char szInfoRelDate  [] = "2009-01-07";
-const char szInfoLink     [] = "http://bb4win.sf.net/bblean";
+const char szInfoRelDate  [] = "2009-05-20";
+const char szInfoLink     [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail    [] = "grischka@users.sourceforge.net";
 const char szCopyright    [] = "2006-2009";
 

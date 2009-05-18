@@ -48,10 +48,11 @@
 const char szAppName      [] = "bbSDK";
 const char szInfoVersion  [] = "0.2";
 const char szInfoAuthor   [] = "grischka";
-const char szInfoRelDate  [] = "2009-01-07";
+const char szInfoRelDate  [] = "2009-05-20";
 const char szInfoLink     [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail    [] = "grischka@users.sourceforge.net";
 const char szVersion      [] = "bbSDK 0.2"; /* fallback for pluginInfo() */
+const char szCopyright    [] = "2004,2009";
 
 /* ---------------------------------- */
 /* The About MessageBox */
@@ -61,9 +62,9 @@ void about_box(void)
     char szTemp[1000];
     sprintf(szTemp,
         "%s - A plugin example for Blackbox for Windows."
-        "\n© 2004,2009 %s"
+        "\n© %s %s"
         "\n%s"
-        , szVersion, szInfoEmail, szInfoLink
+        , szVersion, szCopyright, szInfoEmail, szInfoLink
         );
     MessageBox(NULL, szTemp, "About", MB_OK|MB_TOPMOST);
 }

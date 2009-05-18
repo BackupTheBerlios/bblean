@@ -69,18 +69,17 @@
   History:
   ========
 
-  07 Jan 2009 - bbSDK 0.2
+  20-May-2009 - bbSDK 0.2
   -----------------------
   - Replaced all "bbSDK" strings by macros such that they can be
     changed more easily.
   - Function 'edit_rc(file)' works also under xoblite
-  - Now also works as plain C source
+  - Also works as plain C source (rename bbSDK.cpp to bbSDK.c)
 
-  01 Aug 2004 - bbSDK 0.1
+  01-Aug-2004 - bbSDK 0.1
   -----------------------
   - initial release
 
 
   Enjoy!
   --- grischka
-

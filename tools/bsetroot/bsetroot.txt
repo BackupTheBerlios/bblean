@@ -209,7 +209,7 @@
  bsetroot
  ........
 
- Version 2.1 (07-Jan-2009) (grischka)
+ Version 2.1 (20-May-2009) (grischka)
  + New: color dithering on 16-bit displays.
  + Added switches: -scale, -quiet, -path.
  ~ Changed bsetroot.rc format to be a commandline option listing.

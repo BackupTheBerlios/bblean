@@ -26,8 +26,8 @@ const char szVersion      [] = "bbNote-Proxy 1.08";
 const char szAppName      [] = "bbNote-Proxy";
 const char szInfoVersion  [] = "1.08";
 const char szInfoAuthor   [] = "grischka";
-const char szInfoRelDate  [] = "2009-01-07";
-const char szInfoLink     [] = "http://grischka.port5.com/bbnote/";
+const char szInfoRelDate  [] = "2009-05-20";
+const char szInfoLink     [] = "http://bb4win.sourceforge.net/bblean/";
 const char szInfoEmail    [] = "grischka@users.sourceforgs.net";
 
 LPCSTR pluginInfo(int field)

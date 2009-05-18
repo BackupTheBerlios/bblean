@@ -307,8 +307,7 @@ void bb_about(void)
     "\n%s",
     GetBBVersion(),
     NLS2("$About_Blackbox$",
-        "Based stylistically on the Blackbox window manager "
-            "for Linux by Brad Hughes"
+        "Based stylistically on blackboxwm by Brad Hughes"
         "\n"
         "\nSwitches:"
         "\n-help           \tShow this text"
@@ -319,8 +318,8 @@ void bb_about(void)
         "\n-exec <@broam>  \tSend broadcast message to running shell"
         "\n"
         "\nFor more information visit:"
-        "\n- http://bb4win.sourceforge.net/bblean/"
-        "\n- http://bb4win.org/"
+        "\nhttp://bb4win.sourceforge.net/bblean/"
+        "\nhttp://bb4win.org/"
         ));
 
 }

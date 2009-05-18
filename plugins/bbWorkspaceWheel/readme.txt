@@ -1,7 +1,7 @@
 
     -----------------------------------------------------------------
 
-    bbWorkspaceWheel 0.1.0
+    bbWorkspaceWheel 0.2.0
 
     copyright © 2005-2009 grischka@users.sourceforge.net
     http://bb4win.sourceforge.net/bblean

@@ -28,9 +28,10 @@ const char szVersion     [] = "bbWorkspaceWheel 0.2";
 const char szAppName     [] = "bbWorkspaceWheel";
 const char szInfoVersion [] = "0.2";
 const char szInfoAuthor  [] = "grischka";
-const char szInfoRelDate [] = "2009-01-07";
+const char szInfoRelDate [] = "2009-05-20";
 const char szInfoLink    [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail   [] = "grischka@users.sourceforge.net";
+const char szCopyright   [] = "2004-2009";
 
 //===========================================================================
 

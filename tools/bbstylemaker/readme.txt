@@ -126,7 +126,7 @@
   Changes:
   --------
 
-  [07 Jan 2009] v 1.31
+  [20 May 2009] v 1.31
   - Released with bbLean 1.17
 
   [15 Mar 2006] v 1.3 - not published

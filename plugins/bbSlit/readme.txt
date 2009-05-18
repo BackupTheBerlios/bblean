@@ -57,7 +57,7 @@
 
     History:
 
-    [07-Jan-2009] v1.17
+    [20-May-2009] v1.17
     - released with bbLean 1.17
 
     [24-Oct-2006] v1.16.1
