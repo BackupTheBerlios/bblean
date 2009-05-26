@@ -424,6 +424,8 @@ int writefnt(FILE *out, Font *fnt, int version, char *name, struct writefntopt *
     return 0;
   }
 
+  printf("%s: %d/%d\n", name, avgwidth, h);
+
   headersz = (char *)&(finfo->dfFlags) - (char *)fhead;
   tablesz = (fnt->nchars + 1) * sizeof(RASTERGLYPHENTRY) ;
   rastersz = (fnt->nchars + 1) * rs ;
