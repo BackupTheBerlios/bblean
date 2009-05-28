@@ -75,6 +75,7 @@ extern int nScreens;
 
 // current desktop
 extern int currentScreen;
+extern int lastScreen;
 
 // vwm options
 extern bool Settings_altMethod, Settings_styleXPFix;

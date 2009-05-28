@@ -302,6 +302,8 @@ ST void defer_windows(int newdesk)
         newdesk = nScreens-1;
 
     deskchanged = currentScreen != newdesk;
+    if (deskchanged)
+        lastScreen = currentScreen;
     currentScreen = newdesk;
     winmoved = false;
 

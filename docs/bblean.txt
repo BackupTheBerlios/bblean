@@ -511,6 +511,7 @@ Workspaces: :
 @BBCore.PrevWorkspace       : previous workspace
 @BBCore.NextWorkspace       : next workspace
 @BBCore.SwitchToWorkspace_#n : switch to workspace number #n
+@BBCore.LastWorkspace       : switch to last used workspace
 @BBCore.MoveWindowLeft      : move window to previous workspace
 @BBCore.MoveWindowRight     : move window to next workspace
 @BBCore.MoveWindowToWS_#n   : move window to workspace number #n and switch WS

@@ -1186,7 +1186,7 @@ int get_workspace_number(const char *s)
 {
     if (0 == memicmp(s, "workspace", 9)) {
         int n = atoi(s+9);
-        if (n >= 1 && n <= nScreens)
+        if (n >= 1 && n <= 9)
             return n - 1;
     }
     return -1;
@@ -1291,6 +1291,7 @@ static const struct corebroam_table {
     { "PrevWorkspace",          BB_WORKSPACE,       0, BBWS_DESKLEFT },
     { "RightWorkspace",         BB_WORKSPACE,       0, BBWS_DESKRIGHT },
     { "NextWorkspace",          BB_WORKSPACE,       0, BBWS_DESKRIGHT },
+    { "LastWorkspace",          BB_WORKSPACE,       0, BBWS_LASTDESK },
     { "SwitchToWorkspace",      BB_WORKSPACE,       e_lpnum,  BBWS_SWITCHTODESK },
 
     { "Gather",                 BB_WORKSPACE,       0, BBWS_GATHERWINDOWS },

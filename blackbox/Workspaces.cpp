@@ -32,7 +32,7 @@
 // public variables
 
 int VScreenX, VScreenY, VScreenWidth, VScreenHeight;
-int currentScreen;
+int currentScreen, lastScreen;
 int nScreens;
 
 //====================
@@ -115,6 +115,7 @@ void send_task_refresh(void);
 void Workspaces_Init(int nostartup)
 {
     currentScreen   = 0;
+    lastScreen      = 0;
     deskNames       = NULL;
     stickyNamesList = NULL;
 
@@ -335,7 +336,7 @@ LRESULT Workspaces_Command(UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
 
                 case BBWS_LASTDESK:
-                    Workspaces_DeskSwitch(nScreens-1);
+                    Workspaces_DeskSwitch(lastScreen);
                     break;
 
                 case BBWS_GATHERWINDOWS:
