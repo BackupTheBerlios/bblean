@@ -28,7 +28,7 @@
 
 #define ST static
 
-char usingNT, usingXP;
+static char usingNT, usingXP;
 static const char sys_command[] = "SysCommand %p,%x";
 
 ST HMENU get_sysmenu(HWND Window)
@@ -210,7 +210,7 @@ bool ShowSysmenu(HWND Window, HWND Owner, RECT *pRect, const char *plugin_broam)
     int n, workspace;
     bool bbLeanSkin = 0 != strstr(plugin_broam, "Skin");
 
-    unsigned ver = GetVersion(),
+    unsigned ver = GetVersion();
     usingNT = (ver & 0x80000000) == 0;
     usingXP =  usingNT && (ver & 0xFF) >= 5;
 
