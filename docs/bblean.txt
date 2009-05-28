@@ -670,10 +670,11 @@ Format: Effect:
 %#a,A,b,B,p,X,z,Z,%:       # flag is ignored
 
 
-You can set another language for the time display in extensions.rc (<locale-id>
-is for example: us, uk, jp, ...)
+You can set another language for the clock display in extensions.rc.
 
     blackbox.options.locale: <locale-id>
+
+For locale-id's see http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 
 ****************************************************************************
 Hacks

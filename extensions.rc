@@ -106,7 +106,7 @@ blackbox.desktop.AltRightClick: @BBCore.ShowMenu configuration
 ! blackbox.options.openFolderCommand: explorer.exe /e,"%1"
 
 # other locale may be set (for the clock display)
-! blackbox.options.locale: <en, ru, fr, it, etc ...>
+! blackbox.options.locale: <usa, gbr, rus, fra, ita, etc ...>
 
 # run something after processing the system startup items
 ! blackbox.startup.run: <any command or @broam>
