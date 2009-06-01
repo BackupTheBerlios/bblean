@@ -1317,8 +1317,7 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
 
         }
 
-        if (hwnd || prev_fg_window || false == bbactive)
-            send_task_message(hwnd, TASKITEM_ACTIVATED);
+        send_task_message(hwnd, TASKITEM_ACTIVATED);
         break;
     }
 
