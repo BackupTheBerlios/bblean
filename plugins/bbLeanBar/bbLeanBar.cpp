@@ -742,11 +742,7 @@ void barinfo::set_clock_string (void)
     }
     // <--------------------------------------
 
-    WCHAR wfmt[200], result[200];
-    bbMB2WC(fmt, wfmt, sizeof wfmt);
-    wcsftime(result, sizeof result, wfmt, ltp);
-    bbWC2MB(result, clockTime, sizeof clockTime);
-
+    strftime(clockTime, array_count(clockTime), fmt, ltp);
     clockWidth = get_text_width(clockTime);
 
     SYSTEMTIME lt;
