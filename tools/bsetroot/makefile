@@ -423,7 +423,7 @@ USELIB = CxImage
 
 ifeq "$(USELIB)" "CxImage"
   IMGOBJ = image_cx.obj $(XIMA_OBJ) $(PNG_OBJ) $(ZLIB_OBJ) $(JPEG_OBJ)
-  IMGDEF = -I CXIMAGE\zlib -D WIN32
+  IMGDEF = -I CXIMAGE/zlib -D WIN32
   VP1 = CXIMAGE/CxImage
   VP2 = CXIMAGE/zlib
   VP3 = CXIMAGE/png
