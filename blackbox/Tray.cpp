@@ -1105,7 +1105,8 @@ void Tray_Init(void)
     }
 
     BBRegisterClass(trayClassName, TrayWndProc, 0);
-    trayredirect_message = RegisterWindowMessage("BBTrayMessage");
+    if (Settings_OldTray)
+        trayredirect_message = RegisterWindowMessage("BBTrayMessage");
 
     hTrayWnd = CreateWindowEx(
         tray_on_top ? WS_EX_TOOLWINDOW|WS_EX_TOPMOST : WS_EX_TOOLWINDOW,

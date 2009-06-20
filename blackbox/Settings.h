@@ -125,6 +125,7 @@ BBSETTING bool Settings_globalFonts;
 BBSETTING bool Settings_imageDither;
 BBSETTING bool Settings_shellContextMenu;
 BBSETTING bool Settings_UTF8Encoding;
+BBSETTING bool Settings_OldTray;
 BBSETTING int Settings_contextMenuAdjust[2];
 BBSETTING int Settings_LogFlag;
 

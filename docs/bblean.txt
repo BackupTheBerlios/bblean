@@ -713,6 +713,7 @@ Option : Default : Description :
 blackbox.options.openFolderCommand : explorer : for menu double-click, e.g. explorer.exe /e,"%1" (R)
 blackbox.options.locale         : C : locale identifier for clock and date strings (R)
 blackbox.options.UTF8Encoding   : false : use unicode and read menu.rc etc. as UTF-8 files (R)
+blackbox.options.OldTray        : false : Vista Support with older Taskbars (e.g. SystembarEx) (Q)
 blackbox.options.translation    :       : translation file for messages and menus. See "docs/nls-c.txt" (R)
 blackbox.options.log            :       : enable blackbox.log. Possible options: Startup, Tray (L)
 blackbox.editor                 : notepad : editor to edit styles and rc files (R)

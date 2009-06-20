@@ -939,6 +939,7 @@ static const struct rccfg extrc_cfg[] = {
 
     { "blackbox.options.shellContextMenu",     C_BOL, (void*)false,    &Settings_shellContextMenu },
     { "blackbox.options.UTF8Encoding",         C_BOL, (void*)false,    &Settings_UTF8Encoding },
+    { "blackbox.options.OldTray",              C_BOL, (void*)false,    &Settings_OldTray },
 
     { "blackbox.global.fonts.enabled",         C_BOL, (void*)false,    &Settings_globalFonts },
     { "blackbox.editor",                       C_STR, (void*)"notepad.exe", Settings_preferredEditor },
