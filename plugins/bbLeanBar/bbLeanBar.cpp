@@ -355,14 +355,14 @@ struct barinfo : plugin_info
     };
 
     // another list for the info as loaded from/saved to bbleanbar.rc
-    struct traySave {
-        struct traySave *next;
+    struct trayHidden {
+        struct trayHidden *next;
         unsigned uID;
         char class_name[CLASS_NAME_MAX];
     };
 
-    traySave *traySaveList;
     trayNode *trayList;
+    trayHidden *trayHiddenList;
     int trayVisiblesCount;
     bool trayShowAll;
 
@@ -370,7 +370,7 @@ struct barinfo : plugin_info
     void DelTraylist(void)
     {
         freeall(&trayList);
-        freeall(&traySaveList);
+        freeall(&trayHiddenList);
     }
 
     // -----------------------------------------------
@@ -411,14 +411,14 @@ struct barinfo : plugin_info
     void NewTraylist(void)
     {
         struct trayNode *tn, **ptn;
-        struct traySave *sn;
-        int n, ts;
+        struct trayHidden *sn;
+        int n, ts, load;
+
+        if (NULL == trayHiddenList)
+            trayHiddenList = trayLoadHidden();
 
         if (false == this->has_tray)
             goto skip;
-
-        if (NULL == trayList)
-            trayLoadHidden();
 
         // loop through icons, add new ones as needed, mark all as present
         for (n = 0, ts = GetTraySize(); n < ts; ++n) {
@@ -439,6 +439,23 @@ struct barinfo : plugin_info
 
             // add a new one
             cons_node(&trayList, tn);
+
+            // check through saved list whether this should start hidden
+            dolist (sn, trayHiddenList) {
+                if (0 == strcmp(sn->class_name, tn->class_name)) {
+                    struct trayNode *tn1 = NULL;
+                    if (sn->uID != tn->uID) {
+                        dolist (tn1, trayList)
+                        if (tn1 != tn && 0 == strcmp(tn1->class_name, tn->class_name))
+                            break;
+                    }
+                    if (!tn1) {
+                        tn->hidden = true;
+                        break;
+                    }
+                }
+            }
+
         found:
             tn->mark = true; // do not remove this below
             tn->index = n; // the index for 'GetTrayIcon(int index);'
@@ -456,24 +473,10 @@ struct barinfo : plugin_info
             }
         }
 
-        // check through saved list whether this should start hidden
         trayVisiblesCount = 0;
-        dolist (tn, trayList) {
-            dolist (sn, traySaveList)
-                if (0 == strcmp(sn->class_name, tn->class_name)) {
-                    struct trayNode *tn1 = NULL;
-                    if (sn->uID != tn->uID)
-                        dolist (tn1, tn->next)
-                            if (0 == strcmp(tn1->class_name, tn->class_name))
-                                break;
-                    if (!tn1) {
-                        tn->hidden = true;
-                        break;
-                    }
-                }
+        dolist (tn, trayList)
             if (false == tn->hidden || trayShowAll)
                 ++ trayVisiblesCount;
-        }
     }
 
     // change hidden state:  1:show,  0:hide, -1:toggle
@@ -504,24 +507,23 @@ struct barinfo : plugin_info
     // save info about hidden icons to rc (by uID and window classname)
     void traySaveHidden (void)
     {
-        struct traySave *sn;
+        struct trayHidden *sn, *sn0 = NULL;
         struct trayNode *tn;
         int n;
 
         // build new list
-        freeall(&traySaveList);
         dolist (tn, trayList) {
             if (false == tn->hidden)
                 continue;
-            sn = new traySave;
+            sn = new trayHidden;
             sn->uID = tn->uID;
             GetClassName(tn->hWnd, sn->class_name, sizeof sn->class_name);
-            cons_node(&traySaveList, sn);
+            cons_node(&sn0, sn);
         }
 
         // save list to rc
-        BBP_write_int(this, "tray.hidden.count", listlen(traySaveList));
-        for (n = 0, sn = traySaveList;;) {
+        BBP_write_int(this, "tray.hidden.count", listlen(sn0));
+        for (n = 0, sn = sn0;;) {
             char val[240], key[40];
             sprintf(key, "tray.hidden.%d", ++n);
             if (sn) {
@@ -535,12 +537,15 @@ struct barinfo : plugin_info
                 BBP_write_string(this, key, NULL);
             }
         }
+
+        freeall(&trayHiddenList);
+        trayHiddenList = sn0;
     }
 
     // load hidden icons' info from rc (uID and window classname)
-    void trayLoadHidden (void)
+    struct trayHidden *trayLoadHidden (void)
     {
-        struct traySave *sn;
+        struct trayHidden *sn, *sn0 = NULL;
         int n, count;
         char key[40];
         const char *val;
@@ -549,11 +554,12 @@ struct barinfo : plugin_info
             sprintf(key, "tray.hidden.%d", n+1);
             val = BBP_read_string(this, NULL, key, NULL);
             if (val) {
-                sn = new traySave;
+                sn = new trayHidden;
                 sscanf(val, "\"%[^\"]\",%u", sn->class_name, &sn->uID);
-                cons_node(&traySaveList, sn);
+                cons_node(&sn0, sn);
             }
         }
+        return sn0;
     }
 
     // some icons dont have a tip until mouse hoover.
