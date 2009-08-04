@@ -158,7 +158,7 @@ SFInsert::~SFInsert()
 
 void SFInsert::Measure(HDC hDC, SIZE *size)
 {
-    MenuItem *pNext;
+    MenuItem *pNext, *p;
     size->cx = size->cy = 0;
     if (m_pLast)
         return;
@@ -166,12 +166,11 @@ void SFInsert::Measure(HDC hDC, SIZE *size)
     pNext = this->next;
     this->next = NULL;
     m_pMenu->m_pLastItem = this;
-
     m_pMenu->AddFolderContents(m_pidl_list, m_pszExtra);
-
+    for (p = this->next; p; p = p->next)
+        ++m_pMenu->m_itemcount;
     m_pLast = m_pMenu->m_pLastItem;
     m_pLast->next = pNext;
-
     if (NULL == m_pMenu->m_pidl_list) {
         m_pMenu->m_pidl_list = copy_pidl_list(m_pidl_list);
         m_pMenu->m_bIsDropTarg = true;
@@ -186,6 +185,7 @@ void SFInsert::RemoveStuff(void)
     for (mi = this->next; mi; ) {
         next = mi->next;
         delete mi;
+        --m_pMenu->m_itemcount;
         if (mi == m_pLast)
             break;
         mi = next;
