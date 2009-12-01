@@ -25,31 +25,33 @@ bbleanbar.item: Clock
 !bbleanbar.item: Space
 
 # ----------------
-# General Settings
+# General Settings (ctrl-right-click menu)
 bbLeanBar.placement: TopCenter
 bbLeanBar.position.x: 128
 bbLeanBar.position.y: 0
 bbLeanBar.widthPercent: 80
 bbLeanBar.useSlit: false
-bbLeanBar.pluginToggle: true
-bbleanbar.OnTop: true
 bbLeanBar.AutoHide: false
+bbleanbar.OnTop: true
 bbleanbar.autoRaise: true
 bbleanbar.snapToEdge: true
+bbLeanBar.pluginToggle: true
+
 bbleanbar.alpha.enabled: false
 bbleanbar.alpha.value: 200
 
 # ---------
 # Task Tabs
 bbLeanBar.tasks.style: 2
+bbLeanBar.tasks.maxWidth: 100
 bbLeanBar.tasks.reverse: false
 bbLeanBar.tasks.current: true
 bbLeanBar.tasks.sysmenu: false
 bbLeanBar.tasks.drawBorder: false
-bbLeanBar.tasks.maxWidth: 100
 
 ------------
-# Icon Color
+# Icons
+bbLeanBar.smallIcons: true
 bbLeanBar.icon.saturation: 20
 bbLeanBar.icon.hue: 60
 
@@ -59,13 +61,11 @@ bbLeanBar.strftimeFormat: %d %a %#H:%M
 
 # ---------------
 # Special Options
-bbLeanBar.smallIcons: true
-bbLeanBar.balloonTips: true
 bbLeanBar.autoFullscreenHide: true
 bbLeanBar.setDesktopMargin: true
 bbLeanBar.sendToSwitchTo: true
+bbLeanBar.sendToGesture: true
 
 # -------------------------
 # hidden icons (auto saved)
 bbLeanBar.tray.hidden.count: 0
-

@@ -160,8 +160,9 @@ struct barinfo : plugin_info
     bool currentOnly            ;
     bool task_with_border       ;
     bool autoFullscreenHide     ;
-    bool setDesktopMargin      ;
+    bool setDesktopMargin       ;
     bool sendToSwitchTo         ;
+    bool sendToGesture          ;
 
     // painting
     HFONT hFont;
@@ -412,7 +413,7 @@ struct barinfo : plugin_info
     {
         struct trayNode *tn, **ptn;
         struct trayHidden *sn;
-        int n, ts, load;
+        int n, ts;
 
         if (NULL == trayHiddenList)
             trayHiddenList = trayLoadHidden();
@@ -649,9 +650,10 @@ void barinfo::make_cfg()
     {  "strftimeFormat" ,   R_STR, (void*)"%a %d %H:%M",  &strftimeFormat },
 
     {  "smallIcons" ,       R_BOL, (void*)true,           &smallIcons },
-    {  "autoFullscreenHide",R_BOL, (void*)false,          &autoFullscreenHide },
-    {  "setDesktopMargin"  ,R_BOL, (void*)true,          &setDesktopMargin },
-    {  "sendToSwitchTo"    ,R_BOL, (void*)false,          &sendToSwitchTo },
+    {  "autoFullscreenHide",R_BOL, (void*)true,           &autoFullscreenHide },
+    {  "setDesktopMargin"  ,R_BOL, (void*)true,           &setDesktopMargin },
+    {  "sendToSwitchTo"    ,R_BOL, (void*)true,           &sendToSwitchTo },
+    {  "sendToGesture"     ,R_BOL, (void*)true,           &sendToGesture },
     { NULL,0,NULL,NULL }
     };
     cfg_list = new config[array_count(c)], memcpy(cfg_list, c, sizeof c);
@@ -666,8 +668,8 @@ void barinfo::make_cfg()
     { "Icons only",             "tbStyle 1",        CFG_INT2|CFG_TASK|1<<8, &TaskStyle },
     { "Text and Icons",         "tbStyle 2",        CFG_INT2|CFG_TASK|2<<8, &TaskStyle },
     { "",                       "",                 CFG_TASK, &nobool  },
+    { "Max. Width (%)",         "taskMaxWidth",     CFG_TASK|CFG_INT, &taskMaxWidth },
     { "Reversed",               "reversedTasks",    CFG_TASK, &reverseTasks  },
-    { "Max. Width %",           "taskMaxWidth",     CFG_TASK|CFG_INT, &taskMaxWidth },
     { "Current Only",           "currentOnly",      CFG_TASK, &currentOnly },
     { "System Menu",            "sysMenu",          CFG_TASK, &taskSysmenu },
     { "Force Border",           "drawBorder",       CFG_TASK, &task_with_border },
@@ -681,11 +683,12 @@ void barinfo::make_cfg()
     { "Clock Format",           "clockFormat",      CFG_MAIN|CFG_STR, &strftimeFormat  },
 
     //--------
-    { "Special",                "", CFG_SUB, NULL },
+    { "Special Options",        "", CFG_SUB, NULL },
     //--------
     { "Detect Fullscreen App",  "autoFullscreenHide",   0, &autoFullscreenHide  },
     { "Set Desktop Margin",   "setDesktopMargin",     0, &setDesktopMargin  },
     { "SendTo Switches Workspace", "sendToSwitchTo",       0, &sendToSwitchTo  },
+    { "Mouse Gesture Moves Task", "sendToGesture",       0, &sendToGesture  },
 
     { NULL,NULL,0,NULL }
     };
@@ -1663,8 +1666,8 @@ DLL_EXPORT void endPlugin(HINSTANCE hPluginInstance)
         delete g_PI;
 
     if (NULL == g_PI) {
-        exit_bb_balloon();
 #ifndef NO_TIPS
+        exit_bb_balloon();
         ExitToolTips();
 #endif
 #ifndef NO_DROP

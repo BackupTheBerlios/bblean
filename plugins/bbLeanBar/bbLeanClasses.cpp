@@ -577,8 +577,10 @@ public:
 
             case WM_LBUTTONDOWN:
                 press_x = mx;
-                m_bar->gesture_lock = true;
-                SetTimer(m_bar->hwnd, GESTURE_TIMER, 800, NULL);
+                if (m_bar->sendToGesture) {
+                    m_bar->gesture_lock = true;
+                    SetTimer(m_bar->hwnd, GESTURE_TIMER, 500, NULL);
+                }
 
                 a2 = a1;
             case WM_RBUTTONDOWN:
