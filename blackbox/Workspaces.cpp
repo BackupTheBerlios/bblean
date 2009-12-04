@@ -1081,6 +1081,14 @@ ST void SetTopTask(struct tasklist *tl, int set_where)
         append_node(&pTopTask, new_node(tl));
 }
 
+ST void get_caption(struct tasklist *tl, int force)
+{
+    if (force || 0 == tl->caption[0])
+        get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
+    if (force || NULL == tl->icon)
+        get_window_icon(tl->hwnd, &tl->icon);
+}
+
 HWND GetActiveTaskWindow(void)
 {
     return activeTaskWindow;
@@ -1090,7 +1098,7 @@ void Workspaces_GetCaptions()
 {
     struct tasklist *tl;
     dolist (tl, taskList)
-        get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
+        get_caption(tl, 1);
 }
 
 //==================================
@@ -1101,8 +1109,7 @@ ST struct tasklist *AddTask(HWND hwnd)
     tl->hwnd = hwnd;
     tl->wkspc = currentScreen;
     append_node(&taskList, tl);
-    get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
-    get_window_icon(tl->hwnd, &tl->icon);
+    get_caption(tl, 1);
     send_task_message(hwnd, TASKITEM_ADDED);
     return tl;
 }
@@ -1133,13 +1140,11 @@ ST int FindTask(HWND hwnd)
 void CleanTasks(void)
 {
     struct tasklist **tl = &taskList;
-    while (*tl) {
-        HWND hwnd = (*tl)->hwnd;
-        if (is_valid_task(hwnd) && GetWindowTextLength(hwnd))
+    while (*tl)
+        if (is_valid_task((*tl)->hwnd))
             tl = &(*tl)->next;
         else
             RemoveTask(*tl);
-    }
 }
 
 //==================================
@@ -1216,6 +1221,8 @@ ST void debug_tasks(WPARAM wParam, HWND hwnd, int is_task)
 void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
 {
     struct tasklist *tl;
+    static HWND hwnd_replacing;
+
     if (hwnd) {
         tl = (struct tasklist *)assoc(taskList, hwnd);
         if (tl)
@@ -1230,6 +1237,24 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
 
     //====================
     case HSHELL_WINDOWREPLACING:
+        hwnd_replacing = hwnd;
+        goto hshell_windowdestroyed;
+
+    case HSHELL_WINDOWREPLACED:
+        if (NULL == hwnd_replacing)
+            goto hshell_windowdestroyed;
+        hwnd = hwnd_replacing;
+        hwnd_replacing = NULL;
+        if (NULL == tl)
+            break;
+        tl->hwnd = hwnd;
+        get_caption(tl, 1);
+        if (activeTaskWindow == hwnd)
+            goto hshell_windowactivated;
+        send_task_message(hwnd, TASKITEM_MODIFIED);
+        break;
+
+    //====================
     case HSHELL_WINDOWCREATED: // 1
         // windows reshown by the vwm also trigger the HSHELL_WINDOWCREATED
         if (hwnd && NULL == tl)
@@ -1240,8 +1265,8 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
         break;
 
     //====================
-    case HSHELL_WINDOWREPLACED:
     case HSHELL_WINDOWDESTROYED: // 2
+    hshell_windowdestroyed:
         // windows hidden by the vwm also trigger the HSHELL_WINDOWDESTROYED
         if (tl && is_valid_task(hwnd) != 2)
         {
@@ -1310,11 +1335,7 @@ void Workspaces_TaskProc(WPARAM wParam, HWND hwnd)
             // ----------------------------------------
             // try to grab title & icon, if still missing
 
-            if (0 == tl->caption[0])
-                get_window_text(tl->hwnd, tl->caption, sizeof tl->caption);
-            if (NULL == tl->icon)
-                get_window_icon(tl->hwnd, &tl->icon);
-
+            get_caption(tl, 0);
         }
 
         send_task_message(hwnd, TASKITEM_ACTIVATED);
