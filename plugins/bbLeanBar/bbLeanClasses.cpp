@@ -191,7 +191,7 @@ public:
     bool check_capture(int mx, int my, int message)
     {
         bool pa = m_active;
-        bool ret = true;
+        bool ret = false;
         if (m_bar->capture_item == this)
         {
             int over = mouse_over(mx, my);
@@ -213,7 +213,7 @@ public:
         {
             SetCapture(m_bar->hwnd);
             m_bar->capture_item = this;
-            m_active = true;
+            m_active = ret = true;
         }
 
         if (m_active != pa)
@@ -473,12 +473,9 @@ public:
 
         if (menuclick(message, flags))
             return;
-
-        if (false == check_capture(mx, my, message))
+        if (false == check_capture(mx, my, message) && message != BB_DRAGOVER)
             return;
-
         tl = m_bar->GetTaskPtrEx(m_index);
-
         if (NULL == tl)
             return;
 
