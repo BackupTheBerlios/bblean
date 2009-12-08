@@ -26,13 +26,14 @@
 #include "BBApi.h"
 #include "engine/hookinfo.h"
 #include "bblib.h"
+#include "bbversion.h"
 
 // info
-const char szVersion     [] = "bbLeanSkin 1.17";
+const char szVersion     [] = "bbLeanSkin "BBLEAN_VERSION;
 const char szAppName     [] = "bbLeanSkin";
-const char szInfoVersion [] = "1.17";
+const char szInfoVersion [] = BBLEAN_VERSION;
 const char szInfoAuthor  [] = "grischka";
-const char szInfoRelDate [] = "2009-05-20";
+const char szInfoRelDate [] = BBLEAN_RELDATE;
 const char szInfoLink    [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail   [] = "grischka@users.sourceforge.net";
 const char szCopyright   [] = "2003-2009";

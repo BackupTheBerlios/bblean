@@ -119,7 +119,7 @@ void ShellContext::Invoke(int nCmd)
         char newName[100];
         WCHAR newNameW[100];
         sh_getnameof(psfFolder, pidlItem, SHGDN_NORMAL, oldName);
-        if (IDOK == EditBox(APPNAME, "Enter new name:", oldName, newName))
+        if (IDOK == EditBox(BBAPPNAME, "Enter new name:", oldName, newName))
         {
             MultiByteToWideChar (CP_ACP, 0, newName, -1, newNameW, array_count(newNameW));
             hr = psfFolder->SetNameOf(NULL, (LPCITEMIDLIST)pidlItem, newNameW, SHGDN_NORMAL, NULL);

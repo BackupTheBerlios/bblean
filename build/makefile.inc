@@ -59,6 +59,7 @@ clean.stuff :
 # --------------------------------------------------------------------
 
 include $(TOP)/build/makefile-$(COMPILER).inc
+include $(TOP)/build/version.inc
 
 # --------------------------------------------------------------------
 
@@ -98,7 +99,13 @@ $(BIN): $(OBJ) $(LIBS)
 	$(DIR)
 	@echo ---------------------------------------------------------------
 
-CLEAN_FILES += $(BIN) $(BIN).manifest
+$(OBJ): $(BBAPI)/bbversion.h
+$(BBAPI)/bbversion.h:
+	echo>$@ #define BBLEAN_VERSION "$(BBLEAN_VERSION)"
+	echo>>$@ #define BBLEAN_RELDATE "$(BBLEAN_RELDATE)"
+	echo>>$@ #define BBLEAN_NUMVERSION $(BBLEAN_NUMVERSION)
+
+CLEAN_FILES += $(BIN) $(BIN).manifest $(BBAPI)/bbversion.h
 CLEAN_FILES += *.obj *.res *.exp *.lib *.a *.pdb *.tds lmakestate
 
 endif

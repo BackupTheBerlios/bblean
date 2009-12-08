@@ -34,7 +34,7 @@
 
 int BBMessageBox(int flg, const char *fmt, ...)
 {
-    const char *caption = APPNAME;
+    const char *caption = BBAPPNAME;
     const char *message;
     char *p, *q;
     int r;

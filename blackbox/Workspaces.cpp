@@ -178,7 +178,7 @@ ST void SetWorkspaceNames(const char *names)
     if (names) {
         strcpy(Settings_workspaceNames, names);
     } else if (IDOK != EditBox(
-        APPNAME,
+        BBAPPNAME,
         NLS2("$Workspace_EditNames$", "Workspace Names:"),
         Settings_workspaceNames,
         Settings_workspaceNames

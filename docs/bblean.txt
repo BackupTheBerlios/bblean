@@ -868,6 +868,11 @@ Now uses simple searchpaths instead of wildcards. See bsetroot.rc
 Changes
 =======
 
+08 Dec 2009 - bbLean 1.17.1
+.........................
+- Minor bugfixes for blackbox.exe and bbLeanBar.dll
+- Remove control chars from artwiz fonts
+
 20 May 2009 - bbLean 1.17
 .........................
 - bbLean is more precise with the blackboxwm 0.70 style conventions.
@@ -983,7 +988,7 @@ Jan 2003
 [fuzzydoc]
     footer      = Copyright 2003-2009 grischka@users.sourceforge.net
     title       = bbLean - Readme
-    version     = 1.17
+    version     = 1.17.1
     basename    = bblean
     table-column-width-1 = 35%
     header      = \

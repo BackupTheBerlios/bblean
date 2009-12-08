@@ -45,6 +45,7 @@
 #include "BBApi.h"
 #include "bblib.h"
 #include "bbPlugin.h"
+#include "bbversion.h"
 #include <time.h>
 #include <math.h>
 
@@ -60,7 +61,7 @@ const char szVersion      [] = "bbAnalog 1.0 AA";  // Used in MessageBox titleba
 const char szAppName      [] = "bbAnalog";         // The name of our window class, etc.
 const char szInfoVersion  [] = "1.0 AA";
 const char szInfoAuthor   [] = "mortar, grischka";
-const char szInfoRelDate  [] = "2009-05-20";
+const char szInfoRelDate  [] = BBLEAN_RELDATE;
 const char szInfoLink     [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail    [] = "grischka@users.sourceforge.net";
 const char szCopyright    [] = "2004-2009";

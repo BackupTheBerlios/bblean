@@ -21,12 +21,13 @@
 */
 
 #include "bbIconBox.h"
+#include "bbversion.h"
 
-const char szVersion     [] = "bbIconBox 1.17";
+const char szVersion     [] = "bbIconBox "BBLEAN_VERSION;
 const char szAppName     [] = "bbIconBox";
-const char szInfoVersion [] = "1.17";
+const char szInfoVersion [] = BBLEAN_VERSION;
 const char szInfoAuthor  [] = "grischka";
-const char szInfoRelDate [] = "2009-05-20";
+const char szInfoRelDate [] = BBLEAN_RELDATE;
 const char szInfoLink    [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail   [] = "grischka@users.sourceforge.net";
 const char szCopyright   [] = "2005-2009";

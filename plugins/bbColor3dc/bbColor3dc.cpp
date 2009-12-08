@@ -20,6 +20,7 @@
 
 #include "BBApi.h"
 #include "bblib.h"
+#include "bbversion.h"
 #include <stdlib.h>
 
 #define VALID_TEXTURE       1 // gradient definition
@@ -35,7 +36,7 @@ const char szVersion     [] = "bbColor3dc 1.3";
 const char szAppName     [] = "bbColor3dc";
 const char szInfoVersion [] = "1.3";
 const char szInfoAuthor  [] = "grischka";
-const char szInfoRelDate [] = "2009-05-20";
+const char szInfoRelDate [] = BBLEAN_RELDATE;
 const char szInfoLink    [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail   [] = "grischka@users.sourceforge.net";
 const char szCopyright   [] = "2004-2009";

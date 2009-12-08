@@ -19,6 +19,7 @@
 
 #include "BBApi.h"
 #include "bblib.h"
+#include "bbversion.h"
 #include "BBSendData.h"
 #include "StyleStruct.h"
 
@@ -26,7 +27,7 @@ const char szVersion      [] = "bbNote-Proxy 1.08";
 const char szAppName      [] = "bbNote-Proxy";
 const char szInfoVersion  [] = "1.08";
 const char szInfoAuthor   [] = "grischka";
-const char szInfoRelDate  [] = "2009-05-20";
+const char szInfoRelDate  [] = BBLEAN_RELDATE;
 const char szInfoLink     [] = "http://bb4win.sourceforge.net/bblean/";
 const char szInfoEmail    [] = "grischka@users.sourceforgs.net";
 

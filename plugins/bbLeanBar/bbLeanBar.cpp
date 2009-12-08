@@ -28,6 +28,7 @@
 #include "BBApi.h"
 #include "win0x500.h"
 #include "bblib.h"
+#include "bbversion.h"
 #include "bbPlugin.h"
 #include "drawico.h"
 #ifndef NO_TIPS
@@ -51,15 +52,15 @@
 #define MY_BROAM "@bbLeanBar"
 
 #ifdef BBTINY
-const char szVersion     [] = "bbLeanBar 1.17t";
-const char szInfoVersion [] = "1.17t";
+const char szVersion     [] = "bbLeanBar "BBLEAN_VERSION"t";
+const char szInfoVersion [] = BBLEAN_VERSION"t";
 #else
-const char szVersion     [] = "bbLeanBar 1.17";
-const char szInfoVersion [] = "1.17";
+const char szVersion     [] = "bbLeanBar "BBLEAN_VERSION;
+const char szInfoVersion [] = BBLEAN_VERSION;
 #endif
 const char szAppName     [] = "bbLeanBar";
 const char szInfoAuthor  [] = "grischka";
-const char szInfoRelDate [] = "2009-05-20";
+const char szInfoRelDate [] = BBLEAN_RELDATE;
 const char szInfoLink    [] = "http://bb4win.sourceforge.net/bblean";
 const char szInfoEmail   [] = "grischka@users.sourceforge.net";
 const char szCopyright   [] = "2003-2009";

@@ -261,7 +261,7 @@ ST void plugin_error(struct plugins *q, int error)
             return;
         case error_plugin_is_built_in      :
             msg = NLS2("$Error_Plugin_IsBuiltIn$",
-            "Dont load this plugin with "APPNAME". It is built-in."
+            "Dont load this plugin with "BBAPPNAME". It is built-in."
             ); break;
         case error_plugin_dll_not_found    :
             msg = NLS2("$Error_Plugin_NotFound$",
@@ -499,7 +499,7 @@ void PluginManager_aboutPlugins(void)
         }
 
     BBMessageBox(MB_OK,
-        "#"APPNAME" - %s#%s\t",
+        "#"BBAPPNAME" - %s#%s\t",
         NLS2("$About_Plugins_Title$", "About loaded plugins"),
         x ? msg : NLS1("No plugins loaded.")
         );

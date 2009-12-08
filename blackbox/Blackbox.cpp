@@ -303,9 +303,7 @@ void terminate_welcomescreen(void)
 void bb_about(void)
 {
     BBMessageBox(MB_OK,
-    "%s - Copyright 2003-2009 grischka"
-    "\n%s",
-    GetBBVersion(),
+    BBAPPVERSION" - Copyright 2003-2009 grischka\n%s",
     NLS2("$About_Blackbox$",
         "Based stylistically on blackboxwm by Brad Hughes"
         "\n"
@@ -321,7 +319,6 @@ void bb_about(void)
         "\nhttp://bb4win.sourceforge.net/bblean/"
         "\nhttp://bb4win.org/"
         ));
-
 }
 
 //===========================================================================
@@ -1086,7 +1083,7 @@ void about_style(void)
 
     cp = stylePath(NULL);
     BBMessageBox(MB_OK,
-        "#"APPNAME" - %s#"
+        "#"BBAPPNAME" - %s#"
         "%s"
         "\n%s %s"
         "\n%s"
@@ -1911,7 +1908,7 @@ void show_run_dlg(void)
 
 const char* GetBBVersion(void)
 {
-    return APPVERSION;
+    return BBAPPVERSION;
 }
 
 //===========================================================================
